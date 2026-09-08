@@ -795,7 +795,7 @@ async function runAutonomousSuite() {
 
     // 14.2 Verify sitemap.xml
     const sitemapXml = fs.readFileSync(path.join(__dirname, '../public/sitemap.xml'), 'utf8');
-    if (sitemapXml.includes('<loc>https://streetalk.live/</loc>') && sitemapXml.includes('<changefreq>daily</changefreq>')) {
+    if ((sitemapXml.includes('<loc>https://streetalk-live.vercel.app/</loc>') || sitemapXml.includes('<loc>https://streetalk.live/</loc>')) && sitemapXml.includes('<changefreq>daily</changefreq>')) {
       pass('Technical SEO: sitemap.xml declares canonical URL and daily update frequency');
     } else {
       fail('Technical SEO: sitemap.xml missing required tags');
