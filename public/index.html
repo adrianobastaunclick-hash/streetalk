@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-[#0a0b0e] text-gray-100 antialiased selection:bg-[#ff5500] selection:text-white">
+<head>
+  <!-- ======================================================== -->
+  <!-- 1. TECHNICAL SEO & METADATA (2026 STANDARDS)              -->
+  <!-- ======================================================== -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  
+  <title>STREETALK // Chat Anonima Realtime con Scambio Segreti | Zero Registrazione</title>
+  
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="STREETALK // Chat Anonima Realtime con Scambio Segreti | Zero Registrazione">
+  <meta name="description" content="Entra in STREETALK: la prima chat anonima underground in tempo reale con patto di scambio segreti. Niente account, nessun log salvato, stanze effimere da 3 minuti. Trova subito qualcuno con cui parlare di cose vere.">
+  <meta name="keywords" content="chat anonima, segreti anonimi, sfogo anonimo, chat senza registrazione, chat effimera, streetalk, chat 3 minuti, confessioni anonime, chat realtime, chat underground">
+  <meta name="author" content="STREETALK Labs">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <link rel="canonical" href="https://streetalk.live/">
+  <meta name="theme-color" content="#0a0b0e">
+  <meta name="application-name" content="STREETALK">
+  <meta name="color-scheme" content="dark">
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Open Graph / Facebook / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="it_IT">
+  <meta property="og:site_name" content="STREETALK">
+  <meta property="og:url" content="https://streetalk.live/">
+  <meta property="og:title" content="STREETALK // Le solite chat fanno schifo. Qui si parla di cose vere.">
+  <meta property="og:description" content="Niente 'm o f?', niente profili falsi. Entri, scambi un segreto anonimo inconfessabile e parli per 180 secondi. Nessun database, cancellazione istantanea dalla RAM.">
+  <meta property="og:image" content="https://streetalk.live/og-streetalk.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="STREETALK - Chat Anonima Realtime con Scambio Segreti">
+
+  <!-- Twitter / X Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://streetalk.live/">
+  <meta name="twitter:title" content="STREETALK // Chat Anonima Realtime con Scambio Segreti">
+  <meta name="twitter:description" content="Entri, scambi un segreto anonimo e trovi subito qualcuno con cui parlarne per 3 minuti. Zero dati salvati.">
+  <meta name="twitter:image" content="https://streetalk.live/og-streetalk.jpg">
+  <meta name="twitter:creator" content="@streetalk_app">
+
+  <!-- ======================================================== -->
+  <!-- 2. STRUCTURED DATA SCHEMA.ORG (JSON-LD)                  -->
+  <!-- ======================================================== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://streetalk.live/#webapp",
+        "name": "STREETALK",
+        "url": "https://streetalk.live/",
+        "description": "Applicazione di chat anonima in tempo reale basata su patto paritario di scambio segreti e architettura volatile a costo zero.",
+        "applicationCategory": "CommunicationApplication",
+        "operatingSystem": "All modern web browsers",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "featureList": [
+          "Scambio istantaneo di segreti anonimi",
+          "Matchmaking FIFO deterministico in meno di 500ms",
+          "Timer effimero di 3 minuti con proroga a doppio consenso",
+          "Zero database e cancellazione integrale dalla memoria RAM",
+          "Protezione DOM integrale contro attacchi XSS",
+          "Motore 3D WebGL a 60 FPS con particelle e onde asfalto"
+        ]
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://streetalk.live/#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Come funziona STREETALK?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Per entrare scrivi una confessione anonima di massimo 90 caratteri e selezioni il tuo mood. Il nostro motore realtime ti abbina a un interlocutore compatibile svelando reciprocamente i segreti all'istante."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "I messaggi e i segreti vengono salvati in un database?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "No. STREETALK opera con memoria RAM al 100% volatile. Alla disconnessione o allo skip, ogni traccia della stanza e della conversazione viene deallocata all'istante."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "È necessaria una registrazione con email o telefono?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Nessuna registrazione, nessuna email, nessun numero di telefono. L'accesso è completamente libero, anonimo e istantaneo."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Cosa accade allo scadere dei 3 minuti?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Allo scadere dei 180 secondi, entrambi gli interlocutori possono confermare una proroga di 5 minuti. In assenza di doppio consenso, la stanza si autodistrugge immediatamente."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
+  <!-- ======================================================== -->
+  <!-- 3. TYPOGRAPHY & CDN ASSETS                               -->
+  <!-- ======================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            street: {
+              asphalt: '#0a0b0e',
+              concrete: '#12151c',
+              surface: 'rgba(18, 21, 28, 0.88)',
+              card: '#161922',
+              zinc: '#1c222d',
+              border: '#262c3d',
+              borderGlow: 'rgba(255, 85, 0, 0.3)',
+              orange: '#ff5500',
+              orangeHover: '#ff6a00',
+              orangeGlow: 'rgba(255, 85, 0, 0.45)',
+              cement: '#94a3b8',
+              steel: '#8b949e'
+            }
+          },
+          fontFamily: {
+            street: ['Syne', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          animation: {
+            'radar-pulse': 'radarPulse 2.8s cubic-bezier(0, 0, 0.2, 1) infinite',
+            'radar-sweep': 'radarSweep 3.6s linear infinite'
+          },
+          keyframes: {
+            radarPulse: {
+              '0%': { transform: 'scale(0.35)', opacity: '0.9' },
+              '100%': { transform: 'scale(2.2)', opacity: '0' }
+            },
+            radarSweep: {
+              '0%': { transform: 'rotate(0deg)' },
+              '100%': { transform: 'rotate(360deg)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Three.js (r128 CDN) & GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    /* Neo-Brutalist Urban Aesthetics */
+    body {
+      background-color: #0a0b0e;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+
+    /* 3D WebGL Layer (z-0) */
+    #asphalt-canvas, #banana-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Micro-Grain Noise Overlay (z-1) */
+    .street-noise {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.038;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    /* Street Glow Helpers */
+    .street-glow {
+      box-shadow: 0 0 35px -5px rgba(255, 85, 0, 0.28), 0 0 10px -2px rgba(255, 85, 0, 0.2);
+    }
+    .street-glow-sm {
+      box-shadow: 0 0 16px -2px rgba(255, 85, 0, 0.38);
+    }
+    .radar-line {
+      background: linear-gradient(90deg, rgba(255,85,0,0.9) 0%, rgba(255,85,0,0) 100%);
+      transform-origin: 0% 50%;
+    }
+
+    /* Custom Urban Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0b0e;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1c222d;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ff5500;
+    }
+
+    /* Focus accessibility styling */
+    a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+      outline: 2px solid #ff5500;
+      outline-offset: 2px;
+    }
+
+    /* Interactive 3D physical tilt container */
+    .tilt-card {
+      transform-style: preserve-3d;
+      transition: transform 0.15s ease-out, border-color 0.25s ease, box-shadow 0.25s ease;
+      will-change: transform;
+    }
+
+    /* Floating Reaction Bar animation */
+    @keyframes floatVerticalBounce {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-4px); }
+    }
+    .reaction-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      animation: floatVerticalBounce 2.4s ease-in-out infinite;
+    }
+    .reaction-btn:nth-child(1) { animation-delay: 0s; }
+    .reaction-btn:nth-child(2) { animation-delay: 0.25s; }
+    .reaction-btn:nth-child(3) { animation-delay: 0.5s; }
+    .reaction-btn:nth-child(4) { animation-delay: 0.75s; }
+    .reaction-btn:nth-child(5) { animation-delay: 1.0s; }
+    .reaction-btn:nth-child(6) { animation-delay: 1.25s; }
+    .reaction-btn:nth-child(7) { animation-delay: 1.5s; }
+    .reaction-btn:nth-child(8) { animation-delay: 1.75s; }
+    .reaction-btn:hover { animation-play-state: paused; }
+  </style>
+</head>
+
+<body class="min-h-full flex flex-col font-sans relative">
+
+  <!-- ======================================================== -->
+  <!-- 3D WEBGL ENGINE & AMBIENT CANVAS (LAYER Z-0)              -->
+  <!-- ======================================================== -->
+  <canvas id="asphalt-canvas" data-alias="banana-canvas" aria-hidden="true"></canvas>
+  <div class="street-noise" aria-hidden="true"></div>
+
+  <!-- ======================================================== -->
+  <!-- A. HEADER MINIMAL & LIVE BEACON                          -->
+  <!-- ======================================================== -->
+  <header class="w-full border-b border-zinc-800/90 bg-[#0a0b0e]/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 flex items-center justify-between z-30 sticky top-0">
+    
+    <div class="flex items-center gap-3 cursor-pointer group" onclick="backToLanding()" role="button" aria-label="Torna alla Home di STREETALK">
+      <!-- Streetalk Logo with high-voltage orange square -->
+      <div class="w-8 h-8 bg-street-orange rounded-md flex items-center justify-center font-street font-black text-black text-lg tracking-tighter shadow-[0_0_18px_rgba(255,85,0,0.6)] group-hover:scale-105 transition-transform duration-200">
+        ST
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="font-street font-black text-xl tracking-wider text-white">
+          STREET<span class="text-street-orange">ALK</span>
+        </span>
+        <span class="w-2 h-2 rounded-full bg-street-orange inline-block shadow-[0_0_10px_#ff5500] animate-pulse"></span>
+      </div>
+    </div>
+
+    <!-- Header Actions & Metrics -->
+    <div class="flex items-center gap-2 sm:gap-3">
+      <!-- Realtime Latency Ping Badge -->
+      <div id="ping-badge" class="hidden sm:flex items-center gap-1.5 bg-street-surface border border-zinc-800 px-2.5 py-1.5 rounded-full font-mono text-[11px] text-zinc-400 shadow-inner" title="Latenza verso il nodo volatile">
+        <span id="ping-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span>
+        <span id="ping-text">-- ms</span>
+      </div>
+
+      <!-- Sound FX Toggle Button -->
+      <button id="btn-sound-toggle" onclick="toggleSound()" class="flex items-center gap-1.5 bg-street-surface hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 px-2.5 sm:px-3 py-1.5 rounded-full font-mono text-xs text-zinc-300 transition cursor-pointer" title="Attiva/Disattiva effetti sonori 808">
+        <span id="sound-icon">🔊</span>
+        <span id="sound-text" class="hidden sm:inline">SFX ON</span>
+      </button>
+
+      <!-- Live Counter Badge -->
+      <div class="flex items-center gap-2 bg-street-surface border border-zinc-800/90 px-3 py-1.5 rounded-full font-mono text-xs shadow-inner backdrop-blur-md" role="status" aria-live="polite">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
+        </span>
+        <span class="text-white font-bold tracking-tight">
+          <span id="header-counter-number">142</span>
+          <span class="text-street-cement font-normal font-sans ml-1 hidden md:inline">in strada</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 1: LANDING & ENTRY GATE (DEFAULT VIEW, LAYER Z-10)   -->
+  <!-- ======================================================== -->
+  <main id="view-landing" class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-12 sm:gap-16 z-10 relative">
+    
+    <!-- ---------------------------------------------------- -->
+    <!-- B. HERO SECTION (IL GANCIO IMMEDIATO)                -->
+    <!-- ---------------------------------------------------- -->
+    <section class="text-center max-w-4xl mx-auto pt-2 sm:pt-4" aria-labelledby="hero-title">
+      
+      <!-- Underground Tag -->
+      <div id="hero-tag" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-street-orange/10 border border-street-orange/30 text-street-orange font-mono text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm">
+        <span>⚡ ZERO PROFILI</span>
+        <span class="text-zinc-600">•</span>
+        <span>SOLO VERITÀ</span>
+        <span class="text-zinc-600">•</span>
+        <span>100% ANONIMO</span>
+      </div>
+
+      <!-- Main Title (H1) -->
+      <h1 id="hero-title" class="text-3xl sm:text-5xl md:text-6xl font-black font-street tracking-tight text-white uppercase leading-[1.06] mb-5">
+        LE SOLITE CHAT FANNO SCHIFO.<br class="hidden sm:inline">
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-street-orange via-[#ff7722] to-amber-400 drop-shadow-[0_0_25px_rgba(255,85,0,0.4)]">
+          QUI SI PARLA DI COSE VERE.
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p id="hero-subtitle" class="text-street-cement text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">
+        Niente <span class="text-white font-semibold">"m o f?"</span>, niente account, niente profili falsi. Entri, lasci un segreto anonimo e trovi subito qualcuno con cui parlarne per 3 minuti. Poi decidi se continuare o sparire per sempre.
+      </p>
+
+      <!-- Quick Metrics Bar -->
+      <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mt-6 font-mono text-xs text-zinc-400">
+        <span class="px-3 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 flex items-center gap-1.5">
+          <span class="text-street-orange">⚡</span> Match &lt; 500ms
+        </span>
+        <span class="px-3 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 flex items-center gap-1.5">
+          <span class="text-street-orange">⏳</span> 180s per stanza
+        </span>
+        <span class="px-3 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 flex items-center gap-1.5">
+          <span class="text-street-orange">🔒</span> Zero DB • 100% RAM
+        </span>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- E. ENTRY GATE (IL BOX DI AVVIO AZIONE CON TILT 3D)    -->
+    <!-- ---------------------------------------------------- -->
+    <section id="entry-gate-section" class="w-full max-w-xl mx-auto" aria-labelledby="entry-gate-title">
+      <div id="entry-card" class="tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/40 rounded-2xl p-6 sm:p-8 street-glow relative overflow-hidden backdrop-blur-2xl shadow-2xl">
+        
+        <!-- Top Neon Accent Glow Line -->
+        <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-street-orange to-transparent opacity-95"></div>
+
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-2">
+            <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-wider">Passaggio 01</span>
+            <span class="text-zinc-700 font-mono text-xs">•</span>
+            <h2 id="entry-gate-title" class="font-street font-black text-lg text-white tracking-wide uppercase">IL TUO INGRESSO</h2>
+          </div>
+          <span class="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5 bg-zinc-900/90 px-2.5 py-0.5 rounded-full border border-zinc-800">
+            <span class="w-2 h-2 rounded-full bg-street-orange shadow-[0_0_8px_#ff5500] animate-pulse"></span>
+            Crittografia Volatile
+          </span>
+        </div>
+
+        <form id="entry-form" onsubmit="event.preventDefault(); initiateRadarSearch();" class="space-y-5">
+          
+          <!-- CHI SEI / CHI CERCHI -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label for="user-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
+                Chi sei
+              </label>
+              <div class="relative">
+                <select id="user-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
+                  <option value="M">Ragazzo (M)</option>
+                  <option value="F">Ragazza (F)</option>
+                  <option value="NB">Altro / Non-Binario</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
+                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label for="target-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
+                Chi cerchi
+              </label>
+              <div class="relative">
+                <select id="target-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
+                  <option value="Tutti">Chiunque (Tutti)</option>
+                  <option value="F">Solo Ragazze (F)</option>
+                  <option value="M">Solo Ragazzi (M)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
+                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCELTA MOOD (3 BOTTONI PILLOLA) -->
+          <div>
+            <label class="block text-xs font-mono font-semibold uppercase text-street-cement mb-2">
+              Scegli il tuo Mood
+            </label>
+            <div class="grid grid-cols-3 gap-2" id="mood-pill-group" role="radiogroup" aria-label="Seleziona il mood della conversazione">
+              <button 
+                type="button" 
+                data-mood="Cazzeggio" 
+                role="radio"
+                aria-checked="true"
+                class="mood-pill active bg-street-orange/25 border-2 border-street-orange text-white py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>💬</span> <span>Cazzeggio</span>
+              </button>
+              <button 
+                type="button" 
+                data-mood="Sfogati" 
+                role="radio"
+                aria-checked="false"
+                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>🖤</span> <span>Sfogati</span>
+              </button>
+              <button 
+                type="button" 
+                data-mood="Flirt" 
+                role="radio"
+                aria-checked="false"
+                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>🔥</span> <span>Flirt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- CAMPO SEGRETO (MAX 90 CARATTERI) -->
+          <div>
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="secret-input" class="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
+                <span>🔒 Il tuo Segreto Inconfessabile</span>
+              </label>
+              <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
+            </div>
+            
+            <div class="relative">
+              <textarea 
+                id="secret-input"
+                rows="3"
+                maxlength="90"
+                required
+                placeholder="Scrivi qui il tuo segreto o cosa hai combinato oggi (max 90 caratteri)..."
+                class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition resize-none font-sans leading-snug"
+              ></textarea>
+              
+              <!-- Dynamic Character Bar Indicator -->
+              <div class="w-full h-1.5 bg-zinc-800/90 rounded-full mt-2 overflow-hidden">
+                <div id="secret-progress-bar" class="h-full w-0 bg-street-orange transition-all duration-150"></div>
+              </div>
+            </div>
+
+            <!-- Real-time validation error warning if non-conforming -->
+            <p id="secret-validation-warning" class="hidden text-xs font-mono text-red-400 mt-1.5 flex items-center gap-1.5">
+              <span class="text-red-500">⚠️</span>
+              <span id="secret-validation-warning-text"></span>
+            </p>
+
+            <!-- Avviso Privacy -->
+            <p class="text-[11px] font-mono text-zinc-400 mt-2 flex items-center gap-1.5">
+              <span class="text-street-orange">⚡</span>
+              Questo segreto verrà mostrato solo al partner con cui parlerai (3-90 caratteri, vietati script, URL e numeri di telefono).
+            </p>
+          </div>
+
+          <!-- CALL TO ACTION BUTTON -->
+          <button 
+            type="submit" 
+            id="btn-submit-entry"
+            class="w-full group relative bg-street-orange hover:bg-street-orangeHover text-black font-street font-black py-4 px-6 rounded-xl text-base sm:text-lg tracking-wider uppercase transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.98] street-glow flex items-center justify-center gap-3 mt-4 overflow-hidden cursor-pointer"
+          >
+            <span class="relative z-10">ENTRA NEL CONFESSIONALE</span>
+            <svg class="w-5 h-5 fill-current transform group-hover:translate-x-1.5 transition-transform duration-200 relative z-10" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13.025 1l-2.847 2.828 6.176 6.172H0v4h16.354l-6.176 6.172 2.847 2.828 10.975-11z"/>
+            </svg>
+            <div id="btn-ripple" class="absolute inset-0 bg-white/25 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+          </button>
+
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- C. COME FUNZIONA (LE 3 REGOLE DELLA STRADA)          -->
+    <!-- ---------------------------------------------------- -->
+    <section class="w-full max-w-5xl mx-auto pt-2" aria-labelledby="rules-title">
+      <div class="text-center mb-8 sm:mb-10">
+        <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-widest">Protocollo Di Strada</span>
+        <h2 id="rules-title" class="font-street font-black text-2xl sm:text-3xl md:text-4xl text-white uppercase mt-1">
+          COME FUNZIONA: LE 3 REGOLE
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+        
+        <!-- CARD 01 -->
+        <div class="rule-card tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/60 rounded-2xl p-6 sm:p-7 flex flex-col justify-between group backdrop-blur-xl shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-street font-black text-4xl sm:text-5xl text-street-orange drop-shadow-[0_0_15px_rgba(255,85,0,0.5)]">01</span>
+              <span class="text-2xl">🎟️</span>
+            </div>
+            <h3 class="font-street font-black text-base sm:text-lg text-white uppercase tracking-tight mb-2.5">
+              IL BIGLIETTO D'INGRESSO (IL SEGRETO)
+            </h3>
+            <p class="text-street-cement text-sm leading-relaxed">
+              Per entrare devi scrivere una confessione anonima: una colpa, un rimpianto o un pensiero che non diresti mai a voce alta. Nessuno saprà chi sei.
+            </p>
+          </div>
+          <div class="mt-6 pt-3.5 border-t border-zinc-800/90 font-mono text-[11px] text-zinc-400 flex items-center justify-between">
+            <span>Nessun account</span>
+            <span class="text-street-orange font-bold">Max 90 caratteri</span>
+          </div>
+        </div>
+
+        <!-- CARD 02 -->
+        <div class="rule-card tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/60 rounded-2xl p-6 sm:p-7 flex flex-col justify-between group backdrop-blur-xl shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-street font-black text-4xl sm:text-5xl text-street-orange drop-shadow-[0_0_15px_rgba(255,85,0,0.5)]">02</span>
+              <span class="text-2xl">⚡</span>
+            </div>
+            <h3 class="font-street font-black text-base sm:text-lg text-white uppercase tracking-tight mb-2.5">
+              LO SVELAMENTO ISTANTANEO
+            </h3>
+            <p class="text-street-cement text-sm leading-relaxed">
+              Appena vieni abbinato, leggi il segreto dell'altro e l'altro legge il tuo. Il ghiaccio è rotto al secondo zero: niente silenzi imbarazzanti.
+            </p>
+          </div>
+          <div class="mt-6 pt-3.5 border-t border-zinc-800/90 font-mono text-[11px] text-zinc-400 flex items-center justify-between">
+            <span>Patto paritario</span>
+            <span class="text-street-orange font-bold">Secondo 0</span>
+          </div>
+        </div>
+
+        <!-- CARD 03 -->
+        <div class="rule-card tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/60 rounded-2xl p-6 sm:p-7 flex flex-col justify-between group backdrop-blur-xl shadow-lg">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="font-street font-black text-4xl sm:text-5xl text-street-orange drop-shadow-[0_0_15px_rgba(255,85,0,0.5)]">03</span>
+              <span class="text-2xl">⏳</span>
+            </div>
+            <h3 class="font-street font-black text-base sm:text-lg text-white uppercase tracking-tight mb-2.5">
+              LA REGOLA DEI 3 MINUTI
+            </h3>
+            <p class="text-street-cement text-sm leading-relaxed">
+              Hai 180 secondi di tempo. Al termine, o confermate entrambi di voler continuare per altri 5 minuti, oppure la stanza si autodistrugge nel nulla.
+            </p>
+          </div>
+          <div class="mt-6 pt-3.5 border-t border-zinc-800/90 font-mono text-[11px] text-zinc-400 flex items-center justify-between">
+            <span>Doppio consenso</span>
+            <span class="text-street-orange font-bold">Autodistruzione RAM</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- D. PRIVACY & TRASPARENZA (ZERO CAZZATE)               -->
+    <!-- ---------------------------------------------------- -->
+    <section class="w-full max-w-4xl mx-auto" aria-labelledby="privacy-title">
+      <div class="bg-street-surface border-2 border-zinc-800 rounded-2xl p-6 sm:p-8 backdrop-blur-2xl shadow-xl">
+        
+        <div class="flex items-center gap-2.5 mb-5">
+          <span class="w-2.5 h-2.5 rounded-full bg-street-orange shadow-[0_0_8px_#ff5500]"></span>
+          <h3 id="privacy-title" class="font-street font-black text-sm uppercase tracking-wider text-white">
+            PRIVACY & TRASPARENZA (ZERO CAZZATE)
+          </h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl p-4 flex items-start gap-3.5 transition hover:border-zinc-700">
+            <span class="text-xl" aria-hidden="true">🚫</span>
+            <div>
+              <h4 class="text-xs font-mono font-bold uppercase text-white mb-1">Zero Registrazione</h4>
+              <p class="text-xs text-street-cement leading-relaxed">
+                Nessuna email, nessun numero di telefono, nessun profilo memorizzato.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl p-4 flex items-start gap-3.5 transition hover:border-zinc-700">
+            <span class="text-xl" aria-hidden="true">💨</span>
+            <div>
+              <h4 class="text-xs font-mono font-bold uppercase text-white mb-1">Zero Memoria</h4>
+              <p class="text-xs text-street-cement leading-relaxed">
+                I messaggi vivono solo mentre parli. Nessun database o log su disco.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl p-4 flex items-start gap-3.5 transition hover:border-zinc-700">
+            <span class="text-xl" aria-hidden="true">📷❌</span>
+            <div>
+              <h4 class="text-xs font-mono font-bold uppercase text-white mb-1">Zero Foto/Video</h4>
+              <p class="text-xs text-street-cement leading-relaxed">
+                Solo testo essenziale per proteggere l'anonimato e la sicurezza di tutti.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- F. FAQ ACCORDION SECTION (INTERATTIVA & SEO)         -->
+    <!-- ---------------------------------------------------- -->
+    <section class="w-full max-w-4xl mx-auto" aria-labelledby="faq-section-title">
+      <div class="bg-street-surface border-2 border-zinc-800 rounded-2xl p-6 sm:p-8 backdrop-blur-2xl shadow-xl">
+        
+        <div class="text-center mb-6">
+          <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-widest">Domande Frequenti</span>
+          <h3 id="faq-section-title" class="font-street font-black text-xl sm:text-2xl text-white uppercase mt-1">
+            FAQ // TUTTO QUELLO CHE DEVI SAPERE
+          </h3>
+        </div>
+
+        <div class="space-y-3">
+          
+          <!-- FAQ 1 -->
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl overflow-hidden transition">
+            <button 
+              type="button"
+              onclick="toggleFaq(this)"
+              class="w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 text-sm font-bold text-white hover:text-street-orange transition cursor-pointer"
+            >
+              <span>Come funziona lo scambio del segreto su STREETALK?</span>
+              <span class="faq-icon text-street-orange font-mono font-bold text-base transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer hidden px-4 pb-3.5 text-xs text-street-cement leading-relaxed border-t border-zinc-800/60 pt-2.5">
+              Inserisci un segreto anonimo (massimo 90 caratteri) prima di entrare nel radar. Quando l'algoritmo trova una persona con il tuo stesso mood, i vostri due segreti vengono visualizzati in cima alla chat al secondo zero: niente convenevoli, sapete già la cosa più vera l'uno dell'altro.
+            </div>
+          </div>
+
+          <!-- FAQ 2 -->
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl overflow-hidden transition">
+            <button 
+              type="button"
+              onclick="toggleFaq(this)"
+              class="w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 text-sm font-bold text-white hover:text-street-orange transition cursor-pointer"
+            >
+              <span>I messaggi e i segreti vengono salvati su un database?</span>
+              <span class="faq-icon text-street-orange font-mono font-bold text-base transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer hidden px-4 pb-3.5 text-xs text-street-cement leading-relaxed border-t border-zinc-800/60 pt-2.5">
+              No. STREETALK opera categoricamente senza database (Zero-DB Architecture). Tutto risiede nella memoria volatile RAM del server e viene deallocato al 100% non appena abbandoni la stanza o la sessione termina.
+            </div>
+          </div>
+
+          <!-- FAQ 3 -->
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl overflow-hidden transition">
+            <button 
+              type="button"
+              onclick="toggleFaq(this)"
+              class="w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 text-sm font-bold text-white hover:text-street-orange transition cursor-pointer"
+            >
+              <span>È richiesta la registrazione o un numero di telefono?</span>
+              <span class="faq-icon text-street-orange font-mono font-bold text-base transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer hidden px-4 pb-3.5 text-xs text-street-cement leading-relaxed border-t border-zinc-800/60 pt-2.5">
+              Nessuna registrazione, nessuna email, nessun numero di telefono e nessun cookie di profilazione. L'accesso è immediato da qualsiasi browser senza lasciare traccia.
+            </div>
+          </div>
+
+          <!-- FAQ 4 -->
+          <div class="bg-[#0d0e14] border border-zinc-800/90 rounded-xl overflow-hidden transition">
+            <button 
+              type="button"
+              onclick="toggleFaq(this)"
+              class="w-full text-left px-4 py-3.5 flex items-center justify-between gap-3 text-sm font-bold text-white hover:text-street-orange transition cursor-pointer"
+            >
+              <span>Cosa accade allo scadere dei 3 minuti?</span>
+              <span class="faq-icon text-street-orange font-mono font-bold text-base transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer hidden px-4 pb-3.5 text-xs text-street-cement leading-relaxed border-t border-zinc-800/60 pt-2.5">
+              Allo scadere dei 180 secondi, entrambi i partecipanti possono cliccare sul pulsante "+5m" per richiedere una proroga. Solo se entrambi danno il consenso, la conversazione prosegue per altri 5 minuti; in caso contrario, la stanza si autodistrugge all'istante.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER SEMANTICO -->
+    <footer class="w-full text-center border-t border-zinc-800/80 pt-6 pb-6">
+      <p class="text-xs font-mono text-zinc-500">
+        STREETALK © 2026 // VOLATILE RAM PROTOCOL • ZERO TRACKERS • CRITTOGRAFIA DI STRADA
+      </p>
+    </footer>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 2: RADAR SEARCHING SCREEN WITH 3D SPHERE (LAYER Z-10)-->
+  <!-- ======================================================== -->
+  <section id="view-radar" class="hidden flex-1 w-full max-w-md mx-auto p-4 sm:p-6 flex flex-col items-center justify-center my-auto transition-all duration-300 z-10 relative">
+    <div class="w-full bg-street-surface border-2 border-zinc-800 rounded-2xl p-8 street-glow flex flex-col items-center text-center backdrop-blur-2xl shadow-2xl">
+      
+      <div class="inline-block px-3 py-1 bg-street-orange/10 border border-street-orange/30 rounded-full text-street-orange font-mono text-xs font-bold uppercase tracking-widest mb-3">
+        Radar 3D Attivo
+      </div>
+
+      <!-- 3D WIREFRAME SPHERE & RADAR SONAR CONTAINER -->
+      <div class="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center my-5 overflow-hidden rounded-full border-2 border-street-orange/40 bg-[#0a0b0e] shadow-[inset_0_0_30px_rgba(255,85,0,0.3)]">
+        <!-- Three.js 3D Wireframe Sphere Canvas -->
+        <canvas id="radar-3d-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
+
+        <!-- Concentric rings -->
+        <div class="absolute w-16 h-16 rounded-full border border-street-orange/30"></div>
+        <div class="absolute w-32 h-32 rounded-full border border-street-orange/20"></div>
+        <div class="absolute w-44 h-44 rounded-full border border-dashed border-street-orange/25"></div>
+        
+        <!-- Pulsing sonar waves -->
+        <div class="absolute w-24 h-24 rounded-full bg-street-orange/15 animate-radar-pulse"></div>
+        <div class="absolute w-24 h-24 rounded-full bg-street-orange/10 animate-radar-pulse" style="animation-delay: 1.4s;"></div>
+
+        <!-- Radar sweep line -->
+        <div class="absolute inset-0 flex items-center justify-center animate-radar-sweep pointer-events-none z-20">
+          <div class="w-1/2 h-[2px] radar-line absolute left-1/2 origin-left"></div>
+        </div>
+
+        <!-- Center Beacon -->
+        <div class="relative z-30 w-3.5 h-3.5 bg-street-orange rounded-full shadow-[0_0_16px_#ff5500]"></div>
+      </div>
+
+      <h3 class="font-street font-black text-xl text-white tracking-wide">SCANSIONE DELLA STRADA...</h3>
+      <p id="radar-status-text" class="font-mono text-xs text-street-orange mt-1">In cerca di un partner con lo stesso mood...</p>
+      
+      <div class="flex items-center gap-4 my-5 bg-[#0d0e14] border border-zinc-800 px-4 py-2.5 rounded-xl text-xs font-mono">
+        <div>
+          <span class="text-zinc-500">Mood:</span>
+          <span id="radar-display-mood" class="text-white font-bold ml-1">Cazzeggio</span>
+        </div>
+        <div class="w-[1px] h-3 bg-zinc-700"></div>
+        <div>
+          <span class="text-zinc-500">In coda:</span>
+          <span id="radar-display-pos" class="text-street-orange font-bold ml-1">#1</span>
+        </div>
+        <div class="w-[1px] h-3 bg-zinc-700"></div>
+        <div>
+          <span class="text-zinc-500">Tempo:</span>
+          <span id="radar-timer-counter" class="text-white font-bold ml-1">00:00</span>
+        </div>
+      </div>
+
+      <!-- Cancel Button -->
+      <button 
+        onclick="cancelRadarSearch()"
+        class="px-6 py-2.5 rounded-xl bg-[#0d0e14] hover:bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+      >
+        Annulla Ricerca
+      </button>
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 3: ACTIVE CHAT ROOM & SECRET REVEAL (LAYER Z-10)     -->
+  <!-- ======================================================== -->
+  <section id="view-chat" class="hidden flex-1 w-full max-w-4xl mx-auto p-2 sm:p-6 flex flex-col h-[calc(100vh-4.5rem)] max-h-[860px] z-10 relative">
+    <div class="w-full h-full bg-street-surface border-2 border-zinc-800 rounded-2xl overflow-hidden street-glow flex flex-col backdrop-blur-2xl shadow-2xl relative">
+      
+      <!-- FLOATING REACTIONS OVERLAY (EMOJI BURSTS) -->
+      <div id="floating-reactions-layer" class="pointer-events-none absolute inset-0 overflow-hidden z-30"></div>
+
+      <!-- CHAT HEADER BAR -->
+      <div class="p-3 sm:px-4 sm:py-3 bg-[#0d0e14] border-b border-zinc-800 flex items-center justify-between z-20">
+        
+        <!-- Partner Badge & Pseudonym -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="w-9 h-9 rounded-xl bg-street-orange/20 border border-street-orange/40 flex items-center justify-center text-street-orange text-base font-bold shadow-[0_0_12px_rgba(255,85,0,0.3)]">
+            ⚡
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span id="chat-partner-nick" class="font-street font-black text-sm text-white tracking-wide">SHADOW_42</span>
+              <span id="chat-partner-gender" class="text-[10px] font-mono px-1.5 py-0.2 bg-zinc-800 text-zinc-300 rounded border border-zinc-700">M</span>
+              <span id="chat-partner-mood" class="text-[10px] font-mono px-1.5 py-0.2 bg-street-orange/20 text-street-orange rounded border border-street-orange/30">Cazzeggio</span>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="chat-my-nick-badge" class="text-[10px] font-mono text-zinc-500">Tu: Neon_18</span>
+              <span class="text-zinc-700 font-mono text-[10px]">•</span>
+              <p id="chat-partner-typing-indicator" class="text-[10px] font-mono text-street-orange transition-all opacity-0">sta digitando...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls: Ping, Circular Timer, +5 Min, Safety Shield, Skip -->
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <!-- Chat Realtime Latency Ping Badge -->
+          <div id="chat-ping-badge" class="hidden sm:flex items-center gap-1.5 bg-black/60 border border-zinc-800 px-2 py-1 rounded-lg font-mono text-[10px] text-zinc-400 shadow-inner" title="Latenza realtime (ping ogni 4s)">
+            <span id="chat-ping-dot" class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]"></span>
+            <span id="chat-ping-text">-- ms</span>
+          </div>
+
+          <!-- Circular 3:00 Countdown Timer -->
+          <div id="countdown-badge" class="flex items-center gap-2 bg-black/70 border border-zinc-800 px-2.5 py-1 rounded-lg font-mono text-xs font-bold text-white transition-all shadow-inner">
+            <svg class="w-4 h-4 transform -rotate-90" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15.915" fill="none" stroke="#262c3d" stroke-width="3"></circle>
+              <circle id="timer-circular-ring" cx="18" cy="18" r="15.915" fill="none" stroke="#ff5500" stroke-width="3" stroke-dasharray="100, 100" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-300"></circle>
+            </svg>
+            <span id="chat-countdown">03:00</span>
+          </div>
+
+          <!-- +5 Min Button -->
+          <button 
+            id="btn-extension"
+            onclick="requestExtension()"
+            title="Richiedi proroga di 5 minuti (richiede doppio consenso)"
+            class="px-2 sm:px-2.5 py-1 bg-street-surface hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-xs font-mono text-zinc-300 hover:text-street-orange rounded-lg transition flex items-center gap-1 cursor-pointer"
+          >
+            <span>+5m</span>
+          </button>
+
+          <!-- Safety Report Shield Button -->
+          <button 
+            id="btn-open-report"
+            onclick="openReportModal()"
+            title="Segnala utente e termina istantaneamente la stanza"
+            class="px-2 py-1 bg-zinc-900 hover:bg-red-950/60 border border-zinc-800 hover:border-red-800/80 text-zinc-400 hover:text-red-400 text-xs font-mono rounded-lg transition flex items-center gap-1 cursor-pointer"
+          >
+            <span>🛡️</span>
+            <span class="hidden md:inline">Segnala</span>
+          </button>
+
+          <!-- Skip / Next Button -->
+          <button 
+            onclick="confirmSkip()"
+            class="px-2.5 sm:px-3 py-1 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-400 hover:text-red-200 text-xs font-mono font-bold rounded-lg transition cursor-pointer"
+          >
+            SALTA
+          </button>
+        </div>
+      </div>
+
+      <!-- BOX SUPERIORE: DOPPIA CARD SEGRETI -->
+      <div class="p-3 sm:px-4 sm:py-3 bg-[#08090c] border-b border-zinc-800 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          
+          <!-- Card 1: Il tuo segreto -->
+          <div class="bg-[#10121a] border border-zinc-800/90 hover:border-zinc-700 rounded-xl p-3 flex flex-col justify-between transition shadow-sm">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
+                  IL TUO SEGRETO
+                </span>
+                <span class="text-[10px] font-mono text-zinc-500">Privato tra voi</span>
+              </div>
+              <p id="chat-my-secret-text" class="text-xs sm:text-sm text-zinc-300 font-sans italic break-words">
+                <!-- Rendered via textContent -->
+              </p>
+            </div>
+          </div>
+
+          <!-- Card 2: Il segreto del partner -->
+          <div class="bg-[#141722] border-2 border-street-orange/40 rounded-xl p-3 flex flex-col justify-between transition street-glow-sm shadow-sm relative overflow-hidden">
+            <div class="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-street-orange to-transparent"></div>
+            <div>
+              <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                <span class="text-[10px] font-mono uppercase tracking-widest text-street-orange font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-street-orange animate-pulse"></span>
+                  IL SEGRETO DEL PARTNER
+                </span>
+                <div class="flex items-center gap-1.5">
+                  <button onclick="copyPartnerSecret()" class="text-[10px] font-mono text-zinc-300 hover:text-white flex items-center gap-1 bg-zinc-900/90 px-2 py-0.5 rounded border border-zinc-800 transition cursor-pointer" title="Copia segreto negli appunti">
+                    <span>📋</span> <span>Copia</span>
+                  </button>
+                  <button onclick="openSocialCardModal()" class="text-[10px] font-mono text-street-orange hover:text-white flex items-center gap-1 bg-street-orange/15 hover:bg-street-orange/30 px-2 py-0.5 rounded border border-street-orange/40 transition cursor-pointer" title="Genera card grafica Instagram/TikTok">
+                    <span>📷</span> <span>Card Story</span>
+                  </button>
+                </div>
+              </div>
+              <p id="chat-partner-secret-box" class="text-xs sm:text-sm text-white font-sans italic font-medium break-words">
+                <!-- Rendered via textContent -->
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- MESSAGES SCROLL CONTAINER -->
+      <div id="messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 z-10">
+        <div class="text-center my-2">
+          <span class="text-[10px] font-mono bg-zinc-900/90 border border-zinc-800 text-zinc-400 px-3.5 py-1 rounded-full">
+            Inizio chat sicura • 180 secondi di tempo • Zero database in RAM
+          </span>
+        </div>
+      </div>
+
+      <!-- QUICK REACTION EMOJI BAR -->
+      <div class="px-3 py-1.5 bg-[#090a0e] border-t border-zinc-800/80 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar z-10">
+        <span class="text-[10px] font-mono text-zinc-500 hidden sm:inline uppercase tracking-wider mr-1">Reagisci:</span>
+        <div class="flex items-center gap-1 sm:gap-2">
+          <button type="button" onclick="sendReaction('🔥')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Fuoco">🔥</button>
+          <button type="button" onclick="sendReaction('💀')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Morto">💀</button>
+          <button type="button" onclick="sendReaction('⚡')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Flash">⚡</button>
+          <button type="button" onclick="sendReaction('🖤')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Cuore nero">🖤</button>
+          <button type="button" onclick="sendReaction('🚬')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Fumo">🚬</button>
+          <button type="button" onclick="sendReaction('👀')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Occhi">👀</button>
+          <button type="button" onclick="sendReaction('🤯')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Mind blown">🤯</button>
+          <button type="button" onclick="sendReaction('👏')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Applausi">👏</button>
+        </div>
+      </div>
+
+      <!-- MESSAGE INPUT FORM -->
+      <form id="chat-input-form" onsubmit="event.preventDefault(); sendMessage();" class="p-2.5 sm:p-3 bg-[#0d0e14] border-t border-zinc-800 flex items-center gap-2 z-10">
+        <input 
+          id="chat-message-input"
+          type="text" 
+          maxlength="500"
+          autocomplete="off"
+          placeholder="Scrivi qualcosa nella notte..."
+          oninput="handleTyping()"
+          class="flex-1 bg-[#0a0b0e] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none transition"
+        />
+        <button 
+          type="submit" 
+          class="bg-street-orange hover:bg-street-orangeHover text-black font-street font-black px-4 py-2.5 rounded-xl text-sm transition street-glow-sm flex items-center justify-center cursor-pointer active:scale-95"
+        >
+          INVIA
+        </button>
+      </form>
+
+    </div>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: MATCH TERMINATED / SKIPPED                        -->
+  <!-- ======================================================== -->
+  <div id="modal-ended" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-street-surface border-2 border-zinc-800 rounded-2xl p-6 text-center street-glow">
+      <div class="w-12 h-12 rounded-full bg-street-orange/20 border border-street-orange flex items-center justify-center text-street-orange text-xl mx-auto mb-3">
+        ⚡
+      </div>
+      <h3 id="modal-ended-title" class="font-street font-black text-xl text-white uppercase">CONVERSAZIONE CHIUSA</h3>
+      <p id="modal-ended-desc" class="font-mono text-xs text-zinc-400 mt-1 mb-5">
+        Il partner ha interrotto la connessione. La stanza e la chat sono state eliminate dalla memoria.
+      </p>
+
+      <div class="flex flex-col gap-2">
+        <button 
+          onclick="restartWithSameSecret()" 
+          class="w-full bg-street-orange hover:bg-street-orangeHover text-black font-street font-black py-3 rounded-xl text-sm uppercase tracking-wider transition street-glow-sm cursor-pointer active:scale-95"
+        >
+          NUOVO PARTNER (STESSO SEGRETO)
+        </button>
+        <button 
+          onclick="backToLanding()" 
+          class="w-full bg-[#0d0e14] hover:bg-zinc-800 border border-zinc-800 text-zinc-300 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+        >
+          Torna alla Pagina Principale
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: SAFETY REPORT & SHIELD                            -->
+  <!-- ======================================================== -->
+  <div id="modal-report" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-street-surface border-2 border-red-900/80 rounded-2xl p-6 text-center street-glow shadow-2xl">
+      <div class="w-12 h-12 rounded-full bg-red-950/60 border border-red-700 flex items-center justify-center text-red-400 text-2xl mx-auto mb-3">
+        🛡️
+      </div>
+      <h3 class="font-street font-black text-xl text-white uppercase">SCUDO DI SICUREZZA</h3>
+      <p class="font-mono text-xs text-zinc-400 mt-1 mb-4 leading-relaxed">
+        Segnala comportamenti scorretti. La stanza verrà interrotta all'istante e la memoria RAM azzerata.
+      </p>
+
+      <div class="space-y-2 mb-5 text-left">
+        <label class="flex items-center gap-2.5 p-2.5 bg-[#0d0e14] border border-zinc-800 rounded-xl cursor-pointer hover:border-red-800 transition">
+          <input type="radio" name="report-reason" value="harassment" checked class="accent-red-600">
+          <span class="text-xs text-zinc-300 font-sans">Molestie o insulti verbali</span>
+        </label>
+        <label class="flex items-center gap-2.5 p-2.5 bg-[#0d0e14] border border-zinc-800 rounded-xl cursor-pointer hover:border-red-800 transition">
+          <input type="radio" name="report-reason" value="doxxing" class="accent-red-600">
+          <span class="text-xs text-zinc-300 font-sans">Doxxing / Dati personali o minacce</span>
+        </label>
+        <label class="flex items-center gap-2.5 p-2.5 bg-[#0d0e14] border border-zinc-800 rounded-xl cursor-pointer hover:border-red-800 transition">
+          <input type="radio" name="report-reason" value="illegal" class="accent-red-600">
+          <span class="text-xs text-zinc-300 font-sans">Contenuto illecito o pericoloso</span>
+        </label>
+        <label class="flex items-center gap-2.5 p-2.5 bg-[#0d0e14] border border-zinc-800 rounded-xl cursor-pointer hover:border-red-800 transition">
+          <input type="radio" name="report-reason" value="spam" class="accent-red-600">
+          <span class="text-xs text-zinc-300 font-sans">Spam / Bot commerciale</span>
+        </label>
+      </div>
+
+      <div class="flex gap-2">
+        <button 
+          onclick="closeReportModal()" 
+          class="flex-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-400 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+        >
+          Annulla
+        </button>
+        <button 
+          onclick="submitReport()" 
+          class="flex-1 bg-red-700 hover:bg-red-600 text-white font-street font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition shadow-[0_0_12px_rgba(220,38,38,0.5)] cursor-pointer"
+        >
+          CONFERMA & CHIUDI
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: VIRAL STORY CARD GENERATOR (9:16 CANVAS)          -->
+  <!-- ======================================================== -->
+  <div id="modal-share-card" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-street-surface border-2 border-zinc-800 rounded-2xl p-5 text-center street-glow shadow-2xl">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-street-orange font-mono text-xs font-bold uppercase">STORY CARD</span>
+          <span class="text-zinc-600">•</span>
+          <span class="text-white font-street font-bold text-sm">CONDIVIDI IL SEGRETO</span>
+        </div>
+        <button onclick="closeSocialCardModal()" class="text-zinc-500 hover:text-white text-lg font-mono leading-none cursor-pointer">&times;</button>
+      </div>
+
+      <p class="text-xs font-sans text-street-cement mb-3 text-left leading-relaxed">
+        Card in formato 9:16 per Instagram Stories e TikTok. Zero dati personali: solo il mistero della strada.
+      </p>
+
+      <!-- Canvas Preview Container -->
+      <div class="w-full aspect-[9/16] max-h-[380px] rounded-xl overflow-hidden border border-zinc-800 mx-auto mb-4 bg-black flex items-center justify-center shadow-lg relative">
+        <canvas id="story-card-canvas" width="720" height="1280" class="w-full h-full object-contain"></canvas>
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-2">
+        <button 
+          onclick="closeSocialCardModal()" 
+          class="sm:w-1/4 bg-[#0d0e14] hover:bg-zinc-800 border border-zinc-800 text-zinc-300 py-2.5 rounded-xl text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+        >
+          Chiudi
+        </button>
+        <button 
+          onclick="shareStoryCard()" 
+          class="flex-1 bg-[#1a1f2c] hover:bg-zinc-800 border border-street-orange/40 text-white font-mono font-bold py-2.5 rounded-xl text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-1.5"
+        >
+          <span>📲</span> <span>CONDIVIDI (SHARE)</span>
+        </button>
+        <button 
+          onclick="downloadStoryCard()" 
+          class="flex-1 bg-street-orange hover:bg-street-orangeHover text-black font-street font-black py-2.5 rounded-xl text-xs uppercase tracking-wider transition street-glow-sm cursor-pointer"
+        >
+          SCARICA PNG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATIONS -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Socket.io client script -->
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- ======================================================== -->
+  <!-- 4. SKILL: ThreeWebGLRendererOptimizer & 3D SCENE BUILDER  -->
+  <!-- ======================================================== -->
+  <script>
+    (function init3DWebGLBackground() {
+      const canvas = document.getElementById('asphalt-canvas') || document.getElementById('banana-canvas');
+      if (!canvas) return;
+
+      // Check WebGL availability with graceful 2D fallback
+      function isWebGLAvailable() {
+        try {
+          const testCanvas = document.createElement('canvas');
+          return !!(window.WebGLRenderingContext && (testCanvas.getContext('webgl') || testCanvas.getContext('experimental-webgl')));
+        } catch (e) {
+          return false;
+        }
+      }
+
+      // If WebGL is not available or Three.js fails, fallback to 2D
+      if (!window.THREE || !isWebGLAvailable()) {
+        console.warn('[3D-ENGINE] WebGL non supportato o limitato. Attivazione fallback procedurale 2D.');
+        init2DFallback(canvas);
+        return;
+      }
+
+      try {
+        // --- 1. RENDERER OPTIMIZER SETUP ---
+        const renderer = new THREE.WebGLRenderer({
+          canvas: canvas,
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance"
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0a0b0e, 0.028);
+
+        // --- 2. CAMERA FLY-THROUGH SETUP ---
+        const camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 3.5, 18);
+        camera.rotation.x = -0.12;
+
+        // --- 3. POINT LIGHT FOLLOWING MOUSE ---
+        const pointLight = new THREE.PointLight(0xff5500, 2.5, 45);
+        pointLight.position.set(0, 4, 10);
+        scene.add(pointLight);
+
+        const ambientLight = new THREE.AmbientLight(0x1a1a24, 1.2);
+        scene.add(ambientLight);
+
+        // --- 4. UNDULATING ASPHALT 3D WIREFRAME GRID ---
+        const gridWidth = 90;
+        const gridHeight = 120;
+        const segX = 45;
+        const segY = 60;
+        const planeGeo = new THREE.PlaneGeometry(gridWidth, gridHeight, segX, segY);
+        planeGeo.rotateX(-Math.PI / 2);
+        planeGeo.translate(0, -6, -20);
+
+        // Store baseline positions for wave distortion
+        const posAttr = planeGeo.attributes.position;
+        const baseZ = new Float32Array(posAttr.count);
+        for (let i = 0; i < posAttr.count; i++) {
+          baseZ[i] = posAttr.getY(i); // Note: after rotation, Y corresponds to height
+        }
+
+        // Dark wireframe with glowing neon orange accents
+        const wireframeMat = new THREE.MeshBasicMaterial({
+          color: 0xff5500,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.16
+        });
+        const asphaltGrid = new THREE.Mesh(planeGeo, wireframeMat);
+        scene.add(asphaltGrid);
+
+        // Optional subterranean dark floor for depth
+        const floorMat = new THREE.MeshBasicMaterial({
+          color: 0x050608,
+          transparent: true,
+          opacity: 0.65
+        });
+        const asphaltFloor = new THREE.Mesh(planeGeo, floorMat);
+        asphaltFloor.position.y = -0.1;
+        scene.add(asphaltFloor);
+
+        // --- 5. 800 FLOATING VOLUMETRIC PARTICLES (DUST EMBERS) ---
+        const PARTICLE_COUNT = 800;
+        const particleGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(PARTICLE_COUNT * 3);
+        const velocities = new Float32Array(PARTICLE_COUNT * 3);
+        const randomOffsets = new Float32Array(PARTICLE_COUNT);
+
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          const idx = i * 3;
+          positions[idx] = (Math.random() - 0.5) * 60;     // X
+          positions[idx + 1] = Math.random() * 30 - 8;      // Y
+          positions[idx + 2] = (Math.random() - 0.5) * 60 - 5; // Z
+
+          velocities[idx] = (Math.random() - 0.5) * 0.015;
+          velocities[idx + 1] = 0.02 + Math.random() * 0.045;
+          velocities[idx + 2] = (Math.random() - 0.5) * 0.015;
+
+          randomOffsets[i] = Math.random() * Math.PI * 2;
+        }
+
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        const particleMat = new THREE.PointsMaterial({
+          color: 0xff5500,
+          size: 0.22,
+          transparent: true,
+          opacity: 0.65,
+          blending: THREE.AdditiveBlending
+        });
+        const particleSystem = new THREE.Points(particleGeo, particleMat);
+        scene.add(particleSystem);
+
+        // --- 6. MOUSE & SCROLL STATE ---
+        const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+        let scrollY = 0;
+        let targetScrollY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+          mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
+          mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+          if (e.touches && e.touches[0]) {
+            mouse.targetX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
+            mouse.targetY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+          }
+        }, { passive: true });
+
+        window.addEventListener('scroll', () => {
+          targetScrollY = window.scrollY;
+        }, { passive: true });
+
+        function handleResize() {
+          const w = window.innerWidth;
+          const h = window.innerHeight;
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setSize(w, h);
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        }
+        window.addEventListener('resize', handleResize, { passive: true });
+
+        // --- 7. ANIMATION LOOP (60 FPS) ---
+        const clock = new THREE.Clock();
+
+        function animate() {
+          requestAnimationFrame(animate);
+
+          const time = clock.getElapsedTime();
+
+          // Smooth mouse lerp
+          mouse.x += (mouse.targetX - mouse.x) * 0.06;
+          mouse.y += (mouse.targetY - mouse.y) * 0.06;
+          scrollY += (targetScrollY - scrollY) * 0.08;
+
+          // Point light moves with mouse
+          pointLight.position.x = mouse.x * 16;
+          pointLight.position.y = 3 + mouse.y * 6;
+          pointLight.position.z = 8 + Math.sin(time * 1.2) * 2;
+
+          // Undulating asphalt sinusoidal waves
+          const pos = asphaltGrid.geometry.attributes.position;
+          for (let i = 0; i < pos.count; i++) {
+            const px = pos.getX(i);
+            const pz = pos.getZ(i);
+            const wave = Math.sin(px * 0.12 + time * 0.8) * Math.cos(pz * 0.1 + time * 0.6) * 1.5
+                       + Math.sin((px + pz) * 0.07 + time * 0.4) * 0.8;
+            pos.setY(i, baseZ[i] + wave);
+          }
+          pos.needsUpdate = true;
+
+          // Update 800 floating particles
+          const pPositions = particleGeo.attributes.position.array;
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const idx = i * 3;
+            pPositions[idx] += velocities[idx] + Math.sin(time * 0.5 + randomOffsets[i]) * 0.008;
+            pPositions[idx + 1] += velocities[idx + 1];
+            pPositions[idx + 2] += velocities[idx + 2];
+
+            // Wrap particles around screen
+            if (pPositions[idx + 1] > 22) {
+              pPositions[idx + 1] = -7;
+              pPositions[idx] = (Math.random() - 0.5) * 60;
+              pPositions[idx + 2] = (Math.random() - 0.5) * 60 - 5;
+            }
+          }
+          particleGeo.attributes.position.needsUpdate = true;
+
+          // Camera fly-through tied to scroll
+          const maxDocScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+          const scrollFraction = Math.min(1, Math.max(0, scrollY / maxDocScroll));
+
+          camera.position.z = 18 - scrollFraction * 10;
+          camera.position.y = 3.5 - scrollFraction * 2.5 + mouse.y * 0.8;
+          camera.position.x = mouse.x * 1.8;
+          camera.rotation.z = mouse.x * -0.02 + Math.sin(time * 0.25) * 0.01;
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+
+      } catch (err) {
+        console.warn('[3D-ENGINE] Errore inizializzazione WebGL. Attivazione fallback 2D:', err);
+        init2DFallback(canvas);
+      }
+
+      // Procedural 2D canvas fallback
+      function init2DFallback(c) {
+        const ctx = c.getContext('2d');
+        if (!ctx) return;
+        let w = c.width = window.innerWidth;
+        let h = c.height = window.innerHeight;
+        window.addEventListener('resize', () => {
+          w = c.width = window.innerWidth;
+          h = c.height = window.innerHeight;
+        });
+
+        const pCount = 50;
+        const pts = [];
+        for (let i = 0; i < pCount; i++) {
+          pts.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vy: -(0.3 + Math.random() * 0.6),
+            r: 1.2 + Math.random() * 1.8
+          });
+        }
+
+        function draw2D() {
+          ctx.clearRect(0, 0, w, h);
+          ctx.strokeStyle = 'rgba(38, 44, 61, 0.22)';
+          ctx.lineWidth = 1;
+          for (let x = 0; x < w; x += 48) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+          }
+          for (let y = 0; y < h; y += 48) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+          }
+          ctx.fillStyle = '#ff5500';
+          for (let p of pts) {
+            p.y += p.vy;
+            if (p.y < 0) p.y = h;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          requestAnimationFrame(draw2D);
+        }
+        draw2D();
+      }
+    })();
+  </script>
+
+  <!-- ======================================================== -->
+  <!-- 3D SPHERICAL WIREFRAME RADAR ENGINE                      -->
+  <!-- ======================================================== -->
+  <script>
+    (function init3DRadar() {
+      const radarCanvas = document.getElementById('radar-3d-canvas');
+      if (!radarCanvas || !window.THREE) return;
+
+      try {
+        const renderer = new THREE.WebGLRenderer({
+          canvas: radarCanvas,
+          alpha: true,
+          antialias: true
+        });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(224, 224);
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+        camera.position.z = 6;
+
+        // Outer Wireframe Sphere
+        const sphereGeo = new THREE.SphereGeometry(2.4, 18, 14);
+        const sphereMat = new THREE.MeshBasicMaterial({
+          color: 0xff5500,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.6
+        });
+        const radarSphere = new THREE.Mesh(sphereGeo, sphereMat);
+        scene.add(radarSphere);
+
+        // Inner Core Sphere
+        const innerGeo = new THREE.SphereGeometry(1.0, 12, 10);
+        const innerMat = new THREE.MeshBasicMaterial({
+          color: 0xff8833,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.8
+        });
+        const innerSphere = new THREE.Mesh(innerGeo, innerMat);
+        scene.add(innerSphere);
+
+        // Dynamic concentric wave ring
+        const ringGeo = new THREE.RingGeometry(0.2, 0.3, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0xff5500,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.8
+        });
+        const waveRing = new THREE.Mesh(ringGeo, ringMat);
+        scene.add(waveRing);
+
+        let ringScale = 0.5;
+
+        function animateRadar() {
+          requestAnimationFrame(animateRadar);
+
+          const isRadarActive = !document.getElementById('view-radar').classList.contains('hidden');
+          if (!isRadarActive) return;
+
+          radarSphere.rotation.y += 0.018;
+          radarSphere.rotation.x += 0.01;
+          innerSphere.rotation.y -= 0.025;
+          innerSphere.rotation.z += 0.015;
+
+          // Pulse concentric ring outward
+          ringScale += 0.04;
+          if (ringScale > 6) {
+            ringScale = 0.5;
+            waveRing.material.opacity = 0.8;
+          } else {
+            waveRing.material.opacity = Math.max(0, 0.8 * (1 - ringScale / 6));
+          }
+          waveRing.scale.set(ringScale, ringScale, 1);
+          waveRing.rotation.z += 0.01;
+
+          renderer.render(scene, camera);
+        }
+
+        animateRadar();
+      } catch (e) {
+        console.warn('[RADAR-3D] Fallback a radar CSS 2D:', e);
+      }
+    })();
+  </script>
+
+  <!-- ======================================================== -->
+  <!-- 3D PHYSICAL CARD TILT ENGINE & GSAP MICRO-INTERACTIONS    -->
+  <!-- ======================================================== -->
+  <script>
+    (function init3DTiltAndGSAP() {
+      // 1. 3D Tilt Effect on cards
+      function setupTilt(el, maxAngle = 6) {
+        if (!el) return;
+        el.addEventListener('mousemove', (e) => {
+          const rect = el.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          const cx = rect.width / 2;
+          const cy = rect.height / 2;
+          const rotX = ((y - cy) / cy) * -maxAngle;
+          const rotY = ((x - cx) / cx) * maxAngle;
+          el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+        });
+        el.addEventListener('mouseleave', () => {
+          el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+      }
+
+      // Apply 3D Tilt to entry gate and rule cards
+      const entryCard = document.getElementById('entry-card');
+      if (entryCard) setupTilt(entryCard, 6);
+
+      document.querySelectorAll('.rule-card').forEach(card => {
+        setupTilt(card, 7);
+      });
+
+      // 2. GSAP Entrance Stagger
+      if (window.gsap) {
+        try {
+          gsap.from('#hero-tag', { opacity: 0, y: -20, duration: 0.8, ease: 'power3.out' });
+          gsap.from('#hero-title', { opacity: 0, y: 30, duration: 1.0, delay: 0.15, ease: 'power3.out' });
+          gsap.from('#hero-subtitle', { opacity: 0, y: 20, duration: 0.9, delay: 0.3, ease: 'power3.out' });
+          gsap.from('#entry-card', { opacity: 0, scale: 0.95, y: 35, duration: 1.1, delay: 0.45, ease: 'back.out(1.4)' });
+        } catch (e) {}
+      }
+    })();
+  </script>
+
+  <!-- ======================================================== -->
+  <!-- 5. CLIENT CONTROLLER & SOCKET PROTOCOL                   -->
+  <!-- ======================================================== -->
+  <script>
+    let socket = null;
+    let isSocketConnected = false;
+    let currentRoomId = null;
+    let selectedMood = 'Cazzeggio';
+    let mySecret = '';
+    let partnerSecret = '';
+    let partnerMood = '';
+    let partnerNick = '';
+    let myNick = '';
+    let countdownInterval = null;
+    let radarSecondsCounter = 0;
+    let radarInterval = null;
+    let typingTimeout = null;
+    let isTyping = false;
+
+    // Connect to Socket.io if available
+    try {
+      if (typeof io !== 'undefined') {
+        socket = io({ reconnectionAttempts: 5 });
+        socket.on('connect', () => {
+          isSocketConnected = true;
+          console.log('[STREETALK] Connesso al server realtime.');
+        });
+        socket.on('disconnect', () => {
+          isSocketConnected = false;
+        });
+      }
+    } catch (e) {
+      console.warn('[STREETALK] Modalità standalone attiva.');
+    }
+
+    // ==========================================
+    // SKILL: DOMSafetyFilter (Zero XSS)
+    // ==========================================
+    function safeSetText(element, text) {
+      if (element) {
+        element.textContent = text == null ? '' : String(text);
+      }
+    }
+
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `px-4 py-2.5 rounded-xl text-xs font-mono border backdrop-blur-xl shadow-xl transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${
+        type === 'error' 
+          ? 'bg-red-950/90 border-red-800 text-red-200' 
+          : type === 'success'
+          ? 'bg-emerald-950/90 border-emerald-800 text-emerald-200'
+          : 'bg-street-surface border-street-orange/60 text-street-orange'
+      }`;
+      safeSetText(toast, message);
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // ==========================================
+    // SKILL: AudioSynthesisEngine (Zero MP3 Dependencies)
+    // ==========================================
+    const SoundEngine = {
+      ctx: null,
+      enabled: true,
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) this.ctx = new AudioCtx();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      playMatchSound() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          // 808 sub-bass sweep
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(140, now);
+          osc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
+          gain.gain.setValueAtTime(0.28, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.4);
+
+          // Metallic bell chime
+          const chime = this.ctx.createOscillator();
+          const chimeGain = this.ctx.createGain();
+          chime.type = 'triangle';
+          chime.frequency.setValueAtTime(880, now);
+          chime.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
+          chimeGain.gain.setValueAtTime(0.12, now);
+          chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          chime.connect(chimeGain);
+          chimeGain.connect(this.ctx.destination);
+          chime.start(now);
+          chime.stop(now + 0.25);
+        } catch (e) {}
+      },
+
+      playMsgSent() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(260, now + 0.07);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.07);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.07);
+        } catch (e) {}
+      },
+
+      playMsgReceived() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(540, now);
+          osc.frequency.exponentialRampToValueAtTime(880, now + 0.09);
+          gain.gain.setValueAtTime(0.18, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.11);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.11);
+        } catch (e) {}
+      },
+
+      playReaction() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc1 = this.ctx.createOscillator();
+          const gain1 = this.ctx.createGain();
+          osc1.type = 'sine';
+          osc1.frequency.setValueAtTime(440, now);
+          osc1.frequency.exponentialRampToValueAtTime(660, now + 0.05);
+          gain1.gain.setValueAtTime(0.22, now);
+          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+          osc1.connect(gain1);
+          gain1.connect(this.ctx.destination);
+          osc1.start(now);
+          osc1.stop(now + 0.06);
+
+          const osc2 = this.ctx.createOscillator();
+          const gain2 = this.ctx.createGain();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(660, now + 0.06);
+          osc2.frequency.exponentialRampToValueAtTime(990, now + 0.12);
+          gain2.gain.setValueAtTime(0.24, now + 0.06);
+          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc2.connect(gain2);
+          gain2.connect(this.ctx.destination);
+          osc2.start(now + 0.06);
+          osc2.stop(now + 0.14);
+        } catch (e) {}
+      },
+
+      playWarning() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          [0, 0.14].forEach(offset => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(440, now + offset);
+            gain.gain.setValueAtTime(0.08, now + offset);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.09);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now + offset);
+            osc.stop(now + offset + 0.09);
+          });
+        } catch (e) {}
+      },
+
+      playSkip() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(300, now);
+          osc.frequency.exponentialRampToValueAtTime(90, now + 0.18);
+          gain.gain.setValueAtTime(0.15, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.18);
+        } catch (e) {}
+      }
+    };
+
+    function toggleSound() {
+      SoundEngine.enabled = !SoundEngine.enabled;
+      const icon = document.getElementById('sound-icon');
+      const text = document.getElementById('sound-text');
+      if (SoundEngine.enabled) {
+        SoundEngine.init();
+        if (icon) icon.textContent = '🔊';
+        if (text) text.textContent = 'SFX ON';
+        showToast('Effetti sonori attivati', 'info');
+      } else {
+        if (icon) icon.textContent = '🔇';
+        if (text) text.textContent = 'SFX OFF';
+        showToast('Effetti sonori disattivati', 'info');
+      }
+    }
+
+    // FAQ Accordion Toggle
+    function toggleFaq(btn) {
+      const parent = btn.parentElement;
+      const answer = parent.querySelector('.faq-answer');
+      const icon = parent.querySelector('.faq-icon');
+
+      if (answer.classList.contains('hidden')) {
+        answer.classList.remove('hidden');
+        icon.textContent = '−';
+        parent.classList.add('border-street-orange/50');
+      } else {
+        answer.classList.add('hidden');
+        icon.textContent = '+';
+        parent.classList.remove('border-street-orange/50');
+      }
+    }
+
+    // Secret Validation Helper (3-90 chars, no script, no url, no phone)
+    function validateSecretInput(val) {
+      if (!val || typeof val !== 'string') {
+        return { valid: false, error: 'Scrivi una confessione anonima per entrare.' };
+      }
+      const trimmed = val.trim();
+      if (trimmed.length < 3) {
+        return { valid: false, error: 'Il segreto deve avere almeno 3 caratteri.' };
+      }
+      if (trimmed.length > 90) {
+        return { valid: false, error: 'Il segreto non può superare 90 caratteri.' };
+      }
+      if (/<\s*\/?\s*script/i.test(trimmed)) {
+        return { valid: false, error: 'Vietato inserire tag <script> o codice.' };
+      }
+      if (/https?:/i.test(trimmed) || /www\.[a-z0-9\-]+(?:\.[a-z]{2,})/i.test(trimmed)) {
+        return { valid: false, error: 'Vietato inserire link o URL web.' };
+      }
+      const isPhone = (
+        /(?:\+|00)\d{1,4}[\s./-]?\(?\d{1,4}\)?(?:[\s./-]?\d{2,5}){2,4}/.test(trimmed) ||
+        /(?:\b|\()(?:\d{2,4}[\s./-]|\(\d{2,4}\)[\s.-]?)\d{3,4}[\s./-]?\d{3,7}\b/.test(trimmed) ||
+        /\b(?:\d{3}[-.\s]?\d{3}[-.\s]?\d{4}|\d{7,11})\b/.test(trimmed)
+      );
+      if (isPhone) {
+        return { valid: false, error: 'Vietato inserire numeri di telefono.' };
+      }
+      return { valid: true, text: trimmed };
+    }
+
+    // View Switching
+    function switchView(viewName) {
+      const vLanding = document.getElementById('view-landing');
+      const vRadar = document.getElementById('view-radar');
+      const vChat = document.getElementById('view-chat');
+
+      vLanding.classList.add('hidden');
+      vRadar.classList.add('hidden');
+      vChat.classList.add('hidden');
+
+      if (viewName === 'landing') {
+        vLanding.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (viewName === 'radar') {
+        vRadar.classList.remove('hidden');
+      } else if (viewName === 'chat') {
+        vChat.classList.remove('hidden');
+      }
+    }
+
+    // Radar Actions
+    function initiateRadarSearch() {
+      SoundEngine.init();
+      const secretInput = document.getElementById('secret-input');
+      const secretVal = secretInput.value;
+
+      const validation = validateSecretInput(secretVal);
+      if (!validation.valid) {
+        showToast(validation.error, 'error');
+        secretInput.focus();
+        return;
+      }
+
+      const ripple = document.getElementById('btn-ripple');
+      if (ripple) {
+        ripple.style.opacity = '1';
+        setTimeout(() => { ripple.style.opacity = '0'; }, 200);
+      }
+
+      mySecret = validation.text;
+      const gender = document.getElementById('user-gender').value;
+      const targetGender = document.getElementById('target-gender').value;
+
+      safeSetText(document.getElementById('radar-display-mood'), selectedMood);
+      safeSetText(document.getElementById('radar-display-pos'), '#1');
+      safeSetText(document.getElementById('radar-timer-counter'), '00:00');
+      safeSetText(document.getElementById('radar-status-text'), `In cerca di un partner sul mood [${selectedMood}]...`);
+
+      radarSecondsCounter = 0;
+      clearInterval(radarInterval);
+      radarInterval = setInterval(() => {
+        radarSecondsCounter++;
+        const mins = String(Math.floor(radarSecondsCounter / 60)).padStart(2, '0');
+        const secs = String(radarSecondsCounter % 60).padStart(2, '0');
+        safeSetText(document.getElementById('radar-timer-counter'), `${mins}:${secs}`);
+      }, 1000);
+
+      switchView('radar');
+
+      if (socket && socket.connected) {
+        socket.emit('join_queue', {
+          gender,
+          targetGender,
+          mood: selectedMood,
+          secret: mySecret
+        });
+      }
+    }
+
+    function cancelRadarSearch() {
+      clearInterval(radarInterval);
+      if (socket && socket.connected) {
+        socket.emit('leave_queue');
+      }
+      switchView('landing');
+    }
+
+    function backToLanding() {
+      clearInterval(radarInterval);
+      clearInterval(countdownInterval);
+      document.getElementById('modal-ended').classList.add('hidden');
+      closeReportModal();
+      closeSocialCardModal();
+      currentRoomId = null;
+      switchView('landing');
+    }
+
+    function restartWithSameSecret() {
+      document.getElementById('modal-ended').classList.add('hidden');
+      closeReportModal();
+      closeSocialCardModal();
+      initiateRadarSearch();
+    }
+
+    // Chat Actions
+    function sendMessage() {
+      const input = document.getElementById('chat-message-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('send_message', {
+          roomId: currentRoomId,
+          message: text
+        });
+      }
+
+      input.value = '';
+      input.focus();
+
+      if (isTyping && socket && socket.connected && currentRoomId) {
+        isTyping = false;
+        socket.emit('typing', { roomId: currentRoomId, isTyping: false });
+      }
+    }
+
+    function handleTyping() {
+      if (!currentRoomId || !socket || !socket.connected) return;
+      if (!isTyping) {
+        isTyping = true;
+        socket.emit('typing', { roomId: currentRoomId, isTyping: true });
+      }
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {
+        isTyping = false;
+        socket.emit('typing', { roomId: currentRoomId, isTyping: false });
+      }, 1500);
+    }
+
+    function requestExtension() {
+      if (!currentRoomId || !socket || !socket.connected) return;
+      socket.emit('request_extend', { roomId: currentRoomId });
+      showToast('Hai richiesto la proroga (+5m). In attesa del partner...', 'info');
+      const btn = document.getElementById('btn-extension');
+      btn.classList.add('bg-street-orange/30', 'text-street-orange');
+      safeSetText(btn, '+5m (1/2)');
+    }
+
+    function confirmSkip() {
+      SoundEngine.playSkip();
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('skip_partner', { roomId: currentRoomId });
+      }
+      openEndedModal('HAI SALTATO IL MATCH', 'Hai interrotto la conversazione. Puoi cercare subito un altro partner.');
+    }
+
+    function copyPartnerSecret() {
+      const text = partnerSecret || '';
+      if (!text) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          showToast('Segreto copiato negli appunti! 📋', 'success');
+        }).catch(() => fallbackCopyText(text));
+      } else {
+        fallbackCopyText(text);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Segreto copiato negli appunti! 📋', 'success');
+    }
+
+    function sendReaction(emoji) {
+      if (!currentRoomId || !socket || !socket.connected) return;
+      socket.emit('send_reaction', { roomId: currentRoomId, emoji });
+    }
+
+    function triggerReactionVisual(emoji, isSelf = false) {
+      const layer = document.getElementById('floating-reactions-layer');
+      if (!layer) return;
+
+      const el = document.createElement('div');
+      el.className = 'absolute text-3xl sm:text-4xl pointer-events-none select-none z-40';
+      safeSetText(el, emoji);
+
+      const randomX = isSelf ? (60 + Math.random() * 28) : (10 + Math.random() * 28);
+      el.style.left = `${randomX}%`;
+      el.style.bottom = '30px';
+      el.style.transition = 'all 1.6s cubic-bezier(0.22, 1, 0.36, 1)';
+      el.style.opacity = '1';
+      el.style.transform = `scale(0.6) translateY(0px) rotate(${(Math.random() - 0.5) * 35}deg)`;
+
+      layer.appendChild(el);
+
+      requestAnimationFrame(() => {
+        el.style.opacity = '0';
+        el.style.transform = `scale(1.45) translateY(-${220 + Math.random() * 100}px) rotate(${(Math.random() - 0.5) * 60}deg)`;
+      });
+
+      setTimeout(() => { el.remove(); }, 1700);
+      SoundEngine.playReaction();
+    }
+
+    function openReportModal() {
+      const modal = document.getElementById('modal-report');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById('modal-report');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function submitReport() {
+      const selected = document.querySelector('input[name="report-reason"]:checked');
+      const reason = selected ? selected.value : 'other';
+
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('report_user', { roomId: currentRoomId, reason });
+      }
+
+      closeReportModal();
+      openEndedModal('SEGNALAZIONE INVIATA', 'Utente bloccato e segnalato. La stanza è stata chiusa all\'istante per la tua sicurezza.');
+    }
+
+    // Viral 9:16 Canvas Story Card Generator
+    function openSocialCardModal() {
+      const modal = document.getElementById('modal-share-card');
+      if (modal) {
+        modal.classList.remove('hidden');
+        drawStoryCard();
+      }
+    }
+
+    function closeSocialCardModal() {
+      const modal = document.getElementById('modal-share-card');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function drawStoryCard() {
+      const canvas = document.getElementById('story-card-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      const w = canvas.width;  // 720
+      const h = canvas.height; // 1280
+
+      // Asphalt Dark Gradient
+      const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
+      bgGrad.addColorStop(0, '#0a0b0e');
+      bgGrad.addColorStop(0.4, '#12151d');
+      bgGrad.addColorStop(1, '#060709');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // Subtle Asphalt Perspective Grid
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 85, 0, 0.08)';
+      ctx.lineWidth = 1;
+      for (let x = 0; x < w; x += 45) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+      }
+      for (let y = 0; y < h; y += 45) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+      }
+      ctx.restore();
+
+      // Neon Street Border Frame
+      ctx.save();
+      ctx.strokeStyle = '#ff5500';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(28, 28, w - 56, h - 56);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(38, 38, w - 76, h - 76);
+      ctx.restore();
+
+      // Header Branding
+      ctx.fillStyle = '#ff5500';
+      ctx.fillRect(60, 65, 40, 40);
+      ctx.fillStyle = '#000000';
+      ctx.font = '900 24px Syne, sans-serif';
+      ctx.fillText('ST', 66, 94);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 30px Syne, sans-serif';
+      ctx.fillText('STREET', 115, 95);
+      ctx.fillStyle = '#ff5500';
+      ctx.fillText('ALK', 245, 95);
+
+      // Badge: Segreto svelato
+      ctx.fillStyle = 'rgba(255, 85, 0, 0.14)';
+      ctx.fillRect(60, 135, 260, 36);
+      ctx.strokeStyle = 'rgba(255, 85, 0, 0.45)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(60, 135, 260, 36);
+      ctx.fillStyle = '#ff5500';
+      ctx.font = '700 13px "JetBrains Mono", monospace';
+      ctx.fillText('🔒 SEGRETO INCONFESSABILE', 76, 158);
+
+      // Quotation Mark
+      ctx.fillStyle = 'rgba(255, 85, 0, 0.22)';
+      ctx.font = '900 140px Syne, serif';
+      ctx.fillText('“', 55, 300);
+
+      // Secret Text Word Wrap
+      const textToDisplay = partnerSecret || mySecret || 'Le solite chat fanno schifo. Qui si parla di cose vere.';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '700 34px "Plus Jakarta Sans", sans-serif';
+
+      const maxWidth = w - 140;
+      const words = textToDisplay.split(' ');
+      let line = '';
+      let y = 370;
+      const lineHeight = 50;
+
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, 70, y);
+          line = words[n] + ' ';
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, 70, y);
+
+      ctx.fillStyle = 'rgba(255, 85, 0, 0.22)';
+      ctx.font = '900 140px Syne, serif';
+      ctx.fillText('”', w - 130, y + 90);
+
+      // Metadata Pill
+      const metaY = Math.min(h - 260, y + 150);
+      ctx.fillStyle = '#141720';
+      ctx.fillRect(70, metaY, 360, 54);
+      ctx.strokeStyle = '#262c3d';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(70, metaY, 360, 54);
+
+      ctx.fillStyle = '#ff5500';
+      ctx.font = '700 14px "JetBrains Mono", monospace';
+      ctx.fillText(`MOOD: ${(partnerMood || selectedMood).toUpperCase()}`, 90, metaY + 33);
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText(`ORE ${timeStr}`, 280, metaY + 33);
+
+      // Footer
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '500 16px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('Entra nella notte. Scambia un segreto reale in 180s.', 70, h - 130);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 24px Syne, sans-serif';
+      ctx.fillText('@STREETALK.LIVE', 70, h - 90);
+
+      ctx.fillStyle = '#ff5500';
+      ctx.font = '700 13px "JetBrains Mono", monospace';
+      ctx.fillText('// 100% VOLATILE RAM • ZERO LOG', 70, h - 62);
+    }
+
+    function downloadStoryCard() {
+      const canvas = document.getElementById('story-card-canvas');
+      if (!canvas) return;
+      const link = document.createElement('a');
+      link.download = 'streetalk-segreto.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('Card scaricata con successo! 🚀', 'success');
+    }
+
+    async function shareStoryCard() {
+      const canvas = document.getElementById('story-card-canvas');
+      if (!canvas) return;
+      if (navigator.share && canvas.toBlob) {
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], 'streetalk-segreto.png', { type: 'image/png' });
+            try {
+              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                  title: 'STREETALK // Segreto Svelato',
+                  text: 'Un segreto sussurrato nella notte su STREETALK.LIVE',
+                  files: [file]
+                });
+                showToast('Condiviso con successo! 🔥', 'success');
+                return;
+              }
+            } catch (e) {
+              if (e.name !== 'AbortError') {
+                downloadStoryCard();
+              }
+              return;
+            }
+          }
+          downloadStoryCard();
+        });
+      } else {
+        downloadStoryCard();
+      }
+    }
+
+    function openEndedModal(title, desc) {
+      clearInterval(countdownInterval);
+      currentRoomId = null;
+      safeSetText(document.getElementById('modal-ended-title'), title);
+      safeSetText(document.getElementById('modal-ended-desc'), desc);
+      document.getElementById('modal-ended').classList.remove('hidden');
+    }
+
+    function startChatCountdown(seconds) {
+      clearInterval(countdownInterval);
+      const totalSeconds = seconds || 180;
+      let remaining = seconds;
+      const countdownEl = document.getElementById('chat-countdown');
+      const badge = document.getElementById('countdown-badge');
+      const ring = document.getElementById('timer-circular-ring');
+
+      function updateDisplay() {
+        const mins = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const secs = String(remaining % 60).padStart(2, '0');
+        safeSetText(countdownEl, `${mins}:${secs}`);
+
+        if (ring) {
+          const pct = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
+          ring.style.strokeDashoffset = (100 - pct);
+        }
+
+        if (remaining <= 30) {
+          badge.classList.add('border-red-600', 'text-red-400');
+          badge.classList.remove('border-zinc-800', 'text-white');
+          if (ring) ring.setAttribute('stroke', '#ef4444');
+        } else {
+          badge.classList.remove('border-red-600', 'text-red-400');
+          badge.classList.add('border-zinc-800', 'text-white');
+          if (ring) ring.setAttribute('stroke', '#ff5500');
+        }
+      }
+
+      updateDisplay();
+      countdownInterval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(countdownInterval);
+          safeSetText(countdownEl, '00:00');
+          if (ring) ring.style.strokeDashoffset = 100;
+        } else {
+          updateDisplay();
+        }
+      }, 1000);
+    }
+
+    function appendMessageBubble(messageObj, isSelf) {
+      const container = document.getElementById('messages-container');
+      const wrap = document.createElement('div');
+      wrap.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'} mb-3`;
+
+      const bubble = document.createElement('div');
+      bubble.className = `max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm font-sans ${
+        isSelf 
+          ? 'bg-gradient-to-r from-street-orange to-[#e64a00] text-black font-semibold rounded-br-none' 
+          : 'bg-[#0d0e14] border border-zinc-800 text-gray-100 rounded-bl-none'
+      }`;
+
+      safeSetText(bubble, messageObj.message);
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'text-[9px] font-mono text-zinc-500 mt-1 px-1';
+      const time = new Date(messageObj.timestamp);
+      safeSetText(timeSpan, `${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`);
+
+      wrap.appendChild(bubble);
+      wrap.appendChild(timeSpan);
+      container.appendChild(wrap);
+
+      container.scrollTop = container.scrollHeight;
+    }
+
+    // ==========================================
+    // INITIALIZATION & DOM LISTENERS
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', () => {
+      // Register Service Worker for PWA (2026 standards)
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+
+      // Secret Character Counter & Progress Bar
+      const secretInput = document.getElementById('secret-input');
+      const charCounter = document.getElementById('char-counter');
+      const progressBar = document.getElementById('secret-progress-bar');
+      const warningEl = document.getElementById('secret-validation-warning');
+      const warningTextEl = document.getElementById('secret-validation-warning-text');
+
+      if (secretInput && charCounter) {
+        secretInput.addEventListener('input', () => {
+          const val = secretInput.value;
+          const len = val.length;
+          safeSetText(charCounter, `${len}/90`);
+
+          const pct = Math.min(100, (len / 90) * 100);
+          if (progressBar) {
+            progressBar.style.width = pct + '%';
+          }
+
+          if (len === 0) {
+            if (warningEl) warningEl.classList.add('hidden');
+            secretInput.classList.remove('border-red-500');
+            return;
+          }
+
+          const validation = validateSecretInput(val);
+          if (!validation.valid) {
+            if (warningEl && warningTextEl) {
+              warningEl.classList.remove('hidden');
+              safeSetText(warningTextEl, validation.error);
+            }
+            secretInput.classList.add('border-red-500');
+            if (progressBar) {
+              progressBar.className = 'h-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all duration-150';
+            }
+          } else {
+            if (warningEl) warningEl.classList.add('hidden');
+            secretInput.classList.remove('border-red-500');
+            if (len >= 85) {
+              charCounter.classList.add('text-street-orange');
+              charCounter.classList.remove('text-street-cement');
+              if (progressBar) {
+                progressBar.className = 'h-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all duration-150';
+              }
+            } else {
+              charCounter.classList.remove('text-street-orange');
+              charCounter.classList.add('text-street-cement');
+              if (progressBar) {
+                progressBar.className = 'h-full bg-street-orange shadow-[0_0_6px_#ff5500] transition-all duration-150';
+              }
+            }
+          }
+        });
+      }
+
+      // Mood Pill Selectors
+      const moodPills = document.querySelectorAll('.mood-pill');
+      moodPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+          moodPills.forEach(p => {
+            p.classList.remove('active', 'bg-street-orange/25', 'border-2', 'border-street-orange', 'text-white');
+            p.classList.add('bg-[#0d0e14]', 'border', 'border-zinc-800', 'text-zinc-300');
+            p.setAttribute('aria-checked', 'false');
+          });
+          pill.classList.add('active', 'bg-street-orange/25', 'border-2', 'border-street-orange', 'text-white');
+          pill.classList.remove('bg-[#0d0e14]', 'border', 'border-zinc-800', 'text-zinc-300');
+          pill.setAttribute('aria-checked', 'true');
+          selectedMood = pill.getAttribute('data-mood');
+        });
+      });
+
+      // Simulated user counter activity
+      setInterval(() => {
+        const counterEl = document.getElementById('header-counter-number');
+        if (counterEl) {
+          const current = parseInt(counterEl.textContent, 10) || 142;
+          const delta = Math.floor(Math.random() * 5) - 2;
+          const nextVal = Math.max(130, Math.min(194, current + delta));
+          safeSetText(counterEl, nextVal);
+        }
+      }, 5500);
+
+      // Latency Ping Monitor (every 4 seconds)
+      setInterval(() => {
+        if (socket && socket.connected) {
+          const start = Date.now();
+          socket.emit('ping_check', start, () => {
+            const rtt = Date.now() - start;
+            const pingText = document.getElementById('ping-text');
+            const pingDot = document.getElementById('ping-dot');
+            const pingBadge = document.getElementById('ping-badge');
+            const chatPingText = document.getElementById('chat-ping-text');
+            const chatPingDot = document.getElementById('chat-ping-dot');
+            const chatPingBadge = document.getElementById('chat-ping-badge');
+
+            if (pingText && pingDot) {
+              if (pingBadge) pingBadge.classList.remove('hidden');
+              safeSetText(pingText, `${rtt} ms`);
+              if (rtt < 80) {
+                pingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
+              } else if (rtt < 180) {
+                pingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
+              } else {
+                pingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
+              }
+            }
+
+            if (chatPingText && chatPingDot) {
+              if (chatPingBadge) chatPingBadge.classList.remove('hidden');
+              safeSetText(chatPingText, `${rtt} ms`);
+              if (rtt < 80) {
+                chatPingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
+              } else if (rtt < 180) {
+                chatPingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
+              } else {
+                chatPingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
+              }
+            }
+          });
+        }
+      }, 4000);
+    });
+
+    // ==========================================
+    // SOCKET REALTIME LISTENERS
+    // ==========================================
+    if (socket) {
+      socket.on('online_stats', (stats) => {
+        const counterEl = document.getElementById('header-counter-number');
+        if (counterEl && stats.onlineCount) {
+          safeSetText(counterEl, Number(stats.onlineCount).toLocaleString());
+        }
+      });
+
+      socket.on('queue_joined', (data) => {
+        safeSetText(document.getElementById('radar-display-pos'), `#${data.position}`);
+        safeSetText(document.getElementById('radar-status-text'), `In ascolto sulla frequenza [${data.mood}]...`);
+      });
+
+      socket.on('match_found', (data) => {
+        clearInterval(radarInterval);
+        currentRoomId = data.roomId;
+        partnerSecret = data.partnerSecret;
+        partnerMood = data.partnerMood;
+        partnerNick = data.partnerMoniker || data.partnerNick || 'SHADOW_' + Math.floor(10 + Math.random() * 89);
+        myNick = data.myMoniker || data.myNick || 'NEON_' + Math.floor(10 + Math.random() * 89);
+
+        safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
+        safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
+        safeSetText(document.getElementById('chat-partner-gender'), data.partnerGender);
+        safeSetText(document.getElementById('chat-partner-mood'), data.partnerMood);
+        
+        safeSetText(document.getElementById('chat-partner-secret-box'), data.partnerSecret);
+        safeSetText(document.getElementById('chat-my-secret-text'), mySecret);
+
+        const container = document.getElementById('messages-container');
+        container.innerHTML = `
+          <div class="text-center my-2">
+            <span class="text-[10px] font-mono bg-zinc-900/90 border border-zinc-800 text-zinc-400 px-3.5 py-1 rounded-full">
+              Inizio chat sicura • 180 secondi di tempo • Zero database in RAM
+            </span>
+          </div>
+        `;
+
+        const extBtn = document.getElementById('btn-extension');
+        extBtn.classList.remove('bg-street-orange/30', 'text-street-orange');
+        safeSetText(extBtn, '+5m');
+
+        startChatCountdown(data.timeRemaining || 180);
+        switchView('chat');
+        SoundEngine.playMatchSound();
+
+        // GSAP Stagger Reveal for Secrets in Chat
+        if (window.gsap) {
+          try {
+            gsap.from('#chat-partner-secret-box', { opacity: 0, scale: 0.95, duration: 0.6, ease: 'power2.out' });
+            gsap.from('#chat-my-secret-text', { opacity: 0, scale: 0.95, duration: 0.6, delay: 0.15, ease: 'power2.out' });
+          } catch (e) {}
+        }
+
+        showToast(`Accoppiato con ${partnerNick}! Segreto svelato.`, 'success');
+      });
+
+      socket.on('receive_message', (msg) => {
+        const isSelf = msg.senderId === socket.id;
+        appendMessageBubble(msg, isSelf);
+        if (isSelf) {
+          SoundEngine.playMsgSent();
+        } else {
+          SoundEngine.playMsgReceived();
+        }
+      });
+
+      socket.on('receive_reaction', (data) => {
+        const isSelf = data.senderId === (socket ? socket.id : null);
+        triggerReactionVisual(data.emoji, isSelf);
+      });
+
+      socket.on('partner_typing', (data) => {
+        const indicator = document.getElementById('chat-partner-typing-indicator');
+        if (data.isTyping) {
+          indicator.classList.remove('opacity-0');
+        } else {
+          indicator.classList.add('opacity-0');
+        }
+      });
+
+      socket.on('timer_warning', (data) => {
+        SoundEngine.playWarning();
+        showToast(`⏳ Restano solo ${data.timeRemaining} secondi!`, 'info');
+      });
+
+      socket.on('extension_requested', () => {
+        showToast('Il partner ha richiesto +5 minuti! Clicca su "+5m" per accettare.', 'info');
+        const extBtn = document.getElementById('btn-extension');
+        extBtn.classList.add('border-street-orange', 'text-street-orange');
+      });
+
+      socket.on('extension_granted', (data) => {
+        showToast('Proroga concessa! +5 minuti aggiunti alla chat.', 'success');
+        startChatCountdown(data.newTimeRemaining);
+        const extBtn = document.getElementById('btn-extension');
+        extBtn.classList.remove('bg-street-orange/30');
+        safeSetText(extBtn, '+5m');
+      });
+
+      socket.on('report_confirmed', (data) => {
+        openEndedModal('SEGNALAZIONE CONFERMATA', data.message || 'Utente segnalato con successo.');
+      });
+
+      socket.on('partner_skipped', (data) => {
+        SoundEngine.playSkip();
+        openEndedModal('IL PARTNER HA CHIUSO', data.reason || 'Il partner ha chiuso la sessione.');
+      });
+
+      socket.on('chat_ended', (data) => {
+        SoundEngine.playSkip();
+        openEndedModal('TEMPO SCADUTO', 'I 3 minuti sono trascorsi. La chat e i segreti sono stati distrutti.');
+      });
+
+      socket.on('error_event', (err) => {
+        showToast(err.message, 'error');
+      });
+    }
+  </script>
+
+</body>
+</html>
