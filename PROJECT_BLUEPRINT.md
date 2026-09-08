@@ -95,3 +95,32 @@ Coordinato dall'Orchestratore `autonomous-growth-director` (`.agents/autonomous-
 - **PROVE**: [COMPLETO] Suite automatizzata di 63 test eseguita con successo al 100% (`node tests/autonomous-suite.js`).
 - **LEARN**: [COMPLETO] Prompt Nano Banana 2 e Google Veo registrati in `.agent_learnings.md` insieme alle invarianti di crescita.
 - **HALT**: [PRONTO] Rete multi-agente autonoma operativa, 0 memory leak, WebSockets intatti, pronta per produzione e indicizzazione SERP.
+
+---
+
+## 6. Piano di Intervento Coordinato (Joint Dev & Growth Overhaul)
+
+Registrazione delle migliorie strutturali coordinate tra god-mode-creative-architect e autonomous-growth-director tramite .agents/sync-channel.json:
+
+### 1. Grafica & Immersione 3D (FrontEnd-Cinematic-Dev & UIUX-Design-Virtuoso)
+- **Elevazione della Scena WebGL**:
+  - Riverbero neon anamorfico marcato con piano orizzontale in Additive Blending ad ampiezza dinamica (anamorphicFlare) e pulsazione legata al clock.
+  - Reattivita fluida della camera allo scroll tramite interpolazione lerp ottimizzata e integrazione GSAP ScrollTrigger per un fly-through progressivo sul piano d asfalto deformato.
+  - Micro-illuminazione volumetrica continua: la point light arancione (#ff5500) insegue con inerzia fluida il puntatore (mouse e touch), generando riflessi caldi reattivi sulla griglia.
+- **Perfezionamento del Tilt 3D & Radar**:
+  - Applicazione dell effetto Tilt 3D dinamico ad alta frequenza su card di selezione (Genere, Mood, Segreto, Card Regole) con supporto per giroscopio mobile (deviceorientation).
+  - Animazione radar 3D sferica avanzata durante l attesa matchmaking con sfera wireframe rotante e onde concentriche di sonar pulsanti.
+
+### 2. Neuromarketing & Psicologia del Segreto (Neuromarketing-Psychologist & Color-Cognitive-Scientist)
+- **Barra di Inserimento a Gradiente Dinamico**:
+  - Feedback cromatico ed emotivo a 4 stadi sull input del segreto (0-90 caratteri): da ambra delicata a arancione elettrico, fino a crimson neon pulsante a 85-90 caratteri, accompagnato da micro-copy di tensione drammatica per massimizzare il tasso di completamento.
+- **Svelamento Simultaneo Esplosivo**:
+  - Reveal del segreto del partner con animazione a strappo neon (#partner-secret-card), glitch cromatico con micro-sfarfallio e rimbalzo elastico GSAP.
+  - Sintesi audio Web Audio API amplificata: sweep 808 sub-bass a doppia componente (160Hz -> 36Hz) accoppiato a campanella metallica armonica per un feedback aptico/sensoriale viscerale.
+
+### 3. SEO & Social Engine (SEO-Data-Strategist, Viral-Copy-Architect & Creative-Media-Synthesizer)
+- **Ottimizzazione Meta-Tag & CTR Google SERP**:
+  - Aggiornamento dei meta tag per massimizzare il CTR su query ad alta intenzione di anonimato e sfogo notturno, preservando il codice di verifica Google Search Console e i 4 schemi JSON-LD Schema.org.
+- **Generazione Story Card 9:16 & Web Share API**:
+  - Rendering canvas 720x1280 in stile Dark Neo-Brutalism con griglia d asfalto, virgolette stese a mano, watermark @STREETALK.LIVE e metadati del segreto.
+  - Trigger di condivisione nativa tramite navigator.share (con supporto file blob) e fallback istantaneo su download PNG ad alta risoluzione.

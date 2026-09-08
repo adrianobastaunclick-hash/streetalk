@@ -7,10 +7,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
   
-  <title>STREETALK // Chat Anonima Senza Registrazione | Scambio Segreti & Confessionale Realtime</title>
+  <title>STREETALK // Chat Anonima Senza Registrazione | Il Confessionale Realtime & Scambio Segreti</title>
   
   <!-- Primary Meta Tags -->
-  <meta name="title" content="STREETALK // Chat Anonima Senza Registrazione | Scambio Segreti & Confessionale Realtime">
+  <meta name="title" content="STREETALK // Chat Anonima Senza Registrazione | Il Confessionale Realtime & Scambio Segreti">
   <meta name="description" content="Entra nel confessionale anonimo di STREETALK: scambia un segreto inconfessabile con uno sconosciuto per 180 secondi. Zero registrazioni, nessun log salvato, architettura volatile RAM. Dì quello che non puoi dire a nessuno.">
   <meta name="keywords" content="chat anonima senza registrazione, confessionale online, sfogo anonimo sicuro, alternative a omegle 2026, chat casuale segreti, chat 3 minuti, confessioni anonime, chat realtime underground, streetalk">
   <meta name="author" content="STREETALK Labs">
@@ -30,7 +30,7 @@
   <meta property="og:locale" content="it_IT">
   <meta property="og:site_name" content="STREETALK">
   <meta property="og:url" content="https://streetalk-live.vercel.app/">
-  <meta property="og:title" content="STREETALK // Chat Anonima Senza Registrazione | Scambio Segreti & Confessionale Realtime">
+  <meta property="og:title" content="STREETALK // Chat Anonima Senza Registrazione | Il Confessionale Realtime & Scambio Segreti">
   <meta property="og:description" content="Niente 'm o f?', niente profili falsi. Entri, scambi un segreto anonimo inconfessabile e parli per 180 secondi. Zero database, cancellazione integrale dalla memoria RAM.">
   <meta property="og:image" content="https://streetalk-live.vercel.app/og-streetalk.svg">
   <meta property="og:image:width" content="1200">
@@ -40,7 +40,7 @@
   <!-- Twitter / X Cards -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="https://streetalk-live.vercel.app/">
-  <meta name="twitter:title" content="STREETALK // Chat Anonima Senza Registrazione | Scambio Segreti & Confessionale Realtime">
+  <meta name="twitter:title" content="STREETALK // Chat Anonima Senza Registrazione | Il Confessionale Realtime & Scambio Segreti">
   <meta name="twitter:description" content="Hai 180 secondi per confessare quello che non puoi dire a nessuno. Zero log, nessun account, cancellazione integrale dalla memoria RAM.">
   <meta name="twitter:image" content="https://streetalk-live.vercel.app/og-streetalk.svg">
   <meta name="twitter:creator" content="@streetalk_app">
@@ -561,12 +561,15 @@
           </div>
 
           <!-- CAMPO SEGRETO (MAX 90 CARATTERI) -->
-          <div>
+          <div id="secret-input-card" class="transition-all duration-200">
             <div class="flex justify-between items-center mb-1.5">
               <label for="secret-input" class="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
                 <span>🔒 Il tuo Segreto Inconfessabile</span>
               </label>
-              <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
+              <div class="flex items-center gap-2">
+                <span id="secret-emotional-tag" class="text-[10px] font-mono text-zinc-500 transition-colors duration-200 hidden sm:inline">Patto aperto</span>
+                <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
+              </div>
             </div>
             
             <div class="relative">
@@ -1200,7 +1203,7 @@
           </div>
 
           <!-- Card 2: Il segreto del partner -->
-          <div class="bg-[#141722] border-2 border-street-orange/40 rounded-xl p-3 flex flex-col justify-between transition street-glow-sm shadow-sm relative overflow-hidden">
+          <div id="partner-secret-card" class="bg-[#141722] border-2 border-street-orange/40 rounded-xl p-3 flex flex-col justify-between transition street-glow-sm shadow-sm relative overflow-hidden">
             <div class="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-street-orange to-transparent"></div>
             <div>
               <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
@@ -1586,17 +1589,18 @@
           mouse.y += (mouse.targetY - mouse.y) * 0.06;
           scrollY += (targetScrollY - scrollY) * 0.08;
 
-          // Point light moves with mouse
+          // Point light moves with mouse with volumetric micro-lighting
           pointLight.position.x = mouse.x * 16;
           pointLight.position.y = 3 + mouse.y * 6;
           pointLight.position.z = 8 + Math.sin(time * 1.2) * 2;
+          pointLight.intensity = 2.6 + Math.abs(mouse.x) * 0.8;
 
-          // Anamorphic reflection tracks mouse point light with horizontal stretch & pulse
+          // Anamorphic reflection tracks mouse point light with marked horizontal stretch & pulse
           if (anamorphicFlare) {
             anamorphicFlare.position.x = pointLight.position.x * 0.75;
             anamorphicFlare.position.z = 6 + Math.sin(time * 1.5) * 1.2;
-            anamorphicFlare.scale.x = 1.0 + Math.abs(mouse.x) * 0.45;
-            anamorphicFlare.material.opacity = 0.22 + (Math.sin(time * 2.2) + 1) * 0.08;
+            anamorphicFlare.scale.x = 1.0 + Math.abs(mouse.x) * 0.55;
+            anamorphicFlare.material.opacity = 0.28 + (Math.sin(time * 2.2) + 1) * 0.12;
           }
 
           // Undulating asphalt sinusoidal waves
@@ -1827,6 +1831,13 @@
       const partnerSecretCard = document.getElementById('partner-secret-card');
       if (partnerSecretCard) setupTilt(partnerSecretCard, 5);
 
+      const secretInputCard = document.getElementById('secret-input-card');
+      if (secretInputCard) setupTilt(secretInputCard, 5);
+
+      document.querySelectorAll('.mood-pill').forEach(pill => {
+        setupTilt(pill, 6);
+      });
+
       // 2. GSAP Entrance Stagger & ScrollTrigger Animations
       if (window.gsap) {
         try {
@@ -2003,18 +2014,31 @@
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          // 808 sub-bass sweep
+          // Amplified 808 sub-bass sweep (punch & visceral low-end)
           const osc = this.ctx.createOscillator();
           const gain = this.ctx.createGain();
           osc.type = 'sine';
-          osc.frequency.setValueAtTime(140, now);
-          osc.frequency.exponentialRampToValueAtTime(40, now + 0.35);
-          gain.gain.setValueAtTime(0.28, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+          osc.frequency.setValueAtTime(160, now);
+          osc.frequency.exponentialRampToValueAtTime(36, now + 0.45);
+          gain.gain.setValueAtTime(0.38, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.48);
           osc.connect(gain);
           gain.connect(this.ctx.destination);
           osc.start(now);
-          osc.stop(now + 0.4);
+          osc.stop(now + 0.48);
+
+          // Sub-harmonic punch
+          const subOsc = this.ctx.createOscillator();
+          const subGain = this.ctx.createGain();
+          subOsc.type = 'triangle';
+          subOsc.frequency.setValueAtTime(95, now);
+          subOsc.frequency.exponentialRampToValueAtTime(30, now + 0.28);
+          subGain.gain.setValueAtTime(0.22, now);
+          subGain.gain.exponentialRampToValueAtTime(0.001, now + 0.28);
+          subOsc.connect(subGain);
+          subGain.connect(this.ctx.destination);
+          subOsc.start(now);
+          subOsc.stop(now + 0.28);
 
           // Metallic bell chime
           const chime = this.ctx.createOscillator();
@@ -2022,7 +2046,7 @@
           chime.type = 'triangle';
           chime.frequency.setValueAtTime(880, now);
           chime.frequency.exponentialRampToValueAtTime(1760, now + 0.15);
-          chimeGain.gain.setValueAtTime(0.12, now);
+          chimeGain.gain.setValueAtTime(0.14, now);
           chimeGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
           chime.connect(chimeGain);
           chimeGain.connect(this.ctx.destination);
@@ -2740,6 +2764,8 @@
       const warningTextEl = document.getElementById('secret-validation-warning-text');
 
       if (secretInput && charCounter) {
+        const emotionalTag = document.getElementById('secret-emotional-tag');
+
         secretInput.addEventListener('input', () => {
           const val = secretInput.value;
           const len = val.length;
@@ -2752,7 +2778,11 @@
 
           if (len === 0) {
             if (warningEl) warningEl.classList.add('hidden');
-            secretInput.classList.remove('border-red-500');
+            secretInput.classList.remove('border-red-500', 'border-street-orange');
+            if (emotionalTag) safeSetText(emotionalTag, 'Patto aperto');
+            if (progressBar) {
+              progressBar.className = 'h-full bg-street-orange transition-all duration-150';
+            }
             return;
           }
 
@@ -2763,24 +2793,47 @@
               safeSetText(warningTextEl, validation.error);
             }
             secretInput.classList.add('border-red-500');
+            secretInput.classList.remove('border-street-orange');
+            if (emotionalTag) safeSetText(emotionalTag, 'Formato non valido');
             if (progressBar) {
               progressBar.className = 'h-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all duration-150';
             }
           } else {
             if (warningEl) warningEl.classList.add('hidden');
             secretInput.classList.remove('border-red-500');
-            if (len >= 85) {
+
+            if (len < 30) {
+              if (emotionalTag) safeSetText(emotionalTag, 'Sussurro iniziale...');
+              if (progressBar) {
+                progressBar.className = 'h-full bg-gradient-to-r from-emerald-500 to-amber-500 shadow-[0_0_8px_#f59e0b] transition-all duration-150';
+              }
+              secretInput.classList.remove('border-street-orange');
+              charCounter.classList.remove('text-street-orange');
+              charCounter.classList.add('text-street-cement');
+            } else if (len < 60) {
+              if (emotionalTag) safeSetText(emotionalTag, 'Tensione in aumento...');
+              if (progressBar) {
+                progressBar.className = 'h-full bg-gradient-to-r from-amber-500 via-street-orange to-orange-500 shadow-[0_0_10px_#ff5500] transition-all duration-150';
+              }
+              secretInput.classList.add('border-street-orange');
+              charCounter.classList.remove('text-street-orange');
+              charCounter.classList.add('text-street-cement');
+            } else if (len < 85) {
+              if (emotionalTag) safeSetText(emotionalTag, 'Segreto profondo...');
+              if (progressBar) {
+                progressBar.className = 'h-full bg-gradient-to-r from-street-orange to-red-500 shadow-[0_0_12px_#ff5500] transition-all duration-150';
+              }
+              secretInput.classList.add('border-street-orange');
+              charCounter.classList.remove('text-street-orange');
+              charCounter.classList.add('text-street-cement');
+            } else {
+              if (emotionalTag) safeSetText(emotionalTag, 'Tensione massima: pronto!');
               charCounter.classList.add('text-street-orange');
               charCounter.classList.remove('text-street-cement');
               if (progressBar) {
-                progressBar.className = 'h-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all duration-150';
+                progressBar.className = 'h-full bg-gradient-to-r from-red-500 via-rose-600 to-orange-500 shadow-[0_0_16px_#ef4444] transition-all duration-150 animate-pulse';
               }
-            } else {
-              charCounter.classList.remove('text-street-orange');
-              charCounter.classList.add('text-street-cement');
-              if (progressBar) {
-                progressBar.className = 'h-full bg-street-orange shadow-[0_0_6px_#ff5500] transition-all duration-150';
-              }
+              secretInput.classList.add('border-street-orange');
             }
           }
         });
@@ -2903,18 +2956,25 @@
         switchView('chat');
         SoundEngine.playMatchSound();
 
-        // Explosive GSAP Stagger Reveal for Secrets in Chat
+        // Explosive GSAP Stagger Reveal with Neon Tear Effect
         if (window.gsap) {
           try {
             const secretTl = gsap.timeline();
             secretTl.fromTo('#partner-secret-card',
-              { scale: 0.85, opacity: 0, filter: 'drop-shadow(0 0 35px #ff5500)' },
-              { scale: 1, opacity: 1, filter: 'drop-shadow(0 0 8px rgba(255,85,0,0.25))', duration: 0.7, ease: 'elastic.out(1.1, 0.4)' }
+              { scale: 0.82, opacity: 0, filter: 'drop-shadow(0 0 45px #ff5500) brightness(1.7)', x: -6, skewX: -3 },
+              { scale: 1, opacity: 1, filter: 'drop-shadow(0 0 10px rgba(255,85,0,0.3)) brightness(1)', x: 0, skewX: 0, duration: 0.7, ease: 'elastic.out(1.15, 0.45)' }
             );
+            secretTl.to('#partner-secret-card', {
+              opacity: 0.8,
+              duration: 0.05,
+              yoyo: true,
+              repeat: 3,
+              ease: 'power1.inOut'
+            }, '-=0.4');
             secretTl.fromTo('#chat-partner-secret-box',
-              { opacity: 0, y: 12, scale: 0.95 },
-              { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.5)' },
-              '-=0.35'
+              { opacity: 0, y: 12, scale: 0.94, filter: 'blur(3px)' },
+              { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.45, ease: 'back.out(1.5)' },
+              '-=0.3'
             );
             secretTl.fromTo('#chat-my-secret-text',
               { opacity: 0, y: 8 },
