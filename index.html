@@ -1247,6 +1247,20 @@
       >
         Annulla Ricerca
       </button>
+
+      <!-- Direct Preview Trigger if waiting alone -->
+      <div class="mt-4 pt-3.5 border-t border-zinc-800/80 w-full flex flex-col items-center gap-1.5">
+        <button 
+          type="button" 
+          onclick="launchChatPreview()" 
+          id="btn-radar-preview-chat"
+          class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-street-orange/10 hover:bg-street-orange/20 border border-street-orange/30 text-street-orange font-mono text-xs font-semibold transition cursor-pointer"
+        >
+          <span>⚡</span>
+          <span>Nessun partner online? Esplora l'Anteprima Chatroom</span>
+        </button>
+        <span class="text-[10px] font-mono text-zinc-500">Visualizza subito la stanza, i segreti svelati e le reazioni live</span>
+      </div>
     </div>
   </section>
 
@@ -2747,6 +2761,69 @@
     }
 
     // View Switching with Cinematic GSAP Transition
+    
+    // Direct Chatroom Interactive Preview Mode
+    function launchChatPreview() {
+      clearInterval(radarInterval);
+      currentRoomId = null; // marks preview/demo mode
+      mySecret = mySecret || 'A volte spengo tutte le notifiche e fingo di non essere reperibile per 24 ore.';
+      partnerSecret = 'Ho finto di aver dimenticato il portafoglio al primo appuntamento perché ero al verde.';
+      partnerNick = 'SHADOW_88';
+      myNick = myNick || 'NEON_24';
+      partnerMood = selectedMood || 'Cazzeggio';
+      partnerGender = 'F';
+
+      safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
+      safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
+      safeSetText(document.getElementById('chat-partner-gender'), partnerGender);
+      safeSetText(document.getElementById('chat-partner-mood'), partnerMood);
+      
+      safeSetText(document.getElementById('chat-partner-secret-box'), partnerSecret);
+      safeSetText(document.getElementById('chat-my-secret-text'), mySecret);
+
+      const container = document.getElementById('messages-container');
+      container.innerHTML = `
+        <div class="text-center my-2">
+          <span class="text-[10px] font-mono bg-street-orange/15 border border-street-orange/30 text-street-orange px-3.5 py-1 rounded-full">
+            ⚡ ANTEPRIMA CHATROOM ATTIVA • 180 secondi • Zero log in RAM
+          </span>
+        </div>
+        <div class="flex flex-col items-start mb-3">
+          <div class="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm font-sans bg-[#0d0e14] border border-zinc-800 text-gray-100 rounded-bl-none">
+            Bella! Ho letto il tuo segreto... assurdo 😂 Sei pronto a parlare o scappi prima dei 3 minuti?
+          </div>
+          <span class="text-[9px] font-mono text-zinc-500 mt-1 px-1">Adesso</span>
+        </div>
+      `;
+
+      const extBtn = document.getElementById('btn-extension');
+      if (extBtn) {
+        extBtn.classList.remove('bg-street-orange/30', 'text-street-orange');
+        safeSetText(extBtn, '+5m');
+      }
+
+      startChatCountdown(180);
+      SoundEngine.init();
+      SoundEngine.playMatchSound();
+
+      if (typeof decryptMatrixText === 'function') {
+        decryptMatrixText(document.getElementById('chat-partner-secret-box'), partnerSecret, 600);
+      }
+
+      switchView('chat', () => {
+        if (window.gsap) {
+          try {
+            gsap.fromTo('#partner-secret-card',
+              { scale: 0.85, opacity: 0 },
+              { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.4)' }
+            );
+          } catch (e) {}
+        }
+      });
+
+      showToast('Sei entrato nell\'anteprima interattiva della chatroom! 🔥', 'success');
+    }
+
     function switchView(viewName, onActive) {
       const vLanding = document.getElementById('view-landing');
       const vRadar = document.getElementById('view-radar');
@@ -2895,6 +2972,26 @@
           roomId: currentRoomId,
           message: text
         });
+      } else if (!currentRoomId) {
+        // Interactive Preview Mode Echo
+        appendMessageBubble({ message: text, timestamp: Date.now() }, true);
+        SoundEngine.playMsgSent();
+
+        const typingEl = document.getElementById('chat-partner-typing-indicator');
+        if (typingEl) typingEl.style.opacity = '1';
+
+        setTimeout(() => {
+          if (typingEl) typingEl.style.opacity = '0';
+          const replies = [
+            'Concordo al 100%, nella notte si dicono cose che di giorno non ammetteresti mai.',
+            'Ahah incredibile! Mi piace come ragioni 🔥',
+            'Siamo sulla stessa frequenza. I 3 minuti stanno volando...',
+            'Verissimo. Se scade il timer che fai, richiedi la proroga (+5m) o sparisci nel nulla?'
+          ];
+          const randomReply = replies[Math.floor(Math.random() * replies.length)];
+          appendMessageBubble({ message: randomReply, timestamp: Date.now() }, false);
+          SoundEngine.playMsgReceived();
+        }, 1200);
       }
 
       input.value = '';
@@ -2920,7 +3017,18 @@
     }
 
     function requestExtension() {
-      if (!currentRoomId || !socket || !socket.connected) return;
+      if (!currentRoomId) {
+        // Preview mode simulated consent
+        showToast('Proroga approvata reciprocamente! +300s aggiunti al timer 🔥', 'success');
+        const btn = document.getElementById('btn-extension');
+        if (btn) {
+          btn.classList.add('bg-street-orange/30', 'text-street-orange');
+          safeSetText(btn, '+5m (2/2)');
+        }
+        startChatCountdown(300);
+        return;
+      }
+      if (!socket || !socket.connected) return;
       socket.emit('request_extend', { roomId: currentRoomId });
       showToast('Hai richiesto la proroga (+5m). In attesa del partner...', 'info');
       const btn = document.getElementById('btn-extension');
@@ -3282,6 +3390,15 @@
     // INITIALIZATION & DOM LISTENERS
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Direct URL Navigation for Chatroom Preview (?view=chat, ?preview=chat, #chat)
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('view') === 'chat' || urlParams.get('preview') === 'chat' || window.location.hash === '#chat') {
+          setTimeout(() => {
+            launchChatPreview();
+          }, 200);
+        }
+      } catch (e) {}
       // Register Service Worker for PWA (2026 standards)
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
