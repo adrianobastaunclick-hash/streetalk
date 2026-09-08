@@ -489,9 +489,9 @@
 
         <form id="entry-form" onsubmit="event.preventDefault(); initiateRadarSearch();" class="space-y-5">
           
-          <!-- CHI SEI / CHI CERCHI -->
-          <div class="grid grid-cols-2 gap-3">
-            <div>
+          <!-- CHI SEI / CHI CERCHI (CARTE SELEZIONE GENERE CON TILT 3D) -->
+          <div class="grid grid-cols-2 gap-3" id="gender-selection-container">
+            <div id="user-gender-card" class="gender-card transition-all duration-200">
               <label for="user-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
                 Chi sei
               </label>
@@ -507,7 +507,7 @@
               </div>
             </div>
 
-            <div>
+            <div id="target-gender-card" class="gender-card transition-all duration-200">
               <label for="target-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
                 Chi cerchi
               </label>
@@ -567,7 +567,7 @@
                 <span>🔒 Il tuo Segreto Inconfessabile</span>
               </label>
               <div class="flex items-center gap-2">
-                <span id="secret-emotional-tag" class="text-[10px] font-mono text-zinc-500 transition-colors duration-200 hidden sm:inline">Patto aperto</span>
+                <span id="secret-emotional-tag" class="text-[10px] font-mono text-zinc-500 transition-colors duration-200 inline">Patto aperto</span>
                 <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
               </div>
             </div>
@@ -1545,10 +1545,12 @@
         anamorphicFlare.rotation.x = -Math.PI / 2.8;
         scene.add(anamorphicFlare);
 
-        // --- 6. MOUSE & SCROLL STATE ---
+        // --- 6. MOUSE & SCROLL STATE WITH GSAP SCROLLTRIGGER SYNC ---
         const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
         let scrollY = 0;
         let targetScrollY = 0;
+        let scrollProgress = 0;
+        let targetScrollProgress = 0;
 
         window.addEventListener('mousemove', (e) => {
           mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
@@ -1564,7 +1566,23 @@
 
         window.addEventListener('scroll', () => {
           targetScrollY = window.scrollY;
+          const maxDocScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+          targetScrollProgress = Math.min(1, Math.max(0, window.scrollY / maxDocScroll));
         }, { passive: true });
+
+        // Direct ScrollTrigger binding if GSAP ScrollTrigger is available
+        if (window.ScrollTrigger) {
+          try {
+            ScrollTrigger.create({
+              trigger: document.body,
+              start: 'top top',
+              end: 'bottom bottom',
+              onUpdate: (self) => {
+                targetScrollProgress = self.progress;
+              }
+            });
+          } catch (e) {}
+        }
 
         function handleResize() {
           const w = window.innerWidth;
@@ -1631,12 +1649,11 @@
           }
           particleGeo.attributes.position.needsUpdate = true;
 
-          // Camera fly-through tied to scroll
-          const maxDocScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-          const scrollFraction = Math.min(1, Math.max(0, scrollY / maxDocScroll));
+          // Camera fly-through tied to scroll via GSAP ScrollTrigger
+          scrollProgress += (targetScrollProgress - scrollProgress) * 0.08;
 
-          camera.position.z = 18 - scrollFraction * 10;
-          camera.position.y = 3.5 - scrollFraction * 2.5 + mouse.y * 0.8;
+          camera.position.z = 18 - scrollProgress * 10;
+          camera.position.y = 3.5 - scrollProgress * 2.5 + mouse.y * 0.8;
           camera.position.x = mouse.x * 1.8;
           camera.rotation.z = mouse.x * -0.02 + Math.sin(time * 0.25) * 0.01;
 
@@ -1790,9 +1807,13 @@
   <!-- ======================================================== -->
   <script>
     (function init3DTiltAndGSAP() {
-      // 1. 3D Tilt Effect on cards (Cursor & Gyroscope support)
+      // 1. 3D Tilt Effect on cards (Cursor & Centralized Gyroscope support)
+      const tiltRegisteredElements = [];
+
       function setupTilt(el, maxAngle = 6) {
         if (!el) return;
+        tiltRegisteredElements.push({ el, maxAngle });
+
         el.addEventListener('mousemove', (e) => {
           const rect = el.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -1806,23 +1827,33 @@
         el.addEventListener('mouseleave', () => {
           el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         });
-
-        // Gyroscope tilt support for mobile devices
-        if (window.DeviceOrientationEvent) {
-          window.addEventListener('deviceorientation', (e) => {
-            if (e.gamma == null || e.beta == null) return;
-            const normX = Math.max(-1, Math.min(1, e.gamma / 30));
-            const normY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-            const rotY = normX * maxAngle;
-            const rotX = -normY * maxAngle;
-            el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
-          }, { passive: true });
-        }
       }
 
-      // Apply 3D Tilt to entry gate, rule cards, and secret card
+      // Single centralized RAF-throttled DeviceOrientation listener (Zero redundant listeners, Zero mobile jank)
+      if (window.DeviceOrientationEvent) {
+        let gyroTicking = false;
+        window.addEventListener('deviceorientation', (e) => {
+          if (e.gamma == null || e.beta == null || gyroTicking) return;
+          gyroTicking = true;
+          requestAnimationFrame(() => {
+            gyroTicking = false;
+            const normX = Math.max(-1, Math.min(1, e.gamma / 30));
+            const normY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+            for (let i = 0; i < tiltRegisteredElements.length; i++) {
+              const item = tiltRegisteredElements[i];
+              if (item.el && item.el.offsetParent !== null) {
+                const rotY = normX * item.maxAngle;
+                const rotX = -normY * item.maxAngle;
+                item.el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+              }
+            }
+          });
+        }, { passive: true });
+      }
+
+      // Apply 3D Tilt to entry gate, rule cards, selection cards (Genere, Mood, Segreto) & partner secret card
       const entryCard = document.getElementById('entry-card');
-      if (entryCard) setupTilt(entryCard, 6);
+      if (entryCard) setupTilt(entryCard, 4);
 
       document.querySelectorAll('.rule-card').forEach(card => {
         setupTilt(card, 7);
@@ -1831,12 +1862,19 @@
       const partnerSecretCard = document.getElementById('partner-secret-card');
       if (partnerSecretCard) setupTilt(partnerSecretCard, 5);
 
-      const secretInputCard = document.getElementById('secret-input-card');
-      if (secretInputCard) setupTilt(secretInputCard, 5);
+      // Card di selezione: Genere
+      document.querySelectorAll('.gender-card').forEach(card => {
+        setupTilt(card, 5);
+      });
 
+      // Card di selezione: Mood
       document.querySelectorAll('.mood-pill').forEach(pill => {
         setupTilt(pill, 6);
       });
+
+      // Card di selezione: Segreto
+      const secretInputCard = document.getElementById('secret-input-card');
+      if (secretInputCard) setupTilt(secretInputCard, 5);
 
       // 2. GSAP Entrance Stagger & ScrollTrigger Animations
       if (window.gsap) {
@@ -2232,7 +2270,7 @@
     }
 
     // View Switching with Cinematic GSAP Transition
-    function switchView(viewName) {
+    function switchView(viewName, onActive) {
       const vLanding = document.getElementById('view-landing');
       const vRadar = document.getElementById('view-radar');
       const vChat = document.getElementById('view-chat');
@@ -2260,6 +2298,10 @@
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
+            if (typeof onActive === 'function') {
+              onActive();
+            }
+
             gsap.fromTo(targetView,
               { opacity: 0, y: 20, scale: 0.98 },
               { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power3.out' }
@@ -2276,6 +2318,9 @@
       targetView.classList.remove('hidden');
       if (viewName === 'landing') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      if (typeof onActive === 'function') {
+        onActive();
       }
     }
 
@@ -2645,8 +2690,9 @@
         canvas.toBlob(async (blob) => {
           if (blob) {
             const file = new File([blob], 'streetalk-segreto.png', { type: 'image/png' });
-            try {
-              if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            const canShareFiles = typeof navigator.canShare === 'function' ? navigator.canShare({ files: [file] }) : false;
+            if (canShareFiles) {
+              try {
                 await navigator.share({
                   title: 'STREETALK // Segreto Svelato',
                   text: 'Un segreto sussurrato nella notte su STREETALK.LIVE',
@@ -2654,12 +2700,21 @@
                 });
                 showToast('Condiviso con successo! 🔥', 'success');
                 return;
+              } catch (e) {
+                if (e.name === 'AbortError') return;
               }
-            } catch (e) {
-              if (e.name !== 'AbortError') {
-                downloadStoryCard();
-              }
+            }
+
+            // Fallback: Attempt text/url native share if file sharing wasn't supported
+            try {
+              await navigator.share({
+                title: 'STREETALK // Segreto Svelato',
+                text: 'Un segreto inconfessabile sussurrato su STREETALK: https://streetalk-live.vercel.app/'
+              });
+              showToast('Link condiviso con successo! 🔥', 'success');
               return;
+            } catch (err2) {
+              if (err2.name === 'AbortError') return;
             }
           }
           downloadStoryCard();
@@ -2778,8 +2833,11 @@
 
           if (len === 0) {
             if (warningEl) warningEl.classList.add('hidden');
-            secretInput.classList.remove('border-red-500', 'border-street-orange');
-            if (emotionalTag) safeSetText(emotionalTag, 'Patto aperto');
+            secretInput.classList.remove('border-red-500', 'border-street-orange', 'shadow-[0_0_12px_rgba(255,85,0,0.35)]', 'shadow-[0_0_18px_rgba(239,68,68,0.5)]');
+            if (emotionalTag) {
+              safeSetText(emotionalTag, 'Patto aperto');
+              emotionalTag.className = 'text-[10px] font-mono text-zinc-500 transition-colors duration-200 inline';
+            }
             if (progressBar) {
               progressBar.className = 'h-full bg-street-orange transition-all duration-150';
             }
@@ -2787,53 +2845,69 @@
           }
 
           const validation = validateSecretInput(val);
-          if (!validation.valid) {
+          if (!validation.valid && val.length >= 3) {
             if (warningEl && warningTextEl) {
               warningEl.classList.remove('hidden');
               safeSetText(warningTextEl, validation.error);
             }
             secretInput.classList.add('border-red-500');
-            secretInput.classList.remove('border-street-orange');
-            if (emotionalTag) safeSetText(emotionalTag, 'Formato non valido');
+            secretInput.classList.remove('border-street-orange', 'shadow-[0_0_12px_rgba(255,85,0,0.35)]');
+            if (emotionalTag) {
+              safeSetText(emotionalTag, 'Formato non valido');
+              emotionalTag.className = 'text-[10px] font-mono text-red-400 font-bold transition-colors duration-200 inline';
+            }
             if (progressBar) {
               progressBar.className = 'h-full bg-red-500 shadow-[0_0_8px_#ef4444] transition-all duration-150';
             }
           } else {
             if (warningEl) warningEl.classList.add('hidden');
-            secretInput.classList.remove('border-red-500');
+            secretInput.classList.remove('border-red-500', 'shadow-[0_0_18px_rgba(239,68,68,0.5)]');
 
             if (len < 30) {
-              if (emotionalTag) safeSetText(emotionalTag, 'Sussurro iniziale...');
+              if (emotionalTag) {
+                safeSetText(emotionalTag, 'Sussurro iniziale...');
+                emotionalTag.className = 'text-[10px] font-mono text-emerald-400 transition-colors duration-200 inline';
+              }
               if (progressBar) {
                 progressBar.className = 'h-full bg-gradient-to-r from-emerald-500 to-amber-500 shadow-[0_0_8px_#f59e0b] transition-all duration-150';
               }
-              secretInput.classList.remove('border-street-orange');
+              secretInput.classList.remove('border-street-orange', 'shadow-[0_0_12px_rgba(255,85,0,0.35)]');
               charCounter.classList.remove('text-street-orange');
               charCounter.classList.add('text-street-cement');
             } else if (len < 60) {
-              if (emotionalTag) safeSetText(emotionalTag, 'Tensione in aumento...');
+              if (emotionalTag) {
+                safeSetText(emotionalTag, 'Tensione in aumento...');
+                emotionalTag.className = 'text-[10px] font-mono text-amber-400 transition-colors duration-200 inline';
+              }
               if (progressBar) {
                 progressBar.className = 'h-full bg-gradient-to-r from-amber-500 via-street-orange to-orange-500 shadow-[0_0_10px_#ff5500] transition-all duration-150';
               }
               secretInput.classList.add('border-street-orange');
+              secretInput.classList.remove('shadow-[0_0_12px_rgba(255,85,0,0.35)]');
               charCounter.classList.remove('text-street-orange');
               charCounter.classList.add('text-street-cement');
             } else if (len < 85) {
-              if (emotionalTag) safeSetText(emotionalTag, 'Segreto profondo...');
+              if (emotionalTag) {
+                safeSetText(emotionalTag, 'Segreto profondo...');
+                emotionalTag.className = 'text-[10px] font-mono text-street-orange font-semibold transition-colors duration-200 inline';
+              }
               if (progressBar) {
                 progressBar.className = 'h-full bg-gradient-to-r from-street-orange to-red-500 shadow-[0_0_12px_#ff5500] transition-all duration-150';
               }
-              secretInput.classList.add('border-street-orange');
+              secretInput.classList.add('border-street-orange', 'shadow-[0_0_12px_rgba(255,85,0,0.35)]');
               charCounter.classList.remove('text-street-orange');
               charCounter.classList.add('text-street-cement');
             } else {
-              if (emotionalTag) safeSetText(emotionalTag, 'Tensione massima: pronto!');
+              if (emotionalTag) {
+                safeSetText(emotionalTag, 'Tensione massima: pronto!');
+                emotionalTag.className = 'text-[10px] font-mono text-red-400 font-bold animate-pulse transition-colors duration-200 inline';
+              }
               charCounter.classList.add('text-street-orange');
               charCounter.classList.remove('text-street-cement');
               if (progressBar) {
                 progressBar.className = 'h-full bg-gradient-to-r from-red-500 via-rose-600 to-orange-500 shadow-[0_0_16px_#ef4444] transition-all duration-150 animate-pulse';
               }
-              secretInput.classList.add('border-street-orange');
+              secretInput.classList.add('border-street-orange', 'shadow-[0_0_18px_rgba(239,68,68,0.5)]');
             }
           }
         });
@@ -2953,36 +3027,40 @@
         safeSetText(extBtn, '+5m');
 
         startChatCountdown(data.timeRemaining || 180);
-        switchView('chat');
-        SoundEngine.playMatchSound();
 
-        // Explosive GSAP Stagger Reveal with Neon Tear Effect
-        if (window.gsap) {
-          try {
-            const secretTl = gsap.timeline();
-            secretTl.fromTo('#partner-secret-card',
-              { scale: 0.82, opacity: 0, filter: 'drop-shadow(0 0 45px #ff5500) brightness(1.7)', x: -6, skewX: -3 },
-              { scale: 1, opacity: 1, filter: 'drop-shadow(0 0 10px rgba(255,85,0,0.3)) brightness(1)', x: 0, skewX: 0, duration: 0.7, ease: 'elastic.out(1.15, 0.45)' }
-            );
-            secretTl.to('#partner-secret-card', {
-              opacity: 0.8,
-              duration: 0.05,
-              yoyo: true,
-              repeat: 3,
-              ease: 'power1.inOut'
-            }, '-=0.4');
-            secretTl.fromTo('#chat-partner-secret-box',
-              { opacity: 0, y: 12, scale: 0.94, filter: 'blur(3px)' },
-              { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.45, ease: 'back.out(1.5)' },
-              '-=0.3'
-            );
-            secretTl.fromTo('#chat-my-secret-text',
-              { opacity: 0, y: 8 },
-              { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
-              '-=0.2'
-            );
-          } catch (e) {}
-        }
+        const triggerExplosiveReveal = () => {
+          SoundEngine.playMatchSound();
+
+          // Explosive GSAP Stagger Reveal with Neon Tear Effect
+          if (window.gsap) {
+            try {
+              const secretTl = gsap.timeline();
+              secretTl.fromTo('#partner-secret-card',
+                { scale: 0.82, opacity: 0, filter: 'drop-shadow(0 0 50px #ff5500) brightness(1.8)', x: -8, skewX: -3 },
+                { scale: 1, opacity: 1, filter: 'drop-shadow(0 0 10px rgba(255,85,0,0.3)) brightness(1)', x: 0, skewX: 0, duration: 0.65, ease: 'elastic.out(1.2, 0.45)' }
+              );
+              secretTl.to('#partner-secret-card', {
+                opacity: 0.75,
+                duration: 0.04,
+                yoyo: true,
+                repeat: 3,
+                ease: 'power1.inOut'
+              }, '-=0.35');
+              secretTl.fromTo('#chat-partner-secret-box',
+                { opacity: 0, y: 12, scale: 0.94, filter: 'blur(3px)' },
+                { opacity: 1, y: 0, scale: 1, filter: 'blur(0px)', duration: 0.45, ease: 'back.out(1.5)' },
+                '-=0.25'
+              );
+              secretTl.fromTo('#chat-my-secret-text',
+                { opacity: 0, y: 8 },
+                { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+                '-=0.2'
+              );
+            } catch (e) {}
+          }
+        };
+
+        switchView('chat', triggerExplosiveReveal);
 
         showToast(`Accoppiato con ${partnerNick}! Segreto svelato.`, 'success');
       });

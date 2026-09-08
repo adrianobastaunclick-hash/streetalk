@@ -22,8 +22,8 @@
 - **DOM Safety & Neutralizzazione XSS**: Sanitizzazione preventiva prima del rendering tramite `textContent`/`safeSetText` e neutralizzazione delle entità HTML pericolose.
 - **Volatile Memory Audit & Zero-Leak Invariance**: Azzeramento provato e verificabile di mappe utenti, stanze, code e contatori di rate limit alla chiusura delle sessioni.
 - **Resilient Cloud Fallback**: Gestione resiliente della modalità memoria-volatile in assenza di credenziali Supabase, senza crash di processo.
-- **Technical SEO & Indexing Contract**: Robots.txt conforme, sitemap.xml con date canoniche, tag meta OpenGraph/Twitter card, meta tag Google Search Console e 4 schemi semantici Schema.org JSON-LD (WebApplication, Organization, HowTo, FAQPage con 8 voci).
-- **Test Baseline Automatizzata**: Suite end-to-end con 63/63 test automatizzati passanti al 100% (`tests/autonomous-suite.js`).
+- **Technical SEO & Indexing Contract**: Robots.txt conforme, sitemap.xml con date canoniche, tag meta OpenGraph/Twitter card, meta tag Google Search Console e 4 schemi semantici Schema.org JSON-LD (WebApplication, Organization, HowTo, FAQPage con 9 voci).
+- **Test Baseline Automatizzata**: Suite end-to-end con 70/70 test automatizzati passanti al 100% (`tests/autonomous-suite.js`).
 
 ---
 
@@ -37,7 +37,7 @@
 | **Game-Mechanics-Engine** | Logic/Engine Layer | Timestep matchmaking, macchine a stati FSM, code FIFO per mood, timer 180s/+300s | Transizioni di stato deterministiche, zero lock |
 | **AI-Backend-Engineer** | Logic/Engine Layer | Server Socket.io, routing eventi, validazione contrattuale payload, architettura volatile | Output deterministici, zero leakage in RAM |
 | **Smart-Contract-Auditor** | Resilience Layer | Sanitizzazione input, neutralizzazione XSS, isolamento delle stanze | Zero injection (XSS/SQL), isolamento crittografico |
-| **Self-Correction-Auditor** | Resilience Layer | Suite di test QA (63/63 test), profilazione RAM/heap, log su `.agent_learnings.md` | 100% test pass rate, 0 memory leak verificato |
+| **Self-Correction-Auditor** | Resilience Layer | Suite di test QA (70/70 test), profilazione RAM/heap, log su `.agent_learnings.md` | 100% test pass rate, 0 memory leak verificato |
 
 ---
 
@@ -47,7 +47,7 @@ Coordinato dall'Orchestratore `autonomous-growth-director` (`.agents/autonomous-
 
 | Sub-Agente Growth | Focus Operativo | Stack Principale | Output & Deliverable Operativi |
 |---|---|---|---|
-| **SEO-Data-Strategist** | Posizionamento Organico SERP #1 | Search Intent Clustering, Schema.org Graph, CWV, Programmatic SEO | Ottimizzazione index.html, sitemap XML, JSON-LD FAQPage (8 Q&A), ranking keyword target |
+| **SEO-Data-Strategist** | Posizionamento Organico SERP #1 | Search Intent Clustering, Schema.org Graph, CWV, Programmatic SEO | Ottimizzazione index.html, sitemap XML, JSON-LD FAQPage (9 Q&A), ranking keyword target |
 | **Neuromarketing-Psychologist** | Trigger Cognitivi & Retention | Behavioral Economics, Cialdini Scarcity, Fogg B=MAP, FOMO | Micro-copy psicologico, voyeurismo etico del segreto, abbattimento ansia sociale <5s |
 | **Color-Cognitive-Scientist** | Neuro-Ergonomia Cromatica | Chromatic Psychology, WCAG AAA Contrast, Attention Heatmaps | Mappe cromatiche (#0a0b0e / #ff5500), gradienti Three.js shader, neuro-palette promozionale |
 | **Viral-Copy-Architect** | Hook & Narrazione Viscerale | Hook-Story-Offer, Street Slang Parsing, TikTok/Reels Scripting | Script video short-form, cataloghi hook ad alta ritenzione, headline scroll-stopping |
@@ -92,7 +92,7 @@ Coordinato dall'Orchestratore `autonomous-growth-director` (`.agents/autonomous-
 ## 5. Stato del Protocollo di Esecuzione
 - **REVIEW**: [COMPLETO] Rete tecnica (7 nodi) e Dipartimento Growth (7 nodi) registrati e sincronizzati su `PROJECT_BLUEPRINT.md`.
 - **ACT**: [COMPLETO] Codice applicativo modulare, template generativi in `.agents/creative-templates/` e markup SEO ad alto CTR attivi.
-- **PROVE**: [COMPLETO] Suite automatizzata di 63 test eseguita con successo al 100% (`node tests/autonomous-suite.js`).
+- **PROVE**: [COMPLETO] Suite automatizzata di 70 test eseguita con successo al 100% (`node tests/autonomous-suite.js`).
 - **LEARN**: [COMPLETO] Prompt Nano Banana 2 e Google Veo registrati in `.agent_learnings.md` insieme alle invarianti di crescita.
 - **HALT**: [PRONTO] Rete multi-agente autonoma operativa, 0 memory leak, WebSockets intatti, pronta per produzione e indicizzazione SERP.
 
@@ -105,22 +105,23 @@ Registrazione delle migliorie strutturali coordinate tra god-mode-creative-archi
 ### 1. Grafica & Immersione 3D (FrontEnd-Cinematic-Dev & UIUX-Design-Virtuoso)
 - **Elevazione della Scena WebGL**:
   - Riverbero neon anamorfico marcato con piano orizzontale in Additive Blending ad ampiezza dinamica (anamorphicFlare) e pulsazione legata al clock.
-  - Reattivita fluida della camera allo scroll tramite interpolazione lerp ottimizzata e integrazione GSAP ScrollTrigger per un fly-through progressivo sul piano d asfalto deformato.
+  - Reattività fluida della camera allo scroll tramite interpolazione lerp ottimizzata e integrazione diretta con GSAP ScrollTrigger per un fly-through progressivo sul piano d'asfalto deformato.
   - Micro-illuminazione volumetrica continua: la point light arancione (#ff5500) insegue con inerzia fluida il puntatore (mouse e touch), generando riflessi caldi reattivi sulla griglia.
 - **Perfezionamento del Tilt 3D & Radar**:
-  - Applicazione dell effetto Tilt 3D dinamico ad alta frequenza su card di selezione (Genere, Mood, Segreto, Card Regole) con supporto per giroscopio mobile (deviceorientation).
-  - Animazione radar 3D sferica avanzata durante l attesa matchmaking con sfera wireframe rotante e onde concentriche di sonar pulsanti.
+  - Applicazione dell'effetto Tilt 3D dinamico ad alta frequenza su card di selezione (Genere `.gender-card`, Mood `.mood-pill`, Segreto `#secret-input-card`), card delle 3 regole (`.rule-card`) ed `#entry-card`.
+  - Architettura centralizzata e performante: singolo event listener throttled tramite `requestAnimationFrame` per giroscopio mobile (`deviceorientation`), che agisce esclusivamente sugli elementi visibili a video.
+  - Animazione radar 3D sferica avanzata durante l'attesa matchmaking con sfera wireframe rotante e onde concentriche di sonar pulsanti.
 
 ### 2. Neuromarketing & Psicologia del Segreto (Neuromarketing-Psychologist & Color-Cognitive-Scientist)
 - **Barra di Inserimento a Gradiente Dinamico**:
-  - Feedback cromatico ed emotivo a 4 stadi sull input del segreto (0-90 caratteri): da ambra delicata a arancione elettrico, fino a crimson neon pulsante a 85-90 caratteri, accompagnato da micro-copy di tensione drammatica per massimizzare il tasso di completamento.
-- **Svelamento Simultaneo Esplosivo**:
-  - Reveal del segreto del partner con animazione a strappo neon (#partner-secret-card), glitch cromatico con micro-sfarfallio e rimbalzo elastico GSAP.
-  - Sintesi audio Web Audio API amplificata: sweep 808 sub-bass a doppia componente (160Hz -> 36Hz) accoppiato a campanella metallica armonica per un feedback aptico/sensoriale viscerale.
+  - Feedback cromatico ed emotivo a 4 stadi sull'input del segreto (0-90 caratteri): da ambra delicata a arancione elettrico, fino a crimson neon pulsante a 85-90 caratteri, con aggiornamento dinamico dei colori del tag emotivo (`#secret-emotional-tag`) visibile su tutti i dispositivi (desktop e mobile) e glow border sul textarea.
+- **Svelamento Simultaneo Esplosivo Sincronizzato**:
+  - Reveal del segreto del partner (#partner-secret-card) perfettamente sincronizzato al montaggio a video della chat view tramite callback di transizione, con animazione a strappo neon, glitch cromatico, sfarfallio e rimbalzo elastico GSAP.
+  - Sintesi audio Web Audio API amplificata: sweep 808 sub-bass a doppia componente (160Hz -> 36Hz) accoppiato a campanella metallica armonica sincronizzato all'esatto frame dello svelamento.
 
 ### 3. SEO & Social Engine (SEO-Data-Strategist, Viral-Copy-Architect & Creative-Media-Synthesizer)
 - **Ottimizzazione Meta-Tag & CTR Google SERP**:
-  - Aggiornamento dei meta tag per massimizzare il CTR su query ad alta intenzione di anonimato e sfogo notturno, preservando il codice di verifica Google Search Console e i 4 schemi JSON-LD Schema.org.
+  - Aggiornamento dei meta tag per massimizzare il CTR su query ad alta intenzione di anonimato e sfogo notturno, preservando il codice di verifica Google Search Console e i 4 schemi JSON-LD Schema.org (con 9 FAQ complete).
 - **Generazione Story Card 9:16 & Web Share API**:
-  - Rendering canvas 720x1280 in stile Dark Neo-Brutalism con griglia d asfalto, virgolette stese a mano, watermark @STREETALK.LIVE e metadati del segreto.
-  - Trigger di condivisione nativa tramite navigator.share (con supporto file blob) e fallback istantaneo su download PNG ad alta risoluzione.
+  - Rendering canvas 720x1280 in stile Dark Neo-Brutalism con griglia d'asfalto, virgolette stese a mano, watermark @STREETALK.LIVE e metadati del segreto.
+  - Condivisione nativa tramite navigator.share con fallback a cascata (files blob -> text/url -> download PNG diretto ad alta risoluzione) e gestione silenziosa delle cancellazioni utente (`AbortError`).
