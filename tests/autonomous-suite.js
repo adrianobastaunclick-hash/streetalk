@@ -777,6 +777,77 @@ async function runAutonomousSuite() {
     }
 
     // ----------------------------------------------------
+    // TEST 14: Technical SEO, Schema.org Graph & Crawlability
+    // ----------------------------------------------------
+    console.log('\n--- TEST 14: Technical SEO, Schema.org & Google Indexing ---');
+
+    // 14.1 Verify robots.txt
+    const robotsTxt = fs.readFileSync(path.join(__dirname, '../public/robots.txt'), 'utf8');
+    if (robotsTxt.includes('User-agent: *') && robotsTxt.includes('Allow: /') && robotsTxt.includes('Sitemap:')) {
+      pass('Technical SEO: robots.txt allows crawlability and declares sitemap location');
+    } else {
+      fail('Technical SEO: robots.txt missing or invalid directives');
+    }
+
+    // 14.2 Verify sitemap.xml
+    const sitemapXml = fs.readFileSync(path.join(__dirname, '../public/sitemap.xml'), 'utf8');
+    if (sitemapXml.includes('<loc>https://streetalk.live/</loc>') && sitemapXml.includes('<changefreq>daily</changefreq>')) {
+      pass('Technical SEO: sitemap.xml declares canonical URL and daily update frequency');
+    } else {
+      fail('Technical SEO: sitemap.xml missing required tags');
+    }
+
+    // 14.3 Verify Open Graph Image Asset
+    const ogImageExists = fs.existsSync(path.join(__dirname, '../public/og-streetalk.svg'));
+    if (ogImageExists) {
+      pass('Technical SEO: High-resolution vector social preview image (og-streetalk.svg) exists');
+    } else {
+      fail('Technical SEO: og-streetalk.svg missing');
+    }
+
+    // 14.4 Verify Google Search Console & Canonical Tags
+    if (indexHtml.includes('google-site-verification') && indexHtml.includes('rel="canonical"')) {
+      pass('Technical SEO: Google Search Console verification placeholder and canonical tags present');
+    } else {
+      fail('Technical SEO: Google Search Console verification or canonical tag missing');
+    }
+
+    // 14.5 Verify Schema.org JSON-LD graph integrity & richness
+    const jsonLdMatch = indexHtml.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    if (jsonLdMatch && jsonLdMatch[1]) {
+      try {
+        const schemaData = JSON.parse(jsonLdMatch[1]);
+        const graph = schemaData['@graph'] || [schemaData];
+        const types = graph.map(item => item['@type']);
+
+        const hasWebApp = types.includes('WebApplication');
+        const hasOrg = types.includes('Organization');
+        const hasHowTo = types.includes('HowTo');
+        const faqItem = graph.find(item => item['@type'] === 'FAQPage');
+        const has8Faqs = faqItem && Array.isArray(faqItem.mainEntity) && faqItem.mainEntity.length >= 8;
+
+        if (hasWebApp && hasOrg && hasHowTo && has8Faqs) {
+          pass(`Schema.org Rich Snippets: Verified WebApplication, Organization, HowTo, and FAQPage with ${faqItem.mainEntity.length} questions`);
+        } else {
+          fail(`Schema.org JSON-LD incomplete: hasWebApp=${hasWebApp}, hasOrg=${hasOrg}, hasHowTo=${hasHowTo}, faqs=${faqItem ? faqItem.mainEntity.length : 0}`);
+        }
+      } catch (err) {
+        fail(`Schema.org JSON-LD parsing error: ${err.message}`);
+      }
+    } else {
+      fail('Schema.org JSON-LD script block not found');
+    }
+
+    // 14.6 Verify Crawlable Comparative Table & Moods Content
+    if (indexHtml.includes('PERCHÉ STREETALK È DIVERSA') &&
+        indexHtml.includes('SCEGLI IL TUO MOOD') &&
+        indexHtml.includes('ARCHITETTURA FORENSE ZERO-LOG')) {
+      pass('On-Page SEO: Verified crawlable comparative table, 3 moods guide, and zero-log privacy manifesto');
+    } else {
+      fail('On-Page SEO: Missing crawlable comparative table or editorial sections');
+    }
+
+    // ----------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------
     console.log('\n====================================================');

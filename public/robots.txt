@@ -1,0 +1,16 @@
+# ==========================================
+# STREETALK // ROBOTS.TXT
+# Optimized for Googlebot & Modern Crawlers (2026)
+# ==========================================
+
+User-agent: *
+Allow: /
+Disallow: /api/stats
+Disallow: /health
+
+# Sitemaps
+Sitemap: https://streetalk.live/sitemap.xml
+Sitemap: https://temporary-racing-lilac-wqcaj3i.vercel.app/sitemap.xml
+
+# Host Directive
+Host: https://streetalk.live

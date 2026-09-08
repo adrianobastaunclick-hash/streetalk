@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <defs>
+    <radialGradient id="neonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff5500" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#0a0b0e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff5500"/>
+      <stop offset="100%" stop-color="#ff7700"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1f2430" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="1200" height="630" fill="#0a0b0e"/>
+  
+  <!-- Subtle Grid Pattern -->
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.6"/>
+
+  <!-- Radial Glow Behind Brand -->
+  <circle cx="600" cy="300" r="450" fill="url(#neonGlow)"/>
+
+  <!-- Top Street Tag Badge -->
+  <rect x="430" y="80" width="340" height="44" rx="22" fill="#14171f" stroke="#ff5500" stroke-width="2"/>
+  <circle cx="455" cy="102" r="7" fill="#22c55e"/>
+  <text x="475" y="108" fill="#ff5500" font-family="'JetBrains Mono', monospace, sans-serif" font-weight="bold" font-size="16" letter-spacing="2">REALTIME CHAT ENGINE</text>
+
+  <!-- Brand Title -->
+  <text x="600" y="240" text-anchor="middle" fill="#ffffff" font-family="'Syne', Arial, sans-serif" font-weight="900" font-size="92" letter-spacing="4">
+    STREET<tspan fill="url(#orangeGrad)">ALK</tspan>
+  </text>
+
+  <!-- Headline -->
+  <text x="600" y="320" text-anchor="middle" fill="url(#textGrad)" font-family="'Syne', Arial, sans-serif" font-weight="700" font-size="34">
+    CHAT ANONIMA CON SCAMBIO SEGRETI
+  </text>
+
+  <!-- Subtitle / Value Proposition -->
+  <text x="600" y="380" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="22">
+    Niente account. Nessun dato salvato. Timer 3:00 a cancellazione istantanea.
+  </text>
+
+  <!-- Feature Pills -->
+  <g transform="translate(240, 460)">
+    <!-- Pill 1 -->
+    <rect x="0" y="0" width="220" height="52" rx="12" fill="#14171f" stroke="#27272a" stroke-width="1.5"/>
+    <text x="110" y="32" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold">⚡ ZERO REGISTRAZIONE</text>
+
+    <!-- Pill 2 -->
+    <rect x="250" y="0" width="220" height="52" rx="12" fill="#14171f" stroke="#27272a" stroke-width="1.5"/>
+    <text x="360" y="32" text-anchor="middle" fill="#ff5500" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold">🔥 PATTO DEL SEGRETO</text>
+
+    <!-- Pill 3 -->
+    <rect x="500" y="0" width="220" height="52" rx="12" fill="#14171f" stroke="#27272a" stroke-width="1.5"/>
+    <text x="610" y="32" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold">🛡️ 100% MEMORIA RAM</text>
+  </g>
+
+  <!-- Footer Domain -->
+  <text x="600" y="580" text-anchor="middle" fill="#64748b" font-family="'JetBrains Mono', monospace" font-size="18" letter-spacing="3">
+    WWW.STREETALK.LIVE // UNDERGROUND WEB EXPERIENCE
+  </text>
+</svg>

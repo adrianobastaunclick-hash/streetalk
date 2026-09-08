@@ -1,6 +1,10 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/robots.txt", "destination": "/robots.txt" },
+    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/og-streetalk.svg", "destination": "/og-streetalk.svg" },
+    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]
 }
