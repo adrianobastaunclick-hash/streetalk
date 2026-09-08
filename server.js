@@ -1,9 +1,11 @@
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
+const supabaseClient = require('./lib/supabase');
 
 const app = express();
 const server = http.createServer(app);
@@ -431,6 +433,14 @@ function createRoom(userA, userB) {
     });
   }
 
+  // Asynchronously archive secrets to Supabase if configured (non-blocking)
+  if (supabaseClient && supabaseClient.isReady()) {
+    Promise.all([
+      supabaseClient.archiveSecret({ content: userA.secret, mood: userA.mood }),
+      supabaseClient.archiveSecret({ content: userB.secret, mood: userB.mood })
+    ]).catch(err => console.warn('[STREETALK:SUPABASE] Match archive warning:', err.message));
+  }
+
   return room;
 }
 
@@ -720,6 +730,16 @@ io.on('connection', (socket) => {
         const count = (reportCounts.get(partnerIp) || 0) + 1;
         reportCounts.set(partnerIp, count);
         ipJail.set(partnerIp, Date.now() + DEFAULT_JAIL_TIME_MS);
+
+        // Asynchronously log abuse report to Supabase if configured
+        if (supabaseClient && supabaseClient.isReady()) {
+          supabaseClient.logReport({
+            roomId: room.id,
+            reason: payload.reason || 'safety_report',
+            reporterIp: user.ip,
+            reportedIp: partnerIp
+          }).catch(err => console.warn('[STREETALK:SUPABASE] Report log error:', err.message));
+        }
       }
 
       if (partnerSocket) {
@@ -781,6 +801,7 @@ app.get('/api/stats', (req, res) => {
     rateLimitsCount: rateLimits.size,
     jailedIpsCount: ipJail.size,
     reportCountsCount: reportCounts.size,
+    supabase: supabaseClient ? supabaseClient.getStatus() : { configured: false },
     memory: {
       rssMb: +(mem.rss / (1024 * 1024)).toFixed(2),
       heapTotalMb: +(mem.heapTotal / (1024 * 1024)).toFixed(2),
@@ -789,13 +810,26 @@ app.get('/api/stats', (req, res) => {
   });
 });
 
+// Supabase Status Endpoint
+app.get('/api/supabase/status', (req, res) => {
+  res.json(supabaseClient ? supabaseClient.getStatus() : { configured: false, mode: 'in_memory_volatile' });
+});
+
+// Community Secrets Feed Endpoint (Wall of Street Confessions)
+app.get('/api/secrets', async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
+  const mood = req.query.mood || null;
+  const result = await (supabaseClient ? supabaseClient.getPublicSecrets({ limit, mood }) : { ok: true, secrets: [], memoryOnly: true });
+  res.json(result);
+});
+
 // Export app and server for testing & running
 const PORT = process.env.PORT || 3000;
 
 if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`[STREETALK] Server online on http://localhost:${PORT}`);
-    console.log(`[STREETALK] Mode: Zero-DB Volatile RAM Engine`);
+    console.log(`[STREETALK] Mode: Zero-DB Volatile RAM Engine + Supabase Cloud Ready`);
   });
 }
 
@@ -810,7 +844,9 @@ module.exports = {
   rateLimits, 
   ipJail, 
   reportCounts,
+  supabaseClient,
   validateJoinPayload, 
   validateMessagePayload, 
   DOMSafetyFilter 
 };
+

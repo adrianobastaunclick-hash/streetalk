@@ -11,6 +11,7 @@
  */
 
 const { io: Client } = require('socket.io-client');
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
@@ -692,6 +693,61 @@ async function runAutonomousSuite() {
     liveCandidateF.disconnect();
     liveCandidateM.disconnect();
     await new Promise((r) => setTimeout(r, 200));
+
+    // ----------------------------------------------------
+    // TEST 13: Supabase Integration & Cloud REST Endpoints
+    // ----------------------------------------------------
+    console.log('\n--- TEST 13: Supabase Cloud & Resilient REST APIs ---');
+    
+    // Helper for HTTP GET requests
+    const fetchJson = (urlPath) => {
+      return new Promise((resolve, reject) => {
+        http.get(`http://127.0.0.1:3001${urlPath}`, (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch (e) {
+              reject(e);
+            }
+          });
+        }).on('error', reject);
+      });
+    };
+
+    // 13.1 Check /api/supabase/status
+    const statusData = await fetchJson('/api/supabase/status');
+    if (statusData && typeof statusData.configured === 'boolean' && statusData.mode) {
+      pass(`Supabase status API verified: mode="${statusData.mode}", configured=${statusData.configured}`);
+    } else {
+      fail('Supabase status API returned invalid format');
+    }
+
+    // 13.2 Check /api/secrets endpoint
+    const secretsData = await fetchJson('/api/secrets?limit=5');
+    if (secretsData && secretsData.ok === true && Array.isArray(secretsData.secrets)) {
+      pass(`Public secrets endpoint verified: ok=true, returned ${secretsData.secrets.length} items`);
+    } else {
+      fail('Public secrets endpoint failed to return valid array');
+    }
+
+    // 13.3 Check /api/stats includes Supabase metadata
+    const statsData = await fetchJson('/api/stats');
+    if (statsData && statsData.supabase && typeof statsData.supabase.configured === 'boolean') {
+      pass(`Stats API successfully reports Supabase cloud status: mode=${statsData.supabase.mode}`);
+    } else {
+      fail('Stats API missing Supabase telemetry metadata');
+    }
+
+    // 13.4 Check client helper methods gracefully handle unconfigured mode
+    const supabaseClient = require('../lib/supabase');
+    const archiveResult = await supabaseClient.archiveSecret({ content: 'Test secret payload', mood: 'cazzeggio' });
+    if (archiveResult && archiveResult.ok === true) {
+      pass('Supabase client helper archiveSecret gracefully handles memory-only mode without crashing');
+    } else {
+      fail('Supabase client helper archiveSecret threw an unhandled error');
+    }
 
     // ----------------------------------------------------
     // SUMMARY
