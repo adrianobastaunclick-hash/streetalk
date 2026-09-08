@@ -11,6 +11,8 @@ sub_agents:
   - AI-Backend-Engineer
   - Smart-Contract-Auditor
   - Self-Correction-Auditor
+managed_orchestrators:
+  - autonomous-growth-director
 rules:
   - Zero Flat UI: Nessun design piatto; profondità, shader, illuminazione e micro-interazioni obbligatorie.
   - Resource Cleanup: Deallocazione forzata di contesti WebGL, geometrie, listener e memory buffer.
@@ -49,6 +51,11 @@ rules:
 7. **Self-Correction-Auditor** (`.agents/sub-agents/Self-Correction-Auditor.agent.md`)
    - **Stack**: Performance Profiler, Memory Leak Detective, Code Quality Linter.
    - **Mandato**: Misurare frame drop, consumo heap RAM, gas overhead e latenza token. Appendere errori e pattern risolti al file `.agent_learnings.md`.
+
+### 1.1 Dipartimento Autonomo Growth, Marketing & Generative Media
+- **Orchestratore**: `autonomous-growth-director` (`.agents/autonomous-growth-director.md`)
+- **Sub-Agenti Gestiti**: SEO-Data-Strategist, Neuromarketing-Psychologist, Color-Cognitive-Scientist, Viral-Copy-Architect, Social-Media-Master, Creative-Media-Synthesizer, Growth-Data-Analyst.
+- **Protocollo**: `GROWTH-RALPH-LOOP` a ciclo chiuso (Market Intel -> Synthesis -> Asset Craft -> App Bridge -> Analytics).
 
 ---
 

@@ -74,6 +74,34 @@ const DEFAULT_JAIL_TIME_MS = 10 * 60 * 1000; // 10 minutes (600,000 ms)
 let simulatedBaseOnline = 1248;
 
 // ==========================================
+// VOLATILE FUNNEL TELEMETRY (Growth-Data-Analyst)
+// Purely numeric counters in volatile RAM - Zero PII
+// ==========================================
+const funnelMetrics = {
+  landings: 0,
+  secretsSubmitted: 0,
+  matchesCompleted: 0,
+  extensionsGranted: 0,
+  getDropOffs() {
+    const s1 = this.landings;
+    const s2 = this.secretsSubmitted;
+    const s3 = this.matchesCompleted;
+    const s4 = this.extensionsGranted;
+    return {
+      dropStage1To2Pct: s1 > 0 ? +((1 - s2 / s1) * 100).toFixed(1) : 0,
+      dropStage2To3Pct: s2 > 0 ? +((1 - (s3 * 2) / s2) * 100).toFixed(1) : 0,
+      dropStage3To4Pct: s3 > 0 ? +((1 - s4 / s3) * 100).toFixed(1) : 0
+    };
+  },
+  reset() {
+    this.landings = 0;
+    this.secretsSubmitted = 0;
+    this.matchesCompleted = 0;
+    this.extensionsGranted = 0;
+  }
+};
+
+// ==========================================
 // SKILL: DOMSafetyFilter (Server-Side Sanitizer)
 // ==========================================
 const DOMSafetyFilter = {
@@ -361,6 +389,7 @@ function createRoom(userA, userB) {
   };
 
   rooms.set(roomId, room);
+  funnelMetrics.matchesCompleted++;
 
   // Update user records
   const userARecord = users.get(userA.socketId);
@@ -509,6 +538,7 @@ function handleUserDisconnectOrSkip(socketId, action = 'disconnect') {
 // SOCKET.IO EVENT HANDLERS
 // ==========================================
 io.on('connection', (socket) => {
+  funnelMetrics.landings++;
   const clientIp = getClientIp(socket);
 
   // Check IP Jail
@@ -553,6 +583,8 @@ io.on('connection', (socket) => {
     if (!validation.valid) {
       return socket.emit('error_event', { code: 'INVALID_PAYLOAD', message: validation.error });
     }
+
+    funnelMetrics.secretsSubmitted++;
 
     // Clean up previous room if any
     const user = users.get(socket.id);
@@ -671,6 +703,7 @@ io.on('connection', (socket) => {
     room.extensions.add(socket.id);
 
     if (room.extensions.size >= 2) {
+      funnelMetrics.extensionsGranted++;
       room.timeRemaining += EXTENSION_TIME_SEC;
       room.extensions.clear();
       io.to(room.id).emit('extension_granted', {
@@ -801,6 +834,13 @@ app.get('/api/stats', (req, res) => {
     rateLimitsCount: rateLimits.size,
     jailedIpsCount: ipJail.size,
     reportCountsCount: reportCounts.size,
+    funnel: {
+      landings: funnelMetrics.landings,
+      secretsSubmitted: funnelMetrics.secretsSubmitted,
+      matchesCompleted: funnelMetrics.matchesCompleted,
+      extensionsGranted: funnelMetrics.extensionsGranted,
+      dropOffs: funnelMetrics.getDropOffs()
+    },
     supabase: supabaseClient ? supabaseClient.getStatus() : { configured: false },
     memory: {
       rssMb: +(mem.rss / (1024 * 1024)).toFixed(2),
@@ -844,6 +884,7 @@ module.exports = {
   rateLimits, 
   ipJail, 
   reportCounts,
+  funnelMetrics,
   supabaseClient,
   validateJoinPayload, 
   validateMessagePayload, 

@@ -77,7 +77,7 @@ async function runAutonomousSuite() {
     console.log(`[TEST-RUNNER] Server already listening on port ${PORT}\n`);
   }
 
-    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, validateJoinPayload, validateMessagePayload, DOMSafetyFilter } = serverModule;
+    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, funnelMetrics, validateJoinPayload, validateMessagePayload, DOMSafetyFilter } = serverModule;
 
   try {
     // ----------------------------------------------------
@@ -536,6 +536,10 @@ async function runAutonomousSuite() {
     if (!reportCounts || reportCounts.size === 0) pass('RAM Report counts map 100% purged: reportCountsCount === 0');
     else fail(`Report counts in RAM not purged: ${reportCounts.size}`);
 
+    if (funnelMetrics && typeof funnelMetrics.reset === 'function') {
+      funnelMetrics.reset();
+    }
+
     if (global.gc) global.gc();
     const memAfter = process.memoryUsage();
     info(`Post-Cleanup Heap: ${(memAfter.heapUsed / 1024 / 1024).toFixed(2)} MB`);
@@ -845,6 +849,136 @@ async function runAutonomousSuite() {
       pass('On-Page SEO: Verified crawlable comparative table, 3 moods guide, and zero-log privacy manifesto');
     } else {
       fail('On-Page SEO: Missing crawlable comparative table or editorial sections');
+    }
+
+    // ----------------------------------------------------
+    // TEST 15: Autonomous Growth Network, Creative Media & Blueprint Audit
+    // ----------------------------------------------------
+    console.log('\n--- TEST 15: Autonomous Growth Network & Creative Media Engine ---');
+
+    // 15.1 Verify Autonomous Growth Director Manifesto
+    const directorPath = path.join(__dirname, '../.agents/autonomous-growth-director.md');
+    if (fs.existsSync(directorPath)) {
+      const directorContent = fs.readFileSync(directorPath, 'utf8');
+      const hasFrontmatter = directorContent.includes('name: autonomous-growth-director') &&
+                             directorContent.includes('type: Master-Orchestrator-Growth') &&
+                             directorContent.includes('reports_to: god-mode-creative-architect') &&
+                             directorContent.includes('managed_sub_agents:');
+      const hasInvariants = directorContent.includes('Data-Driven Iteration:') &&
+                            directorContent.includes('Zero-Hallucination SEO:') &&
+                            directorContent.includes('High-Voltage Visual Identity:') &&
+                            directorContent.includes('Inter-Agent Continuous Sync:');
+      if (hasFrontmatter && hasInvariants) {
+        pass('Autonomous Growth Director manifesto verified with valid frontmatter & invariants');
+      } else {
+        fail('Autonomous Growth Director missing required YAML frontmatter or invariant declarations');
+      }
+    } else {
+      fail('.agents/autonomous-growth-director.md missing');
+    }
+
+    // 15.2 Verify all 7 Growth Sub-Agents exist with valid specifications
+    const requiredGrowthSubAgents = [
+      'SEO-Data-Strategist',
+      'Neuromarketing-Psychologist',
+      'Color-Cognitive-Scientist',
+      'Viral-Copy-Architect',
+      'Social-Media-Master',
+      'Creative-Media-Synthesizer',
+      'Growth-Data-Analyst'
+    ];
+
+    let allGrowthAgentsValid = true;
+    for (const agentName of requiredGrowthSubAgents) {
+      const agentFile = path.join(__dirname, `../.agents/sub-agents/${agentName}.agent.md`);
+      if (!fs.existsSync(agentFile)) {
+        allGrowthAgentsValid = false;
+        break;
+      }
+      const content = fs.readFileSync(agentFile, 'utf8');
+      if (!content.includes(`name: ${agentName}`) || !content.includes('mandate:')) {
+        allGrowthAgentsValid = false;
+        break;
+      }
+    }
+    if (allGrowthAgentsValid) {
+      pass('All 7 Growth Sub-Agent profiles verified in .agents/sub-agents/');
+    } else {
+      fail('One or more Growth Sub-Agent profiles missing or invalid');
+    }
+
+    // 15.3 Verify Creative Media Templates (Nano Banana 2 & Google Veo)
+    const nanoBananaPath = path.join(__dirname, '../.agents/creative-templates/infographics-nano-banana.json');
+    const veoPath = path.join(__dirname, '../.agents/creative-templates/cinematic-reels-veo.json');
+
+    try {
+      const nanoData = JSON.parse(fs.readFileSync(nanoBananaPath, 'utf8'));
+      const hasNanoBrand = nanoData.branding_invariants && nanoData.branding_invariants.watermark === '@STREETALK.LIVE';
+      const hasNanoPresets = Array.isArray(nanoData.infographic_presets) && nanoData.infographic_presets.length >= 2;
+      const hasNeoBrutalist = nanoData.style_guidelines && nanoData.style_guidelines.background_color === '#0a0b0e';
+
+      if (hasNanoBrand && hasNanoPresets && hasNeoBrutalist) {
+        pass('Nano Banana 2 creative template verified (valid JSON, neo-brutalist style, @STREETALK.LIVE watermark)');
+      } else {
+        fail('Nano Banana 2 template missing required brand invariants or presets');
+      }
+    } catch (err) {
+      fail(`Nano Banana 2 template JSON error: ${err.message}`);
+    }
+
+    try {
+      const veoData = JSON.parse(fs.readFileSync(veoPath, 'utf8'));
+      const hasVeoSpecs = veoData.video_specifications &&
+                          veoData.video_specifications.aspect_ratio === '9:16' &&
+                          veoData.video_specifications.frame_rate === '60 FPS';
+      const hasAudioSync = veoData.audio_synchronization && Array.isArray(veoData.audio_synchronization.beat_markers);
+      const hasReels = Array.isArray(veoData.reel_prompts) && veoData.reel_prompts.length >= 2;
+
+      if (hasVeoSpecs && hasAudioSync && hasReels) {
+        pass('Google Veo 9:16 @ 60 FPS video template verified (valid JSON, 808 audio sync, reel prompts)');
+      } else {
+        fail('Google Veo template missing required 9:16 specs, 60 FPS, or audio synch');
+      }
+    } catch (err) {
+      fail(`Google Veo template JSON error: ${err.message}`);
+    }
+
+    // 15.4 Verify Blueprint GROWTH-RALPH-LOOP & Agent Learnings
+    const blueprint = fs.readFileSync(path.join(__dirname, '../PROJECT_BLUEPRINT.md'), 'utf8');
+    const hasGrowthLoop = blueprint.includes('GROWTH-RALPH-LOOP (AUTONOMOUS)') &&
+                          blueprint.includes('[1. MARKET INTEL]') &&
+                          blueprint.includes('[2. SYNTHESIS]') &&
+                          blueprint.includes('[3. ASSET CRAFT]') &&
+                          blueprint.includes('[4. APP BRIDGE]') &&
+                          blueprint.includes('[5. ANALYTICS]');
+    if (hasGrowthLoop) {
+      pass('PROJECT_BLUEPRINT.md specifies complete 5-stage GROWTH-RALPH-LOOP protocol');
+    } else {
+      fail('PROJECT_BLUEPRINT.md missing GROWTH-RALPH-LOOP specification');
+    }
+
+    const learnings = fs.readFileSync(path.join(__dirname, '../.agent_learnings.md'), 'utf8');
+    if (learnings.includes('Nano Banana 2') && learnings.includes('Google Veo') && learnings.includes('GROWTH-RALPH-LOOP')) {
+      pass('.agent_learnings.md registers active prompt templates and growth network memories');
+    } else {
+      fail('.agent_learnings.md missing generative media prompt memories');
+    }
+
+    // 15.5 Verify Growth Funnel Telemetry via /api/stats
+    try {
+      const statsRes2 = await fetch('http://localhost:3001/api/stats');
+      const statsData2 = await statsRes2.json();
+      if (statsData2.funnel &&
+          typeof statsData2.funnel.landings === 'number' &&
+          typeof statsData2.funnel.secretsSubmitted === 'number' &&
+          typeof statsData2.funnel.matchesCompleted === 'number' &&
+          statsData2.funnel.dropOffs) {
+        pass('Growth-Data-Analyst: 4-stage funnel telemetry operational on /api/stats');
+      } else {
+        fail('Growth funnel telemetry missing or malformed on /api/stats');
+      }
+    } catch (err) {
+      fail(`Failed to verify funnel stats: ${err.message}`);
     }
 
     // ----------------------------------------------------
