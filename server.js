@@ -370,6 +370,7 @@ function createRoom(userA, userB) {
 
   // If one socket disconnected right before creation, avoid zombie rooms
   if (!sockA && sockB) {
+    if (userA && userA.secret) destroyedSecretsCount++;
     users.delete(userA.socketId);
     rateLimits.delete(userA.socketId);
     const bQueue = getMoodQueue(userB.mood);
@@ -377,6 +378,7 @@ function createRoom(userA, userB) {
     return null;
   }
   if (!sockB && sockA) {
+    if (userB && userB.secret) destroyedSecretsCount++;
     users.delete(userB.socketId);
     rateLimits.delete(userB.socketId);
     const aQueue = getMoodQueue(userA.mood);
@@ -384,6 +386,8 @@ function createRoom(userA, userB) {
     return null;
   }
   if (!sockA && !sockB) {
+    if (userA && userA.secret) destroyedSecretsCount++;
+    if (userB && userB.secret) destroyedSecretsCount++;
     users.delete(userA.socketId);
     users.delete(userB.socketId);
     rateLimits.delete(userA.socketId);
@@ -411,12 +415,18 @@ function createRoom(userA, userB) {
   rooms.set(roomId, room);
   funnelMetrics.matchesCompleted++;
 
-  // Update user records
+  // Update user records (secrets are transferred to active room, safely clearing from user record)
   const userARecord = users.get(userA.socketId);
-  if (userARecord) userARecord.roomId = roomId;
+  if (userARecord) {
+    userARecord.roomId = roomId;
+    userARecord.secret = null;
+  }
 
   const userBRecord = users.get(userB.socketId);
-  if (userBRecord) userBRecord.roomId = roomId;
+  if (userBRecord) {
+    userBRecord.roomId = roomId;
+    userBRecord.secret = null;
+  }
 
   // Join socket rooms
   if (sockA) sockA.join(roomId);
@@ -497,7 +507,7 @@ function destroyRoom(roomId, reason = 'terminated') {
   const room = rooms.get(roomId);
   if (!room) return;
 
-  const secretsDestroyed = (room.secret1 ? 1 : 0) + (room.secret2 ? 1 : 0) || 2;
+  const secretsDestroyed = (room.secret1 ? 1 : 0) + (room.secret2 ? 1 : 0);
   destroyedSecretsCount += secretsDestroyed;
   room.secret1 = null;
   room.secret2 = null;
@@ -514,13 +524,19 @@ function destroyRoom(roomId, reason = 'terminated') {
     sock1.leave(roomId);
   }
   const u1 = users.get(room.user1);
-  if (u1 && u1.roomId === roomId) u1.roomId = null;
+  if (u1) {
+    if (u1.roomId === roomId) u1.roomId = null;
+    u1.secret = null;
+  }
 
   if (sock2) {
     sock2.leave(roomId);
   }
   const u2 = users.get(room.user2);
-  if (u2 && u2.roomId === roomId) u2.roomId = null;
+  if (u2) {
+    if (u2.roomId === roomId) u2.roomId = null;
+    u2.secret = null;
+  }
 
   room.extensions.clear();
   rooms.delete(roomId);
@@ -608,10 +624,13 @@ io.on('connection', (socket) => {
 
     funnelMetrics.secretsSubmitted++;
 
-    // Clean up previous room if any
+    // Clean up previous room or queue secret if any
     const user = users.get(socket.id);
     if (user && user.roomId) {
       handleUserDisconnectOrSkip(socket.id, 'skip');
+    } else if (user && user.secret) {
+      destroyedSecretsCount++;
+      user.secret = null;
     }
 
     removeFromQueue(socket.id);
@@ -908,7 +927,9 @@ module.exports = {
   validateMessagePayload, 
   DOMSafetyFilter,
   get destroyedSecretsCount() { return destroyedSecretsCount; },
+  setDestroyedSecretsCount(val) { destroyedSecretsCount = val; },
   getTelemetryStats,
-  broadcastOnlineStats
+  broadcastOnlineStats,
+  statsBroadcastTimer
 };
 

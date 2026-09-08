@@ -7,6 +7,7 @@
     { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/og-streetalk.svg", "destination": "/og-streetalk.svg" },
     { "source": "/google33c12d417a750cbf.html", "destination": "/google33c12d417a750cbf.html" },
+    { "source": "/api/:match*", "destination": "https://streetalk.onrender.com/api/:match*" },
     { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
   ]
 }

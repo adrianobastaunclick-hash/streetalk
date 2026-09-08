@@ -2219,13 +2219,70 @@
       ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}` : "http://localhost:3000")
       : "https://streetalk.onrender.com";
 
+    let targetServer = SERVER_URL;
+    try {
+      if (typeof window !== 'undefined' && window.location) {
+        const urlParams = new URLSearchParams(window.location.search);
+        targetServer = urlParams.get('server')
+          || (window.STREETALK_CONFIG && window.STREETALK_CONFIG.SERVER_URL)
+          || SERVER_URL;
+      }
+    } catch (_) {}
+
+    // Live Latency Ping Telemetry Check
+    function performPingCheck() {
+      if (!socket || !socket.connected) return;
+      const start = Date.now();
+      socket.emit('ping_check', start, () => {
+        const rtt = Date.now() - start;
+        const pingText = document.getElementById('ping-text');
+        const pingDot = document.getElementById('ping-dot');
+        const pingBadge = document.getElementById('ping-badge');
+        const chatPingText = document.getElementById('chat-ping-text');
+        const chatPingDot = document.getElementById('chat-ping-dot');
+        const chatPingBadge = document.getElementById('chat-ping-badge');
+        const hudLatency = document.getElementById('hud-latency');
+        const cipherNode = document.getElementById('hud-cipher-node');
+
+        if (hudLatency) {
+          safeSetText(hudLatency, `${rtt} ms`);
+        }
+
+        if (cipherNode) {
+          const transportName = (socket.io && socket.io.engine && socket.io.engine.transport && socket.io.engine.transport.name) || 'wss';
+          const transportLabel = transportName.toUpperCase() === 'WEBSOCKET' ? 'WSS ACTIVE' : 'E2EE VALID';
+          safeSetText(cipherNode, `FRA-01 // ${transportLabel}`);
+        }
+
+        if (pingText && pingDot) {
+          if (pingBadge) pingBadge.classList.remove('hidden');
+          safeSetText(pingText, `${rtt} ms`);
+          if (rtt < 80) {
+            pingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
+          } else if (rtt < 180) {
+            pingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
+          } else {
+            pingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
+          }
+        }
+
+        if (chatPingText && chatPingDot) {
+          if (chatPingBadge) chatPingBadge.classList.remove('hidden');
+          safeSetText(chatPingText, `${rtt} ms`);
+          if (rtt < 80) {
+            chatPingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
+          } else if (rtt < 180) {
+            chatPingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
+          } else {
+            chatPingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
+          }
+        }
+      });
+    }
+
     // Connect to Socket.io if available
     try {
       if (typeof io !== 'undefined') {
-        const urlParams = new URLSearchParams(window.location.search);
-        const targetServer = urlParams.get('server')
-          || (window.STREETALK_CONFIG && window.STREETALK_CONFIG.SERVER_URL)
-          || SERVER_URL;
         socket = io(targetServer, {
           transports: ["websocket", "polling"],
           secure: true,
@@ -2242,6 +2299,7 @@
             const transportLabel = transportName.toUpperCase() === 'WEBSOCKET' ? 'WSS ACTIVE' : 'E2EE VALID';
             safeSetText(cipherNode, `FRA-01 // ${transportLabel}`);
           }
+          performPingCheck();
           if (pendingQueueJoin) {
             safeSetText(document.getElementById('radar-status-text'), `In cerca di un partner sul mood [${pendingQueueJoin.mood}]...`);
             socket.emit('join_queue', pendingQueueJoin);
@@ -2327,16 +2385,19 @@
 
     (function initTrustHUD() {
       // Clean REST fallback before WebSocket handshake
-      fetch('/api/stats')
+      const statsEndpoint = `${targetServer || SERVER_URL}/api/stats`;
+      fetch(statsEndpoint)
         .then(res => {
           if (!res.ok) throw new Error('HTTP ' + res.status);
+          const contentType = res.headers.get('content-type') || '';
+          if (!contentType.includes('application/json')) throw new Error('Not JSON');
           return res.json();
         })
         .then(data => {
           if (data) {
             updateTrustHUD({
-              activeRooms: data.telemetry ? data.telemetry.activeRooms : data.roomsCount,
-              destroyedSecrets: data.telemetry ? data.telemetry.destroyedSecrets : (data.destroyedSecretsCount || 0)
+              activeRooms: data.telemetry ? data.telemetry.activeRooms : (data.activeRooms !== undefined ? data.activeRooms : data.roomsCount),
+              destroyedSecrets: data.telemetry ? data.telemetry.destroyedSecrets : (data.destroyedSecrets !== undefined ? data.destroyedSecrets : (data.destroyedSecretsCount || 0))
             });
             const counterEl = document.getElementById('header-counter-number');
             const online = data.telemetry ? data.telemetry.onlineCount : (data.onlineCount !== undefined ? data.onlineCount : data.usersCount);
@@ -2345,7 +2406,21 @@
             }
           }
         })
-        .catch(() => {});
+        .catch(() => {
+          if (statsEndpoint !== '/api/stats') {
+            fetch('/api/stats')
+              .then(res => res.ok && res.headers.get('content-type')?.includes('application/json') ? res.json() : null)
+              .then(data => {
+                if (data) {
+                  updateTrustHUD({
+                    activeRooms: data.telemetry ? data.telemetry.activeRooms : (data.activeRooms !== undefined ? data.activeRooms : data.roomsCount),
+                    destroyedSecrets: data.telemetry ? data.telemetry.destroyedSecrets : (data.destroyedSecrets !== undefined ? data.destroyedSecrets : (data.destroyedSecretsCount || 0))
+                  });
+                }
+              })
+              .catch(() => {});
+          }
+        });
     })();
 
     // Radar Dynamic Coordinates Jitter Loop
@@ -3333,56 +3408,7 @@
       });
 
       // Latency Ping Monitor (every 4 seconds)
-      setInterval(() => {
-        if (socket && socket.connected) {
-          const start = Date.now();
-          socket.emit('ping_check', start, () => {
-            const rtt = Date.now() - start;
-            const pingText = document.getElementById('ping-text');
-            const pingDot = document.getElementById('ping-dot');
-            const pingBadge = document.getElementById('ping-badge');
-            const chatPingText = document.getElementById('chat-ping-text');
-            const chatPingDot = document.getElementById('chat-ping-dot');
-            const chatPingBadge = document.getElementById('chat-ping-badge');
-            const hudLatency = document.getElementById('hud-latency');
-            const cipherNode = document.getElementById('hud-cipher-node');
-
-            if (hudLatency) {
-              safeSetText(hudLatency, `${rtt} ms`);
-            }
-
-            if (cipherNode) {
-              const transportName = (socket.io && socket.io.engine && socket.io.engine.transport && socket.io.engine.transport.name) || 'wss';
-              const transportLabel = transportName.toUpperCase() === 'WEBSOCKET' ? 'WSS ACTIVE' : 'E2EE VALID';
-              safeSetText(cipherNode, `FRA-01 // ${transportLabel}`);
-            }
-
-            if (pingText && pingDot) {
-              if (pingBadge) pingBadge.classList.remove('hidden');
-              safeSetText(pingText, `${rtt} ms`);
-              if (rtt < 80) {
-                pingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
-              } else if (rtt < 180) {
-                pingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
-              } else {
-                pingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
-              }
-            }
-
-            if (chatPingText && chatPingDot) {
-              if (chatPingBadge) chatPingBadge.classList.remove('hidden');
-              safeSetText(chatPingText, `${rtt} ms`);
-              if (rtt < 80) {
-                chatPingDot.className = 'w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_6px_#10b981]';
-              } else if (rtt < 180) {
-                chatPingDot.className = 'w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_6px_#f59e0b]';
-              } else {
-                chatPingDot.className = 'w-2 h-2 rounded-full bg-red-500 shadow-[0_0_6px_#ef4444]';
-              }
-            }
-          });
-        }
-      }, 4000);
+      setInterval(performPingCheck, 4000);
     });
 
     // ==========================================
