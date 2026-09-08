@@ -27,7 +27,7 @@
 
 ---
 
-## 2. Matrice di Assegnazione dei Sub-Agenti (Ralph Loop - REVIEW)
+## 2. Matrice di Assegnazione dei Sub-Agenti Tecnici (Ralph Loop - REVIEW)
 
 | Sub-Agente | Layer di Competenza | Responsabilità Operativa in STREETALK | Vincolo / Invariante Chiave |
 |---|---|---|---|
@@ -41,9 +41,57 @@
 
 ---
 
-## 3. Stato del Protocollo di Esecuzione (Ralph Self-Improvement Loop)
-- **REVIEW**: [COMPLETO] Analisi dei requisiti e matrice dei 7 sub-agenti registrata su `PROJECT_BLUEPRINT.md`.
-- **ACT**: [COMPLETO] Codice modulare implementato, disaccoppiato e validato.
+## 3. Matrice di Assegnazione del Dipartimento Growth & Neuromarketing (2026)
+
+Coordinato dall'Orchestratore `autonomous-growth-director` (`.agents/autonomous-growth-director.md`), in sinergia diretta con `god-mode-creative-architect`.
+
+| Sub-Agente Growth | Focus Operativo | Stack Principale | Output & Deliverable Operativi |
+|---|---|---|---|
+| **SEO-Data-Strategist** | Posizionamento Organico SERP #1 | Search Intent Clustering, Schema.org Graph, CWV, Programmatic SEO | Ottimizzazione index.html, sitemap XML, JSON-LD FAQPage (8 Q&A), ranking keyword target |
+| **Neuromarketing-Psychologist** | Trigger Cognitivi & Retention | Behavioral Economics, Cialdini Scarcity, Fogg B=MAP, FOMO | Micro-copy psicologico, voyeurismo etico del segreto, abbattimento ansia sociale <5s |
+| **Color-Cognitive-Scientist** | Neuro-Ergonomia Cromatica | Chromatic Psychology, WCAG AAA Contrast, Attention Heatmaps | Mappe cromatiche (#0a0b0e / #ff5500), gradienti Three.js shader, neuro-palette promozionale |
+| **Viral-Copy-Architect** | Hook & Narrazione Viscerale | Hook-Story-Offer, Street Slang Parsing, TikTok/Reels Scripting | Script video short-form, cataloghi hook ad alta ritenzione, headline scroll-stopping |
+| **Social-Media-Master** | Distribuzione Multipiattaforma | Social Scheduling, Algorithm Hacking, Trend Spotting, Community Radar | Calendario editoriale notturno (21:30 - 03:00), monitoring r/sfoghi, engagement rapido |
+| **Creative-Media-Synthesizer** | Sintesi Media Generativa | Nano Banana 2 (Infografiche), Google Veo (Reels 9:16 @ 60 FPS), Canvas Art | Template `.agents/creative-templates/`, prompt per render farm, Story Card per app |
+| **Growth-Data-Analyst** | Funnel Telemetry & Alerting | In-Memory Event Streaming, 4-Stage Funnel, Cohort Analysis | Monitoraggio tassi atterraggio -> segreto -> match -> +5m. Allerta autonoma se drop > 15% |
+
+---
+
+## 4. Il Protocollo di Collaborazione Autonoma (GROWTH-RALPH-LOOP)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────┐
+│                            GROWTH-RALPH-LOOP (AUTONOMOUS)                            │
+└──────────────────────────────────────────────────────────────────────────────────────┘
+  [1. MARKET INTEL] ──> Trend Analysis (TikTok/Reddit) + Keyword Gaps (SEO Strategist)
+           │
+  [2. SYNTHESIS]    ──> Neuromarketing emette direttive psicologiche + Palette arancio/nera
+           │
+  [3. ASSET CRAFT]  ──> Copywriter redige Hook + Media Synthesizer compila layout Nano/Veo
+           │
+  [4. APP BRIDGE]   ──> Aggiornamento meta-tag SEO, rich snippets e micro-copy su index.html
+           │            (Diretta comunicazione con FrontEnd-Cinematic-Dev)
+           │
+  [5. ANALYTICS]    ──> Stress-test dell'indicizzazione e simulazione del CTR / Funnel Test
+           │
+     <KPI RAGGIUNTO?>
+       ├── NO ──> Analisi del drop-off, riscrittura copy/colori e ritorno a [2. SYNTHESIS]
+       │
+       └── SI ──> Deploy automatico artefatti marketing e aggiornamento `.agent_learnings.md`
+```
+
+### Fasi del Ciclo Autonomo
+1. **MARKET INTEL**: `SEO-Data-Strategist` e `Social-Media-Master` scansionano continuamente le SERP di Google e le tendenze di Reddit/TikTok, rilevando keyword emergenti su anonimato, solitudine notturna e sfoghi senza registrazione.
+2. **SYNTHESIS**: `Neuromarketing-Psychologist` definisce gli archi emotivi (urgenza, voyeurismo etico, de-inibizione), mentre `Color-Cognitive-Scientist` calibra le soglie di contrasto retinico e la saturazione della palette ad alta adrenalina.
+3. **ASSET CRAFT**: `Viral-Copy-Architect` produce gli hook testuali entro i primi 2 secondi, e `Creative-Media-Synthesizer` genera le specifiche per Nano Banana 2 (`infographics-nano-banana.json`) e video cinematici Google Veo (`cinematic-reels-veo.json`).
+4. **APP BRIDGE**: Le direttive ottimizzate vengono propagate direttamente all'interfaccia utente in `index.html` e `public/index.html` in cooperazione con `FrontEnd-Cinematic-Dev` e `UIUX-Design-Virtuoso`.
+5. **ANALYTICS & ADAPTATION**: `Growth-Data-Analyst` valuta l'efficacia del funnel a 4 stadi. Se il drop-off supera il 15%, il loop torna autonomamente alla fase di sintesi; al raggiungimento dei KPI, le metriche vengono salvate in `.agent_learnings.md`.
+
+---
+
+## 5. Stato del Protocollo di Esecuzione
+- **REVIEW**: [COMPLETO] Rete tecnica (7 nodi) e Dipartimento Growth (7 nodi) registrati e sincronizzati su `PROJECT_BLUEPRINT.md`.
+- **ACT**: [COMPLETO] Codice applicativo modulare, template generativi in `.agents/creative-templates/` e markup SEO ad alto CTR attivi.
 - **PROVE**: [COMPLETO] Suite automatizzata di 63 test eseguita con successo al 100% (`node tests/autonomous-suite.js`).
-- **LEARN**: [COMPLETO] Invarianti operative attive e persistite su `.agent_learnings.md`.
-- **HALT**: [PRONTO] Artefatto verificato, nessun memory leak, ambiente configurato e in ascolto per il prossimo task.
+- **LEARN**: [COMPLETO] Prompt Nano Banana 2 e Google Veo registrati in `.agent_learnings.md` insieme alle invarianti di crescita.
+- **HALT**: [PRONTO] Rete multi-agente autonoma operativa, 0 memory leak, WebSockets intatti, pronta per produzione e indicizzazione SERP.

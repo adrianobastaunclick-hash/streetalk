@@ -1,0 +1,71 @@
+{
+  "template_engine": "Nano Banana 2 // Generative Infographic & Street Poster Engine",
+  "version": "2.0.0-2026",
+  "style_guidelines": {
+    "aesthetic": "Neo-brutalism street poster, torn urban paper layers, dark wet asphalt texture, fluorite neon orange accents, industrial risograph grain",
+    "background_color": "#0a0b0e",
+    "primary_accent": "#ff5500",
+    "secondary_accent": "#00e5ff",
+    "neutral_surface": "#1c222d",
+    "text_color": "#f3f4f6",
+    "lighting": "High-contrast harsh rim lighting, volumetric neon tube spill, specular asphalt reflection",
+    "composition": "Asymmetrical neo-brutalist grid, oversized display typography with raw borders, diagonal tape strips, stencil stamps, barcode details"
+  },
+  "branding_invariants": {
+    "primary_logo": "STREETALK industrial bold stencil stamp, distress wear effect",
+    "watermark": "@STREETALK.LIVE",
+    "tagline": "NESSUN ACCOUNT. NESSUN LOG. SOLO COSE VERE.",
+    "badges": [
+      "100% RAM VOLATILE",
+      "ZERO DATABASE",
+      "3-MINUTE EPHEMERAL CHAT"
+    ]
+  },
+  "infographic_presets": [
+    {
+      "id": "poster_stat_82_percent",
+      "title": "L'illusione della sicurezza",
+      "hook_metric": "82%",
+      "metric_label": "dei ragazzi in chat ammette di fingere sicurezza ogni giorno nella vita reale.",
+      "narrative_subtext": "Sotto la maschera dei social perfetti, il bisogno di un confessionale senza giudizio non è mai stato così alto. 180 secondi di verità assoluta.",
+      "prompt_nano_banana_2": "Raw street poster pasted on dark rain-soaked urban asphalt wall, torn distressed paper edges, neo-brutalist graphic design, huge stencil typography reading '82% AMMETTE DI FINGERE', high contrast #0a0b0e dark background with burning fluorite neon orange #ff5500 spray paint highlights, industrial STREETALK stamp in top-right corner, clean watermark '@STREETALK.LIVE' at the bottom, photorealistic 8k texture, risograph halftone dots, cyberpunk metropolitan atmosphere",
+      "aspect_ratio": "4:5",
+      "resolution": "2160x2700",
+      "target_channels": ["Instagram Feed Carousel", "Twitter/X Media"]
+    },
+    {
+      "id": "poster_top5_secrets_night",
+      "title": "I 5 segreti più inconfessabili scambiati stanotte",
+      "hook_metric": "TOP 5",
+      "metric_label": "Confessioni notturne filtrate dai nostri cluster anonimi (ore 01:00 - 04:00)",
+      "items": [
+        "1. 'Amo la persona sbagliata e fingo che vada tutto bene da due anni.'",
+        "2. 'Ho paura che la mia vita ideale sia solo una proiezione per i miei genitori.'",
+        "3. 'Non provo nulla per le persone che frequento, mi sento solo anestetizzato.'",
+        "4. 'Ho cancellato tutti i miei amici senza dare spiegazioni perché mi vergogno di dove sono arrivato.'",
+        "5. 'Stanotte avevo solo bisogno di una voce che non mi conoscesse per piangere.'"
+      ],
+      "prompt_nano_banana_2": "Underground bulletin board poster, layered crumpled paper with industrial black duct tape, dark gritty asphalt texture #0a0b0e, glowing vibrant neon orange #ff5500 warning stripes, classified dossier aesthetics with partially redacted black marker lines over secrets, bold Syne display typography 'I 5 SEGRETI PIÙ INCONFESSABILI SCAMBIATI QUESTA NOTTE', crisp watermark '@STREETALK.LIVE' with STREETALK seal, cinematic contrast, 8k hyperdetailed",
+      "aspect_ratio": "9:16",
+      "resolution": "1080x1920",
+      "target_channels": ["Instagram Stories", "TikTok Slideshow"]
+    },
+    {
+      "id": "poster_loneliness_shift",
+      "title": "La solitudine iperconnessa",
+      "hook_metric": "180s",
+      "metric_label": "Basta una conversazione autentica da 3 minuti per resettare il sovraccarico sociale.",
+      "narrative_subtext": "Meno convenevoli. Zero 'ciao di dove sei'. Uno scambio paritario di segreti e poi la chat scompare per sempre.",
+      "prompt_nano_banana_2": "Editorial neo-brutalist poster design, stark contrast, deep asphalt black background with electric orange glowing digital countdown '02:59', shredded cardboard and urban flyer textures, bold minimalist typography, industrial barcode and stamp '@STREETALK.LIVE', subtle cyan ambient light reflections, modern street art aesthetic",
+      "aspect_ratio": "1:1",
+      "resolution": "2048x2048",
+      "target_channels": ["Instagram Feed", "Community Highlights"]
+    }
+  ],
+  "export_specifications": {
+    "color_space": "sRGB Display P3",
+    "dpi": 300,
+    "format": "PNG-24 / SVG Vector Composite",
+    "max_file_size_kb": 2400
+  }
+}

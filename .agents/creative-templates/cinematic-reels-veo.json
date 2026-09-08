@@ -1,0 +1,61 @@
+{
+  "template_engine": "Google Veo // Generative Video Prompting Engine (2026 Standards)",
+  "version": "2.0.0-2026",
+  "project": "STREETALK // Autonomous Viral Video Generation",
+  "video_specifications": {
+    "aspect_ratio": "9:16",
+    "resolution": "1080x1920",
+    "frame_rate": "60 FPS",
+    "color_profile": "Rec.709 / Cinematic Neon Grade",
+    "duration_seconds": 12,
+    "lighting": "Volumetric street lighting, wet asphalt reflections, saturated neon orange glow, moody shadow contrast"
+  },
+  "visual_direction": {
+    "camera": "Dynamic handheld cinematic motion, slight lens distortion, smooth forward dolly through rainy night alleyways, quick whip-pan rack-focus transition to glowing smartphone display",
+    "palette": {
+      "asphalt_base": "#0a0b0e",
+      "neon_orange_bounce": "#ff5500",
+      "cyan_atmospheric_fog": "#00e5ff",
+      "puddle_specular": "#ffffff"
+    },
+    "atmosphere": "Moody cyberpunk realism, rain ripples on dark puddle surfaces, distant sirens and low rumbling city textures, steam rising from urban sewer grates"
+  },
+  "audio_synchronization": {
+    "engine": "Web Audio API procedural sound architecture / 808 sub-bass kicks",
+    "beat_markers": [
+      { "time_s": 0.0, "event": "Low 808 sub-bass sweep intro, camera begins forward drift" },
+      { "time_s": 1.8, "event": "Hard 808 drop, hook text flashes with chromatic aberration" },
+      { "time_s": 4.5, "event": "High-frequency cyber blip, phone screen awakens with 3D asphalt shader" },
+      { "time_s": 7.2, "event": "Double sub-bass hit, secret exchange animation unfolds" },
+      { "time_s": 10.0, "event": "Timer countdown tick (180s -> 179s), final CTA impact hit" }
+    ]
+  },
+  "reel_prompts": [
+    {
+      "id": "veo_reel_01_rainy_confession",
+      "title": "La città bagnata e il segreto non detto",
+      "veo_prompt": "Cinematic 9:16 vertical video at 60 FPS. Dynamic handheld camera swiftly gliding through a narrow metropolitan alleyway at 3 AM. Wet dark asphalt reflecting vibrant neon orange (#ff5500) shop signs and deep puddles shivering with rain drops. Steam billowing from subway grates. The camera rapidly pans into an intense close-up of a person wearing an oversized dark hoodie holding a sleek smartphone. On screen, the dark 3D neo-brutalist interface of STREETALK glows with floating orange particles. A blurred secret swaps instantly on the screen as a 180s timer starts ticking down. Ultra-high fidelity, photorealistic film grain, moody volumetric orange haze, anamorphic bokeh, 8k resolution.",
+      "overlay_copy": {
+        "0.0s - 2.0s": "Cosa faresti se questa chat si cancellasse per sempre tra 180 secondi?",
+        "2.0s - 6.0s": "Niente 'm o f'. Niente nomi. Solo tu e un altro sconosciuto che scambiate una verità che non potete dire a nessuno.",
+        "6.0s - 10.0s": "Zero database. 100% cancellato dalla memoria RAM alla chiusura.",
+        "10.0s - 12.0s": "Entra ora su streetalk.live // Nessun download."
+      },
+      "cta_button": "PROVA STREETALK ORA",
+      "target_platforms": ["TikTok FYP", "Instagram Reels", "YouTube Shorts"]
+    },
+    {
+      "id": "veo_reel_02_midnight_subway",
+      "title": "L'ultima metro delle 02:00",
+      "veo_prompt": "Cinematic vertical 9:16 video at 60 FPS, ultra-detailed cinema camera footage inside an empty, dimly lit subway train car rushing through underground tunnels. Harsh flickering industrial fluorescent tubes giving way to intense neon orange accent reflections against rain-streaked dark windows. A solitary passenger stares intensely into a smartphone displaying the interactive 3D particle terrain of STREETALK. The phone screen illuminates their face with warm orange and cool cyan lighting. Rapid match handshake animation with instant secret reveal. Zero motion blur on interface elements, crisp rendering, visceral metropolitan loneliness shifting into genuine human relief.",
+      "overlay_copy": {
+        "0.0s - 2.2s": "Tutti hanno un segreto che non possono dire a nessuno che conoscono.",
+        "2.2s - 6.5s": "In STREETALK entri, lasci il tuo segreto e leggi quello dell'altro. Parli 3 minuti e svanisce.",
+        "6.5s - 10.0s": "La prima chat underground con cancellazione forense garantita.",
+        "10.0s - 12.0s": "streetalk.live // Senza registrazione."
+      },
+      "cta_button": "SCAMBIA UN SEGRETO",
+      "target_platforms": ["TikTok FYP", "Instagram Reels"]
+    }
+  ]
+}
