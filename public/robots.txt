@@ -9,8 +9,7 @@ Disallow: /api/stats
 Disallow: /health
 
 # Sitemaps
-Sitemap: https://streetalk.live/sitemap.xml
-Sitemap: https://temporary-racing-lilac-wqcaj3i.vercel.app/sitemap.xml
+Sitemap: https://streetalk-live.vercel.app/sitemap.xml
 
 # Host Directive
-Host: https://streetalk.live
+Host: https://streetalk-live.vercel.app

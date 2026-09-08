@@ -3,20 +3,20 @@
         xmlns:xhtml="http://www.w3.org/1999/xhtml"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://streetalk.live/</loc>
+    <loc>https://streetalk-live.vercel.app/</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="it" href="https://streetalk.live/" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://streetalk.live/" />
+    <xhtml:link rel="alternate" hreflang="it" href="https://streetalk-live.vercel.app/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://streetalk-live.vercel.app/" />
     <image:image>
-      <image:loc>https://streetalk.live/og-streetalk.jpg</image:loc>
+      <image:loc>https://streetalk-live.vercel.app/og-streetalk.svg</image:loc>
       <image:title>STREETALK // Chat Anonima Realtime con Scambio Segreti</image:title>
       <image:caption>La prima chat anonima underground in tempo reale con patto di scambio segreti e zero registrazione.</image:caption>
     </image:image>
   </url>
   <url>
-    <loc>https://temporary-racing-lilac-wqcaj3i.vercel.app/</loc>
+    <loc>https://streetalk.live/</loc>
     <lastmod>2026-09-08</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
