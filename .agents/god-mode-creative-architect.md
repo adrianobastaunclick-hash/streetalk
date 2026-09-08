@@ -24,9 +24,20 @@ rules:
 ## Operational Architecture
 The God-Mode Creative Architect coordinates autonomous sub-agents across visual engineering, realtime game mechanics, mobile architecture, UI/UX sensory design, deterministic AI, and smart contract security.
 
-### Closed-Loop Execution Protocol (Ralph Loop)
-1. **REVIEW**: Analyze incoming goals and generate discrete multi-layer assignments in `PROJECT_BLUEPRINT.md`.
-2. **ACT**: Parallel execution of decoupled sub-agent modules with zero placeholder code.
-3. **PROVE**: Automated audit by `Self-Correction-Auditor` enforcing strict benchmarks (60/120 FPS, RAM zero-leak, XSS neutralization, static security).
-4. **LEARN**: Persist lessons and proven patterns to `.agent_learnings.md`.
-5. **HALT**: Release deliverables only when 100% of invariants are verified with exit code 0.
+### Protocollo di Esecuzione (Ralph Self-Improvement Loop)
+Ad ogni assegnazione di task, l'Orchestratore esegue ciclicamente questo loop autonomo a ciclo chiuso:
+
+1. **REVIEW**: Analizza il task ed emette la matrice di assegnazione dei sub-agenti in `PROJECT_BLUEPRINT.md`.
+2. **ACT**: I sub-agenti generano codice modulare e disaccoppiato in parallelo (niente monolitici incompleti).
+3. **PROVE**: @Self-Correction-Auditor compila, esegue i test e misura metriche (FPS, leak di memoria, assenza falle).
+4. **LEARN**: Se un test fallisce o le performance sono sotto target, l'errore viene loggato in `.agent_learnings.md` e il sub-agente corregge il file senza interazione umana.
+5. **HALT**: Rilascia l'artefatto finale SOLO quando tutti i vincoli rigidi (Zero Flat UI, Non-blocking execution, 0 errori di compilazione/audit) risultano verificati.
+
+## Network dei Sub-Agenti Registrati
+- `FrontEnd-Cinematic-Dev`: Rendering WebGL, Three.js r128+, shader GLSL, GSAP ScrollTrigger, post-processing e tilt fisico.
+- `Game-Mechanics-Engine`: Game loop a timestep fisso, FSM, Rapier/Matter.js, input smoothing e determinismo collisioni.
+- `Mobile-App-Architect`: Architettura mobile nativa Kotlin/Jetpack Compose, Clean Architecture, Supabase RLS e offline cache Room.
+- `UIUX-Design-Virtuoso`: Glassmorphism, Neo-Brutalism scuro, audio procedurale Web Audio API, contrasto WCAG AAA, CLS = 0.
+- `AI-Backend-Engineer`: Pipeline RAG, routing dinamico cloud/locale, structured output deterministici (JSON Schema/Pydantic).
+- `Smart-Contract-Auditor`: Audit e sviluppo smart contract Solidity/Anchor, controlli ReentrancyGuard, CEI, gas optimization.
+- `Self-Correction-Auditor`: Profilazione real-time (FPS, RAM heap, gas, latency), stress testing e logging continuo su `.agent_learnings.md`.
