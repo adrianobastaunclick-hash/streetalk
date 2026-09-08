@@ -520,7 +520,7 @@
           <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_#10b981]"></span>
         </span>
         <span class="text-white font-bold tracking-tight">
-          <span id="header-counter-number">142</span>
+          <span id="header-counter-number">0</span>
           <span class="text-street-cement font-normal font-sans ml-1 hidden md:inline">in strada</span>
         </span>
       </div>
@@ -544,15 +544,15 @@
       <div class="telemetry-grid">
         <div class="telemetry-item">
           <span class="item-key">STANZE CRITTOGRAFATE</span>
-          <span class="item-val" id="hud-active-vaults">1,420</span>
+          <span class="item-val" id="hud-active-vaults">0</span>
         </div>
         <div class="telemetry-item">
           <span class="item-key">SEGRETI INCENERITI (24H)</span>
-          <span class="item-val accent-amber" id="hud-destroyed-secrets">89,432</span>
+          <span class="item-val accent-amber" id="hud-destroyed-secrets">0</span>
         </div>
         <div class="telemetry-item">
           <span class="item-key">LATENZA RETE</span>
-          <span class="item-val" id="hud-latency">24ms</span>
+          <span class="item-val" id="hud-latency">-- ms</span>
         </div>
         <div class="telemetry-item">
           <span class="item-key">SICUREZZA NODO</span>
@@ -2236,6 +2236,12 @@
         socket.on('connect', () => {
           isSocketConnected = true;
           console.log('[STREETALK] Connesso al server realtime:', targetServer);
+          const cipherNode = document.getElementById('hud-cipher-node');
+          if (cipherNode) {
+            const transportName = (socket.io && socket.io.engine && socket.io.engine.transport && socket.io.engine.transport.name) || 'wss';
+            const transportLabel = transportName.toUpperCase() === 'WEBSOCKET' ? 'WSS ACTIVE' : 'E2EE VALID';
+            safeSetText(cipherNode, `FRA-01 // ${transportLabel}`);
+          }
           if (pendingQueueJoin) {
             safeSetText(document.getElementById('radar-status-text'), `In cerca di un partner sul mood [${pendingQueueJoin.mood}]...`);
             socket.emit('join_queue', pendingQueueJoin);
@@ -2245,6 +2251,14 @@
         socket.on('disconnect', () => {
           isSocketConnected = false;
           console.log('[STREETALK] Disconnesso dal server realtime');
+          const cipherNode = document.getElementById('hud-cipher-node');
+          if (cipherNode) {
+            safeSetText(cipherNode, 'FRA-01 // RECONNECTING');
+          }
+          const hudLatency = document.getElementById('hud-latency');
+          if (hudLatency) {
+            safeSetText(hudLatency, '-- ms');
+          }
         });
         socket.on('connect_error', (err) => {
           console.warn('[STREETALK] Connessione in corso o risveglio server Render...', err && err.message);
@@ -2294,26 +2308,44 @@
       requestAnimationFrame(update);
     }
 
-    // Commercial Trust Telemetry Cockpit Loop
+    // Commercial Trust Telemetry HUD (100% Real Live Metrics)
+    function updateTrustHUD(stats) {
+      if (!stats) return;
+      const vEl = document.getElementById('hud-active-vaults');
+      const dEl = document.getElementById('hud-destroyed-secrets');
+
+      const vaults = stats.activeRooms !== undefined ? stats.activeRooms : (stats.roomsCount !== undefined ? stats.roomsCount : (stats.activeChats !== undefined ? stats.activeChats : null));
+      if (vEl && vaults !== null) {
+        safeSetText(vEl, Number(vaults).toLocaleString());
+      }
+
+      const destroyed = stats.destroyedSecrets !== undefined ? stats.destroyedSecrets : (stats.destroyedSecretsCount !== undefined ? stats.destroyedSecretsCount : null);
+      if (dEl && destroyed !== null) {
+        safeSetText(dEl, Number(destroyed).toLocaleString());
+      }
+    }
+
     (function initTrustHUD() {
-      let activeVaults = 1420;
-      let destroyedSecrets = 89432;
-      let latencyMs = 24;
-
-      setInterval(() => {
-        activeVaults += (Math.random() > 0.5 ? 1 : -1);
-        if (activeVaults < 1200) activeVaults = 1420;
-        destroyedSecrets += Math.floor(Math.random() * 3);
-        latencyMs = 20 + Math.floor(Math.random() * 8);
-
-        const vEl = document.getElementById('hud-active-vaults');
-        const dEl = document.getElementById('hud-destroyed-secrets');
-        const lEl = document.getElementById('hud-latency');
-
-        if (vEl) vEl.textContent = activeVaults.toLocaleString();
-        if (dEl) dEl.textContent = destroyedSecrets.toLocaleString();
-        if (lEl) lEl.textContent = latencyMs + 'ms';
-      }, 2800);
+      // Clean REST fallback before WebSocket handshake
+      fetch('/api/stats')
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(data => {
+          if (data) {
+            updateTrustHUD({
+              activeRooms: data.telemetry ? data.telemetry.activeRooms : data.roomsCount,
+              destroyedSecrets: data.telemetry ? data.telemetry.destroyedSecrets : (data.destroyedSecretsCount || 0)
+            });
+            const counterEl = document.getElementById('header-counter-number');
+            const online = data.telemetry ? data.telemetry.onlineCount : (data.onlineCount !== undefined ? data.onlineCount : data.usersCount);
+            if (counterEl && online !== undefined) {
+              safeSetText(counterEl, Number(online).toLocaleString());
+            }
+          }
+        })
+        .catch(() => {});
     })();
 
     // Radar Dynamic Coordinates Jitter Loop
@@ -3300,17 +3332,6 @@
         });
       });
 
-      // Simulated user counter activity
-      setInterval(() => {
-        const counterEl = document.getElementById('header-counter-number');
-        if (counterEl) {
-          const current = parseInt(counterEl.textContent, 10) || 142;
-          const delta = Math.floor(Math.random() * 5) - 2;
-          const nextVal = Math.max(130, Math.min(194, current + delta));
-          safeSetText(counterEl, nextVal);
-        }
-      }, 5500);
-
       // Latency Ping Monitor (every 4 seconds)
       setInterval(() => {
         if (socket && socket.connected) {
@@ -3323,6 +3344,18 @@
             const chatPingText = document.getElementById('chat-ping-text');
             const chatPingDot = document.getElementById('chat-ping-dot');
             const chatPingBadge = document.getElementById('chat-ping-badge');
+            const hudLatency = document.getElementById('hud-latency');
+            const cipherNode = document.getElementById('hud-cipher-node');
+
+            if (hudLatency) {
+              safeSetText(hudLatency, `${rtt} ms`);
+            }
+
+            if (cipherNode) {
+              const transportName = (socket.io && socket.io.engine && socket.io.engine.transport && socket.io.engine.transport.name) || 'wss';
+              const transportLabel = transportName.toUpperCase() === 'WEBSOCKET' ? 'WSS ACTIVE' : 'E2EE VALID';
+              safeSetText(cipherNode, `FRA-01 // ${transportLabel}`);
+            }
 
             if (pingText && pingDot) {
               if (pingBadge) pingBadge.classList.remove('hidden');
@@ -3357,9 +3390,26 @@
     // ==========================================
     if (socket) {
       socket.on('online_stats', (stats) => {
+        if (!stats) return;
+
         const counterEl = document.getElementById('header-counter-number');
-        if (counterEl && stats.onlineCount) {
+        if (counterEl && stats.onlineCount !== undefined) {
           safeSetText(counterEl, Number(stats.onlineCount).toLocaleString());
+        }
+
+        const vaultsEl = document.getElementById('hud-active-vaults');
+        if (vaultsEl) {
+          const vaults = stats.activeRooms !== undefined ? stats.activeRooms : (stats.activeChats !== undefined ? stats.activeChats : 0);
+          safeSetText(vaultsEl, Number(vaults).toLocaleString());
+        }
+
+        const destroyedEl = document.getElementById('hud-destroyed-secrets');
+        if (destroyedEl && stats.destroyedSecrets !== undefined) {
+          safeSetText(destroyedEl, Number(stats.destroyedSecrets).toLocaleString());
+        }
+
+        if (typeof updateTrustHUD === 'function') {
+          updateTrustHUD(stats);
         }
       });
 

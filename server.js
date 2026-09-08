@@ -70,8 +70,28 @@ const ipJail = new Map();
 const reportCounts = new Map();
 const DEFAULT_JAIL_TIME_MS = 10 * 60 * 1000; // 10 minutes (600,000 ms)
 
-// Simulated online user count base (streetalk activity aesthetic)
-let simulatedBaseOnline = 1248;
+// Real cumulative secrets destroyed / incinerated since boot
+let destroyedSecretsCount = 0;
+
+// Telemetry helper: returns 100% real live server metrics
+function getTelemetryStats() {
+  return {
+    onlineCount: users.size,
+    activeRooms: rooms.size,
+    activeChats: rooms.size,
+    inQueue: queue.length,
+    destroyedSecrets: destroyedSecretsCount
+  };
+}
+
+// Periodic or event-driven broadcast of real telemetry to all connected clients
+function broadcastOnlineStats() {
+  io.emit('online_stats', getTelemetryStats());
+}
+
+// Background telemetry sync (unref'd to prevent keeping event loop open during test shutdown)
+const statsBroadcastTimer = setInterval(broadcastOnlineStats, 3000);
+if (statsBroadcastTimer.unref) statsBroadcastTimer.unref();
 
 // ==========================================
 // VOLATILE FUNNEL TELEMETRY (Growth-Data-Analyst)
@@ -414,11 +434,7 @@ function createRoom(userA, userB) {
     if (room.timeRemaining <= 0) {
       io.to(roomId).emit('chat_ended', { reason: 'time_expired' });
       destroyRoom(roomId, 'time_expired');
-      io.emit('online_stats', {
-        onlineCount: simulatedBaseOnline + users.size,
-        inQueue: queue.length,
-        activeChats: rooms.size
-      });
+      broadcastOnlineStats();
     }
   }, 1000);
 
@@ -470,6 +486,7 @@ function createRoom(userA, userB) {
     ]).catch(err => console.warn('[STREETALK:SUPABASE] Match archive warning:', err.message));
   }
 
+  broadcastOnlineStats();
   return room;
 }
 
@@ -479,6 +496,11 @@ function createRoom(userA, userB) {
 function destroyRoom(roomId, reason = 'terminated') {
   const room = rooms.get(roomId);
   if (!room) return;
+
+  const secretsDestroyed = (room.secret1 ? 1 : 0) + (room.secret2 ? 1 : 0) || 2;
+  destroyedSecretsCount += secretsDestroyed;
+  room.secret1 = null;
+  room.secret2 = null;
 
   if (room.timerInterval) {
     clearInterval(room.timerInterval);
@@ -527,6 +549,9 @@ function handleUserDisconnectOrSkip(socketId, action = 'disconnect') {
 
       destroyRoom(roomId, action);
     }
+  } else if (user.secret) {
+    destroyedSecretsCount++;
+    user.secret = null;
   }
 
   if (action === 'disconnect') {
@@ -560,12 +585,9 @@ io.on('connection', (socket) => {
     joinedQueueAt: null
   });
 
-  // Emit current stats
-  socket.emit('online_stats', {
-    onlineCount: simulatedBaseOnline + users.size,
-    inQueue: queue.length,
-    activeChats: rooms.size
-  });
+  // Emit current stats to new user and broadcast updated user count to all
+  socket.emit('online_stats', getTelemetryStats());
+  broadcastOnlineStats();
 
   // 1. JOIN QUEUE
   socket.on('join_queue', (payload) => {
@@ -621,26 +643,23 @@ io.on('connection', (socket) => {
       socket.emit('queue_joined', {
         position: moodQueue.length,
         mood,
-        onlineCount: simulatedBaseOnline + users.size
+        onlineCount: users.size
       });
     }
 
-    io.emit('online_stats', {
-      onlineCount: simulatedBaseOnline + users.size,
-      inQueue: queue.length,
-      activeChats: rooms.size
-    });
+    broadcastOnlineStats();
   });
 
   // 2. LEAVE QUEUE
   socket.on('leave_queue', () => {
+    const user = users.get(socket.id);
+    if (user && user.secret) {
+      destroyedSecretsCount++;
+      user.secret = null;
+    }
     removeFromQueue(socket.id);
     socket.emit('queue_left', { success: true });
-    io.emit('online_stats', {
-      onlineCount: simulatedBaseOnline + users.size,
-      inQueue: queue.length,
-      activeChats: rooms.size
-    });
+    broadcastOnlineStats();
   });
 
   // 3. SEND MESSAGE
@@ -724,11 +743,7 @@ io.on('connection', (socket) => {
   socket.on('skip_partner', () => {
     handleUserDisconnectOrSkip(socket.id, 'skip');
     socket.emit('skipped_confirmed', { success: true });
-    io.emit('online_stats', {
-      onlineCount: simulatedBaseOnline + users.size,
-      inQueue: queue.length,
-      activeChats: rooms.size
-    });
+    broadcastOnlineStats();
   });
 
   // 7. REALTIME REACTION (EMOJI BURST)
@@ -789,11 +804,7 @@ io.on('connection', (socket) => {
       message: 'Utente segnalato e bloccato. Stanza chiusa all\'istante.' 
     });
 
-    io.emit('online_stats', {
-      onlineCount: simulatedBaseOnline + users.size,
-      inQueue: queue.length,
-      activeChats: rooms.size
-    });
+    broadcastOnlineStats();
   });
 
   // 9. LATENCY PING CHECK
@@ -806,11 +817,7 @@ io.on('connection', (socket) => {
   // 10. DISCONNECT
   socket.on('disconnect', () => {
     handleUserDisconnectOrSkip(socket.id, 'disconnect');
-    io.emit('online_stats', {
-      onlineCount: simulatedBaseOnline + users.size,
-      inQueue: queue.length,
-      activeChats: rooms.size
-    });
+    broadcastOnlineStats();
   });
 });
 
@@ -828,12 +835,23 @@ app.get('/health', (req, res) => {
 app.get('/api/stats', (req, res) => {
   const mem = process.memoryUsage();
   res.json({
+    onlineCount: users.size,
+    activeRooms: rooms.size,
+    inQueue: queue.length,
+    destroyedSecrets: destroyedSecretsCount,
     usersCount: users.size,
     roomsCount: rooms.size,
     queueCount: queue.length,
     rateLimitsCount: rateLimits.size,
     jailedIpsCount: ipJail.size,
     reportCountsCount: reportCounts.size,
+    destroyedSecretsCount,
+    telemetry: {
+      onlineCount: users.size,
+      activeRooms: rooms.size,
+      inQueue: queue.length,
+      destroyedSecrets: destroyedSecretsCount
+    },
     funnel: {
       landings: funnelMetrics.landings,
       secretsSubmitted: funnelMetrics.secretsSubmitted,
@@ -888,6 +906,9 @@ module.exports = {
   supabaseClient,
   validateJoinPayload, 
   validateMessagePayload, 
-  DOMSafetyFilter 
+  DOMSafetyFilter,
+  get destroyedSecretsCount() { return destroyedSecretsCount; },
+  getTelemetryStats,
+  broadcastOnlineStats
 };
 
