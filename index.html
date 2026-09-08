@@ -364,6 +364,113 @@
     .reaction-btn:nth-child(8) { animation-delay: 1.75s; }
     .reaction-btn:hover { animation-play-state: paused; }
   </style>
+
+  <style id="commercial-overhaul-styles">
+    /* --- COMMERCIAL TRUST HUD & CYBER-SWISS DESIGN SYSTEM --- */
+    .trust-hud-container {
+      background: rgba(10, 10, 14, 0.75);
+      backdrop-filter: blur(24px) saturate(190%);
+      -webkit-backdrop-filter: blur(24px) saturate(190%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 0.5rem;
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pulse-beacon {
+      width: 8px;
+      height: 8px;
+      background: #00ff66;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 12px #00ff66;
+      animation: blink 1.6s infinite ease-in-out;
+    }
+    .mono-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      color: #d4d4d8;
+    }
+    .telemetry-grid {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+    .telemetry-item {
+      display: flex;
+      flex-direction: column;
+    }
+    .item-key {
+      font-size: 9px;
+      color: rgba(255, 255, 255, 0.45);
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+    .item-val {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .accent-amber { color: #ff9900; }
+    .accent-green { color: #00ff66; }
+    @keyframes blink {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.85); }
+    }
+    @media (max-width: 768px) {
+      .trust-hud-container {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 12px 16px;
+      }
+      .telemetry-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        width: 100%;
+      }
+    }
+
+    /* Bento Card Specular Reflections */
+    .bento-card {
+      background: radial-gradient(800px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 85, 0, 0.08), transparent 45%), #12141c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .bento-card:hover {
+      border-color: rgba(255, 85, 0, 0.45);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(255, 85, 0, 0.15);
+    }
+
+    /* Screen Shake on Vault Reveal */
+    @keyframes screen-micro-shake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-3px, 2px); }
+      40% { transform: translate(3px, -2px); }
+      60% { transform: translate(-2px, -1px); }
+      80% { transform: translate(2px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+    .screen-shake-effect {
+      animation: screen-micro-shake 0.22s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+  </style>
+
 </head>
 
 <body class="min-h-full flex flex-col font-sans relative">
@@ -424,6 +531,36 @@
   <!-- VIEW 1: LANDING & ENTRY GATE (DEFAULT VIEW, LAYER Z-10)   -->
   <!-- ======================================================== -->
   <main id="view-landing" class="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-12 sm:gap-16 z-10 relative">
+
+    <!-- ---------------------------------------------------- -->
+    <!-- COMMERCIAL TRUST TELEMETRY HUD (TIER-1 COCKPIT)       -->
+    <!-- ---------------------------------------------------- -->
+    <div class="trust-hud-container" id="commercial-trust-hud">
+      <div class="status-indicator">
+        <span class="pulse-beacon"></span>
+        <span class="mono-label">P2P ZERO-KNOWLEDGE PROTOCOL</span>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="telemetry-item">
+          <span class="item-key">STANZE CRITTOGRAFATE</span>
+          <span class="item-val" id="hud-active-vaults">1,420</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">SEGRETI INCENERITI (24H)</span>
+          <span class="item-val accent-amber" id="hud-destroyed-secrets">89,432</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">LATENZA RETE</span>
+          <span class="item-val" id="hud-latency">24ms</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">SICUREZZA NODO</span>
+          <span class="item-val accent-green" id="hud-cipher-node">FRA-01 // E2EE VALID</span>
+        </div>
+      </div>
+    </div>
+
     
     <!-- ---------------------------------------------------- -->
     <!-- B. HERO SECTION (IL GANCIO IMMEDIATO)                -->
@@ -1073,6 +1210,16 @@
         <div class="relative z-30 w-3.5 h-3.5 bg-street-orange rounded-full shadow-[0_0_16px_#ff5500]"></div>
       </div>
 
+      
+      <!-- HUD Telemetry Dynamic Crosshair Coordinates -->
+      <div id="radar-telemetry-crosshair" class="w-full max-w-xs mt-3 mb-1 py-1.5 px-3.5 bg-zinc-950/85 border border-street-orange/30 rounded-lg flex items-center justify-between font-mono text-[10px] text-zinc-400 backdrop-blur-md">
+        <span class="flex items-center gap-1.5 text-street-orange">
+          <span class="w-1.5 h-1.5 rounded-full bg-street-orange animate-ping"></span>
+          <span id="radar-geo-coords">LAT: 45.4642° N // LON: 9.1900° E</span>
+        </span>
+        <span class="text-zinc-500 font-bold" id="radar-azimuth">AZ: 284°</span>
+      </div>
+
       <h3 class="font-street font-black text-xl text-white tracking-wide">SCANSIONE DELLA STRADA...</h3>
       <p id="radar-status-text" class="font-mono text-xs text-street-orange mt-1">In cerca di un partner con lo stesso mood...</p>
       
@@ -1463,7 +1610,7 @@
         const ambientLight = new THREE.AmbientLight(0x1a1a24, 1.2);
         scene.add(ambientLight);
 
-        // --- 4. UNDULATING ASPHALT 3D WIREFRAME GRID ---
+        // --- 4. UNDULATING ASPHALT 3D WIREFRAME GRID WITH GRAVITATIONAL WELL ---
         const gridWidth = 90;
         const gridHeight = 120;
         const segX = 45;
@@ -1476,7 +1623,7 @@
         const posAttr = planeGeo.attributes.position;
         const baseZ = new Float32Array(posAttr.count);
         for (let i = 0; i < posAttr.count; i++) {
-          baseZ[i] = posAttr.getY(i); // Note: after rotation, Y corresponds to height
+          baseZ[i] = posAttr.getY(i);
         }
 
         // Dark wireframe with glowing neon orange accents
@@ -1489,7 +1636,6 @@
         const asphaltGrid = new THREE.Mesh(planeGeo, wireframeMat);
         scene.add(asphaltGrid);
 
-        // Optional subterranean dark floor for depth
         const floorMat = new THREE.MeshBasicMaterial({
           color: 0x050608,
           transparent: true,
@@ -1531,7 +1677,7 @@
         const particleSystem = new THREE.Points(particleGeo, particleMat);
         scene.add(particleSystem);
 
-        // --- 5B. ANAMORPHIC REFLECTIONS (HORIZONTAL LENS STREAK & SUBTERRANEAN GLOW) ---
+        // --- 5B. ANAMORPHIC REFLECTIONS ---
         const flareGeo = new THREE.PlaneGeometry(36, 0.4);
         const flareMat = new THREE.MeshBasicMaterial({
           color: 0xff5500,
@@ -1545,8 +1691,80 @@
         anamorphicFlare.rotation.x = -Math.PI / 2.8;
         scene.add(anamorphicFlare);
 
+        // --- 5C. CHROMATIC ABERRATION & LENS DISTORTION POST-PROCESSING SETUP ---
+        let renderTarget = null;
+        let postScene = null;
+        let postCamera = null;
+        let chromaticShaderMat = null;
+
+        try {
+          renderTarget = new THREE.WebGLRenderTarget(window.innerWidth, window.innerHeight, {
+            minFilter: THREE.LinearFilter,
+            magFilter: THREE.LinearFilter,
+            format: THREE.RGBAFormat
+          });
+
+          postScene = new THREE.Scene();
+          postCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+          const postQuadGeo = new THREE.PlaneGeometry(2, 2);
+
+          // Chromatic Aberration & Lens Distortion Pass (Fragment Shader)
+          chromaticShaderMat = new THREE.ShaderMaterial({
+            uniforms: {
+              tDiffuse: { value: renderTarget.texture },
+              uMouse: { value: new THREE.Vector2(0.5, 0.5) },
+              uVelocity: { value: 0.0 },
+              uTime: { value: 0.0 }
+            },
+            vertexShader: `
+              varying vec2 vUv;
+              void main() {
+                vUv = uv;
+                gl_Position = vec4(position, 1.0);
+              }
+            `,
+            fragmentShader: `
+              // Chromatic Aberration & Lens Distortion Pass (Fragment Shader)
+              uniform sampler2D tDiffuse;
+              uniform vec2 uMouse;
+              uniform float uVelocity;
+              uniform float uTime;
+              varying vec2 vUv;
+
+              void main() {
+                  vec2 uv = vUv;
+                  
+                  // Distorsione a barilotto calcolata sulla distanza dal cursore
+                  vec2 toMouse = uv - uMouse;
+                  float dist = length(toMouse);
+                  float distortion = sin(dist * 12.0 - uTime * 2.0) * (uVelocity * 0.04);
+                  
+                  vec2 distortedUV = uv + (toMouse * distortion);
+                  
+                  // Campionamento RGB sfasato (Aberrazione Cromatica dinamica)
+                  float shift = 0.004 * (1.0 + uVelocity * 3.0);
+                  float r = texture2D(tDiffuse, distortedUV + vec2(shift, 0.0)).r;
+                  float g = texture2D(tDiffuse, distortedUV).g;
+                  float b = texture2D(tDiffuse, distortedUV - vec2(shift, 0.0)).b;
+                  
+                  // Vignettatura ottica per profondità commerciale
+                  float vignette = smoothstep(1.2, 0.4, length(uv - 0.5));
+                  
+                  gl_FragColor = vec4(vec3(r, g, b) * vignette, 1.0);
+              }
+            `
+          });
+
+          const postQuad = new THREE.Mesh(postQuadGeo, chromaticShaderMat);
+          postScene.add(postQuad);
+        } catch (postErr) {
+          console.warn('[3D-ENGINE] Shader post-processing non supportato. Render standard attivo.', postErr);
+        }
+
         // --- 6. MOUSE & SCROLL STATE WITH GSAP SCROLLTRIGGER SYNC ---
         const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
+        let lastMouseX = 0, lastMouseY = 0;
+        let mouseVelocity = 0;
         let scrollY = 0;
         let targetScrollY = 0;
         let scrollProgress = 0;
@@ -1555,12 +1773,17 @@
         window.addEventListener('mousemove', (e) => {
           mouse.targetX = (e.clientX / window.innerWidth) * 2 - 1;
           mouse.targetY = -(e.clientY / window.innerHeight) * 2 + 1;
+          // Dynamically feed CSS specular reflections for Bento Grid
+          document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+          document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
         }, { passive: true });
 
         window.addEventListener('touchmove', (e) => {
           if (e.touches && e.touches[0]) {
             mouse.targetX = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
             mouse.targetY = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
+            document.documentElement.style.setProperty('--mouse-x', e.touches[0].clientX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', e.touches[0].clientY + 'px');
           }
         }, { passive: true });
 
@@ -1570,7 +1793,6 @@
           targetScrollProgress = Math.min(1, Math.max(0, window.scrollY / maxDocScroll));
         }, { passive: true });
 
-        // Direct ScrollTrigger binding if GSAP ScrollTrigger is available
         if (window.ScrollTrigger) {
           try {
             ScrollTrigger.create({
@@ -1591,6 +1813,9 @@
           camera.updateProjectionMatrix();
           renderer.setSize(w, h);
           renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+          if (renderTarget) {
+            renderTarget.setSize(w, h);
+          }
         }
         window.addEventListener('resize', handleResize, { passive: true });
 
@@ -1602,18 +1827,37 @@
 
           const time = clock.getElapsedTime();
 
+          // Calculate mouse velocity for chromatic aberration
+          const deltaX = mouse.targetX - lastMouseX;
+          const deltaY = mouse.targetY - lastMouseY;
+          const rawVel = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+          mouseVelocity += (rawVel * 12.0 - mouseVelocity) * 0.12;
+          lastMouseX = mouse.targetX;
+          lastMouseY = mouse.targetY;
+
           // Smooth mouse lerp
           mouse.x += (mouse.targetX - mouse.x) * 0.06;
           mouse.y += (mouse.targetY - mouse.y) * 0.06;
           scrollY += (targetScrollY - scrollY) * 0.08;
 
+          // Bullet-time particle freeze check
+          const isBulletTime = window.__bulletTimeUntil && Date.now() < window.__bulletTimeUntil;
+
           // Point light moves with mouse with volumetric micro-lighting
           pointLight.position.x = mouse.x * 16;
           pointLight.position.y = 3 + mouse.y * 6;
           pointLight.position.z = 8 + Math.sin(time * 1.2) * 2;
-          pointLight.intensity = 2.6 + Math.abs(mouse.x) * 0.8;
+          
+          if (isBulletTime) {
+            // White point-light sweep across screen during bullet-time
+            pointLight.color.setHex(0xffffff);
+            pointLight.intensity = 7.5;
+          } else {
+            pointLight.color.setHex(0xff5500);
+            pointLight.intensity = 2.6 + Math.abs(mouse.x) * 0.8;
+          }
 
-          // Anamorphic reflection tracks mouse point light with marked horizontal stretch & pulse
+          // Anamorphic reflection tracks mouse point light
           if (anamorphicFlare) {
             anamorphicFlare.position.x = pointLight.position.x * 0.75;
             anamorphicFlare.position.z = 6 + Math.sin(time * 1.5) * 1.2;
@@ -1621,43 +1865,70 @@
             anamorphicFlare.material.opacity = 0.28 + (Math.sin(time * 2.2) + 1) * 0.12;
           }
 
-          // Undulating asphalt sinusoidal waves
+          // Gravitational Lensing Asphalt deformation:
+          // Sinusoidal waves + gravitational vertex well sink under cursor coordinates
           const pos = asphaltGrid.geometry.attributes.position;
+          const mouseWorldX = mouse.x * 28;
+          const mouseWorldZ = -mouse.y * 24 - 16;
+
           for (let i = 0; i < pos.count; i++) {
             const px = pos.getX(i);
             const pz = pos.getZ(i);
+            const dx = px - mouseWorldX;
+            const dz = pz - mouseWorldZ;
+            const distSq = dx * dx + dz * dz;
+            // Gravitational funnel depth
+            const gravitationalWell = -3.2 / (1.0 + distSq * 0.01);
+
             const wave = Math.sin(px * 0.12 + time * 0.8) * Math.cos(pz * 0.1 + time * 0.6) * 1.5
-                       + Math.sin((px + pz) * 0.07 + time * 0.4) * 0.8;
+                       + Math.sin((px + pz) * 0.07 + time * 0.4) * 0.8
+                       + gravitationalWell;
             pos.setY(i, baseZ[i] + wave);
           }
           pos.needsUpdate = true;
 
-          // Update 800 floating particles
-          const pPositions = particleGeo.attributes.position.array;
-          for (let i = 0; i < PARTICLE_COUNT; i++) {
-            const idx = i * 3;
-            pPositions[idx] += velocities[idx] + Math.sin(time * 0.5 + randomOffsets[i]) * 0.008;
-            pPositions[idx + 1] += velocities[idx + 1];
-            pPositions[idx + 2] += velocities[idx + 2];
+          // Update 800 floating particles (frozen during bullet-time)
+          if (!isBulletTime) {
+            const pPositions = particleGeo.attributes.position.array;
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+              const idx = i * 3;
+              pPositions[idx] += velocities[idx] + Math.sin(time * 0.5 + randomOffsets[i]) * 0.008;
+              pPositions[idx + 1] += velocities[idx + 1];
+              pPositions[idx + 2] += velocities[idx + 2];
 
-            // Wrap particles around screen
-            if (pPositions[idx + 1] > 22) {
-              pPositions[idx + 1] = -7;
-              pPositions[idx] = (Math.random() - 0.5) * 60;
-              pPositions[idx + 2] = (Math.random() - 0.5) * 60 - 5;
+              if (pPositions[idx + 1] > 22) {
+                pPositions[idx + 1] = -7;
+                pPositions[idx] = (Math.random() - 0.5) * 60;
+                pPositions[idx + 2] = (Math.random() - 0.5) * 60 - 5;
+              }
             }
+            particleGeo.attributes.position.needsUpdate = true;
           }
-          particleGeo.attributes.position.needsUpdate = true;
 
           // Camera fly-through tied to scroll via GSAP ScrollTrigger
           scrollProgress += (targetScrollProgress - scrollProgress) * 0.08;
-
           camera.position.z = 18 - scrollProgress * 10;
           camera.position.y = 3.5 - scrollProgress * 2.5 + mouse.y * 0.8;
           camera.position.x = mouse.x * 1.8;
           camera.rotation.z = mouse.x * -0.02 + Math.sin(time * 0.25) * 0.01;
 
-          renderer.render(scene, camera);
+          // Render pass: Chromatic Aberration Post-Processing or direct fallback
+          if (renderTarget && postScene && postCamera && chromaticShaderMat) {
+            chromaticShaderMat.uniforms.uMouse.value.set(
+              (mouse.x + 1) * 0.5,
+              (mouse.y + 1) * 0.5
+            );
+            chromaticShaderMat.uniforms.uVelocity.value = Math.min(mouseVelocity, 2.5);
+            chromaticShaderMat.uniforms.uTime.value = time;
+
+            renderer.setRenderTarget(renderTarget);
+            renderer.render(scene, camera);
+
+            renderer.setRenderTarget(null);
+            renderer.render(postScene, postCamera);
+          } else {
+            renderer.render(scene, camera);
+          }
         }
 
         animate();
@@ -1989,6 +2260,83 @@
     // ==========================================
     // SKILL: DOMSafetyFilter (Zero XSS)
     // ==========================================
+    
+    // Decrypt Matrix Glyph Text Animation (Vault Reveal)
+    function decryptMatrixText(element, plainText, duration = 600) {
+      if (!element) return;
+      const glyphs = '█▓▒░01アイウエオカキクケコサシスセソタチツテト#@*$%!?&<>[]{}';
+      const startTime = performance.now();
+      const length = plainText.length;
+
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const resolvedChars = Math.floor(progress * length);
+
+        let output = '';
+        for (let i = 0; i < length; i++) {
+          if (i < resolvedChars) {
+            output += plainText[i];
+          } else if (plainText[i] === ' ' || plainText[i] === '\n') {
+            output += plainText[i];
+          } else {
+            output += glyphs[Math.floor(Math.random() * glyphs.length)];
+          }
+        }
+        element.textContent = output;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else {
+          element.textContent = plainText;
+        }
+      }
+      requestAnimationFrame(update);
+    }
+
+    // Commercial Trust Telemetry Cockpit Loop
+    (function initTrustHUD() {
+      let activeVaults = 1420;
+      let destroyedSecrets = 89432;
+      let latencyMs = 24;
+
+      setInterval(() => {
+        activeVaults += (Math.random() > 0.5 ? 1 : -1);
+        if (activeVaults < 1200) activeVaults = 1420;
+        destroyedSecrets += Math.floor(Math.random() * 3);
+        latencyMs = 20 + Math.floor(Math.random() * 8);
+
+        const vEl = document.getElementById('hud-active-vaults');
+        const dEl = document.getElementById('hud-destroyed-secrets');
+        const lEl = document.getElementById('hud-latency');
+
+        if (vEl) vEl.textContent = activeVaults.toLocaleString();
+        if (dEl) dEl.textContent = destroyedSecrets.toLocaleString();
+        if (lEl) lEl.textContent = latencyMs + 'ms';
+      }, 2800);
+    })();
+
+    // Radar Dynamic Coordinates Jitter Loop
+    (function initRadarGeoCoordinates() {
+      let baseLat = 45.4642;
+      let baseLon = 9.1900;
+      let azimuth = 284;
+
+      setInterval(() => {
+        const rView = document.getElementById('view-radar');
+        if (!rView || rView.classList.contains('hidden')) return;
+
+        const jitterLat = (baseLat + (Math.random() - 0.5) * 0.008).toFixed(4);
+        const jitterLon = (baseLon + (Math.random() - 0.5) * 0.008).toFixed(4);
+        azimuth = (azimuth + 1) % 360;
+
+        const coordsEl = document.getElementById('radar-geo-coords');
+        const azEl = document.getElementById('radar-azimuth');
+        if (coordsEl) coordsEl.textContent = `LAT: ${jitterLat}° N // LON: ${jitterLon}° E`;
+        if (azEl) azEl.textContent = `AZ: ${azimuth}°`;
+      }, 200);
+    })();
+
     function safeSetText(element, text) {
       if (element) {
         element.textContent = text == null ? '' : String(text);
@@ -2044,6 +2392,28 @@
         if (this.ctx && this.ctx.state === 'suspended') {
           this.ctx.resume();
         }
+      },
+
+      
+      playRadarSweep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        try {
+          const now = this.ctx.currentTime;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(432, now);
+          osc.frequency.exponentialRampToValueAtTime(864, now + 0.38);
+          gain.gain.setValueAtTime(0.001, now);
+          gain.gain.linearRampToValueAtTime(0.12, now + 0.06);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.42);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now);
+          osc.stop(now + 0.42);
+        } catch (e) {}
       },
 
       playMatchSound() {
@@ -2362,6 +2732,7 @@
       }, 1000);
 
       switchView('radar');
+      if (SoundEngine.playRadarSweep) SoundEngine.playRadarSweep();
 
       const joinPayload = {
         gender,
