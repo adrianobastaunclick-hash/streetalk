@@ -1606,6 +1606,7 @@
     let radarInterval = null;
     let typingTimeout = null;
     let isTyping = false;
+    let pendingQueueJoin = null;
 
     // Dynamic Server URL: localhost/127.0.0.1 fallback to local port, otherwise live Render endpoint
     const SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
@@ -1622,14 +1623,28 @@
         socket = io(targetServer, {
           transports: ["websocket", "polling"],
           secure: true,
-          reconnectionAttempts: 5
+          reconnection: true,
+          reconnectionDelay: 1000,
+          reconnectionDelayMax: 5000
         });
         socket.on('connect', () => {
           isSocketConnected = true;
           console.log('[STREETALK] Connesso al server realtime:', targetServer);
+          if (pendingQueueJoin) {
+            safeSetText(document.getElementById('radar-status-text'), `In cerca di un partner sul mood [${pendingQueueJoin.mood}]...`);
+            socket.emit('join_queue', pendingQueueJoin);
+            pendingQueueJoin = null;
+          }
         });
         socket.on('disconnect', () => {
           isSocketConnected = false;
+          console.log('[STREETALK] Disconnesso dal server realtime');
+        });
+        socket.on('connect_error', (err) => {
+          console.warn('[STREETALK] Connessione in corso o risveglio server Render...', err && err.message);
+          if (pendingQueueJoin) {
+            safeSetText(document.getElementById('radar-status-text'), 'Risveglio del server cloud in corso (~30s)...');
+          }
         });
       }
     } catch (e) {
@@ -1993,18 +2008,25 @@
 
       switchView('radar');
 
+      const joinPayload = {
+        gender,
+        targetGender,
+        mood: selectedMood,
+        secret: mySecret
+      };
+
       if (socket && socket.connected) {
-        socket.emit('join_queue', {
-          gender,
-          targetGender,
-          mood: selectedMood,
-          secret: mySecret
-        });
+        pendingQueueJoin = null;
+        socket.emit('join_queue', joinPayload);
+      } else {
+        pendingQueueJoin = joinPayload;
+        safeSetText(document.getElementById('radar-status-text'), 'Connessione al server in corso (risveglio cloud)...');
       }
     }
 
     function cancelRadarSearch() {
       clearInterval(radarInterval);
+      pendingQueueJoin = null;
       if (socket && socket.connected) {
         socket.emit('leave_queue');
       }
@@ -2014,6 +2036,7 @@
     function backToLanding() {
       clearInterval(radarInterval);
       clearInterval(countdownInterval);
+      pendingQueueJoin = null;
       document.getElementById('modal-ended').classList.add('hidden');
       closeReportModal();
       closeSocialCardModal();

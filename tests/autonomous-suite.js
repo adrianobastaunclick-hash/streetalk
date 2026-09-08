@@ -218,6 +218,33 @@ async function runAutonomousSuite() {
       fail('safeSetText / textContent missing in frontend');
     }
 
+    // Verify frontend live Render endpoint and Socket.io client configuration
+    if (indexHtml.includes('https://streetalk-server.onrender.com') &&
+        indexHtml.includes('transports: ["websocket", "polling"]') &&
+        indexHtml.includes('secure: true')) {
+      pass('Frontend dynamically connects to live Render endpoint (https://streetalk-server.onrender.com) with secure websocket+polling');
+    } else {
+      fail('Frontend live Render endpoint or websocket configuration missing/invalid');
+    }
+
+    // Verify Vercel routing configuration preserves static assets
+    const vercelConfig = JSON.parse(fs.readFileSync(path.join(__dirname, '../vercel.json'), 'utf8'));
+    const hasSwRewrite = vercelConfig.rewrites && vercelConfig.rewrites.some(r => r.source === '/sw.js');
+    const hasManifestRewrite = vercelConfig.rewrites && vercelConfig.rewrites.some(r => r.source === '/manifest.json');
+    if (hasSwRewrite && hasManifestRewrite) {
+      pass('Vercel configuration preserves static routes for /sw.js and /manifest.json without text/html rewrite collision');
+    } else {
+      fail('Vercel configuration missing explicit static rewrites for sw.js or manifest.json');
+    }
+
+    // Verify Render blueprint configuration
+    const renderYaml = fs.readFileSync(path.join(__dirname, '../render.yaml'), 'utf8');
+    if (renderYaml.includes('SUPABASE_URL') && renderYaml.includes('SUPABASE_SERVICE_ROLE_KEY')) {
+      pass('Render blueprint (render.yaml) specifies SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY environment variables');
+    } else {
+      fail('Render blueprint missing Supabase cloud environment variables');
+    }
+
     // ----------------------------------------------------
     // TEST 4: Skill AudioSynthesisEngine (Zero MP3 Dependencies)
     // ----------------------------------------------------

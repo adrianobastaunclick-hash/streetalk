@@ -2,5 +2,9 @@
   "version": 2,
   "public": true,
   "cleanUrls": true,
-  "rewrites": [{ "source": "/(.*)", "destination": "/public/index.html" }]
+  "rewrites": [
+    { "source": "/sw.js", "destination": "/public/sw.js" },
+    { "source": "/manifest.json", "destination": "/public/manifest.json" },
+    { "source": "/(.*)", "destination": "/public/index.html" }
+  ]
 }
