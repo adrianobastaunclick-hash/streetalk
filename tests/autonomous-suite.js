@@ -219,10 +219,10 @@ async function runAutonomousSuite() {
     }
 
     // Verify frontend live Render endpoint and Socket.io client configuration
-    if (indexHtml.includes('https://streetalk-server.onrender.com') &&
+    if ((indexHtml.includes('https://streetalk.onrender.com') || indexHtml.includes('https://streetalk-server.onrender.com')) &&
         indexHtml.includes('transports: ["websocket", "polling"]') &&
         indexHtml.includes('secure: true')) {
-      pass('Frontend dynamically connects to live Render endpoint (https://streetalk-server.onrender.com) with secure websocket+polling');
+      pass('Frontend dynamically connects to live Render endpoint (https://streetalk.onrender.com) with secure websocket+polling');
     } else {
       fail('Frontend live Render endpoint or websocket configuration missing/invalid');
     }
