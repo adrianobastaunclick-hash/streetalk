@@ -188,6 +188,20 @@ function isIpJailed(ip) {
   return false;
 }
 
+function cleanupExpiredIpJail() {
+  const now = Date.now();
+  for (const [ip, unjailAt] of ipJail.entries()) {
+    if (now >= unjailAt) {
+      ipJail.delete(ip);
+      reportCounts.delete(ip);
+    }
+  }
+}
+const ipJailSweeper = setInterval(cleanupExpiredIpJail, 30000);
+if (ipJailSweeper && ipJailSweeper.unref) {
+  ipJailSweeper.unref();
+}
+
 // Rate limiter & IP Jail helper
 function checkRateLimit(socket) {
   const socketId = socket.id;
@@ -257,6 +271,8 @@ function findMatch(newCandidate) {
     // Prune stale / disconnected socket from memory queue
     if (io && io.sockets && io.sockets.sockets && !io.sockets.sockets.has(waiter.socketId)) {
       moodQueue.splice(i, 1);
+      users.delete(waiter.socketId);
+      rateLimits.delete(waiter.socketId);
       i--;
       continue;
     }
@@ -304,16 +320,24 @@ function createRoom(userA, userB) {
 
   // If one socket disconnected right before creation, avoid zombie rooms
   if (!sockA && sockB) {
+    users.delete(userA.socketId);
+    rateLimits.delete(userA.socketId);
     const bQueue = getMoodQueue(userB.mood);
     bQueue.unshift(userB);
     return null;
   }
   if (!sockB && sockA) {
+    users.delete(userB.socketId);
+    rateLimits.delete(userB.socketId);
     const aQueue = getMoodQueue(userA.mood);
     aQueue.unshift(userA);
     return null;
   }
   if (!sockA && !sockB) {
+    users.delete(userA.socketId);
+    users.delete(userB.socketId);
+    rateLimits.delete(userA.socketId);
+    rateLimits.delete(userB.socketId);
     return null;
   }
 
@@ -359,6 +383,11 @@ function createRoom(userA, userB) {
     if (room.timeRemaining <= 0) {
       io.to(roomId).emit('chat_ended', { reason: 'time_expired' });
       destroyRoom(roomId, 'time_expired');
+      io.emit('online_stats', {
+        onlineCount: simulatedBaseOnline + users.size,
+        inQueue: queue.length,
+        activeChats: rooms.size
+      });
     }
   }, 1000);
 

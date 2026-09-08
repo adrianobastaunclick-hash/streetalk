@@ -1605,7 +1605,11 @@
     // Connect to Socket.io if available
     try {
       if (typeof io !== 'undefined') {
-        socket = io({ reconnectionAttempts: 5 });
+        const urlParams = new URLSearchParams(window.location.search);
+        const customServer = urlParams.get('server')
+          || (window.STREETALK_CONFIG && window.STREETALK_CONFIG.SERVER_URL)
+          || (window.location.hostname.includes('vercel.app') ? 'https://streetalk-server.onrender.com' : undefined);
+        socket = customServer ? io(customServer, { reconnectionAttempts: 5 }) : io({ reconnectionAttempts: 5 });
         socket.on('connect', () => {
           isSocketConnected = true;
           console.log('[STREETALK] Connesso al server realtime.');
