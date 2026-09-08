@@ -16,9 +16,15 @@ try {
   const out3 = execSync('git add .', { cwd: projectRoot, encoding: 'utf8' });
   console.log(out3.trim());
 
-  console.log('Committing...');
-  const out4 = execSync('git commit -m "feat: streetalk 3d webgl engine + zero-cost cloud deployment ready"', { cwd: projectRoot, encoding: 'utf8' });
-  console.log(out4.trim());
+  console.log('Checking status...');
+  const status = execSync('git status --porcelain', { cwd: projectRoot, encoding: 'utf8' });
+  if (status.trim().length > 0) {
+    console.log('Committing...');
+    const out4 = execSync('git commit -m "feat: streetalk 3d webgl engine + zero-cost cloud deployment ready"', { cwd: projectRoot, encoding: 'utf8' });
+    console.log(out4.trim());
+  } else {
+    console.log('Working tree clean.');
+  }
 
   console.log('>>> [GIT BOOTSTRAPPER COMPLETE] Repository initialized and committed on main.');
 } catch (e) {

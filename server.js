@@ -167,6 +167,8 @@ function validateMessagePayload(payload) {
 
 // IP Extraction helper
 function getClientIp(socket) {
+  const cf = socket.handshake.headers['cf-connecting-ip'];
+  if (cf) return cf.trim();
   const forwarded = socket.handshake.headers['x-forwarded-for'];
   if (forwarded) {
     return forwarded.split(',')[0].trim();
@@ -182,6 +184,7 @@ function isIpJailed(ip) {
     return true;
   }
   ipJail.delete(ip);
+  reportCounts.delete(ip);
   return false;
 }
 
@@ -251,6 +254,13 @@ function findMatch(newCandidate) {
     // Ensure not self
     if (waiter.socketId === newCandidate.socketId) continue;
 
+    // Prune stale / disconnected socket from memory queue
+    if (io && io.sockets && io.sockets.sockets && !io.sockets.sockets.has(waiter.socketId)) {
+      moodQueue.splice(i, 1);
+      i--;
+      continue;
+    }
+
     // Gender compatibility:
     // candidate matches waiter's target AND waiter matches candidate's target
     const candMatchesWaiter = waiter.targetGender === 'Tutti' || waiter.targetGender === newCandidate.gender;
@@ -289,6 +299,24 @@ const MATCH_INITIAL_TIMER_SEC = 180; // 3 minutes
 const EXTENSION_TIME_SEC = 300;       // +5 minutes
 
 function createRoom(userA, userB) {
+  const sockA = io.sockets.sockets.get(userA.socketId);
+  const sockB = io.sockets.sockets.get(userB.socketId);
+
+  // If one socket disconnected right before creation, avoid zombie rooms
+  if (!sockA && sockB) {
+    const bQueue = getMoodQueue(userB.mood);
+    bQueue.unshift(userB);
+    return null;
+  }
+  if (!sockB && sockA) {
+    const aQueue = getMoodQueue(userA.mood);
+    aQueue.unshift(userA);
+    return null;
+  }
+  if (!sockA && !sockB) {
+    return null;
+  }
+
   const roomId = 'street_' + crypto.randomUUID().substring(0, 8);
 
   const room = {
@@ -316,9 +344,6 @@ function createRoom(userA, userB) {
   if (userBRecord) userBRecord.roomId = roomId;
 
   // Join socket rooms
-  const sockA = io.sockets.sockets.get(userA.socketId);
-  const sockB = io.sockets.sockets.get(userB.socketId);
-
   if (sockA) sockA.join(roomId);
   if (sockB) sockB.join(roomId);
 
@@ -397,15 +422,15 @@ function destroyRoom(roomId, reason = 'terminated') {
 
   if (sock1) {
     sock1.leave(roomId);
-    const u1 = users.get(room.user1);
-    if (u1 && u1.roomId === roomId) u1.roomId = null;
   }
+  const u1 = users.get(room.user1);
+  if (u1 && u1.roomId === roomId) u1.roomId = null;
 
   if (sock2) {
     sock2.leave(roomId);
-    const u2 = users.get(room.user2);
-    if (u2 && u2.roomId === roomId) u2.roomId = null;
   }
+  const u2 = users.get(room.user2);
+  if (u2 && u2.roomId === roomId) u2.roomId = null;
 
   room.extensions.clear();
   rooms.delete(roomId);
@@ -726,6 +751,7 @@ app.get('/api/stats', (req, res) => {
     queueCount: queue.length,
     rateLimitsCount: rateLimits.size,
     jailedIpsCount: ipJail.size,
+    reportCountsCount: reportCounts.size,
     memory: {
       rssMb: +(mem.rss / (1024 * 1024)).toFixed(2),
       heapTotalMb: +(mem.heapTotal / (1024 * 1024)).toFixed(2),

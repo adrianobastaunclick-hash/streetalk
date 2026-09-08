@@ -119,49 +119,73 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS v4 CDN & Browser Runtime -->
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-street-asphalt: #0a0b0e;
+      --color-street-concrete: #12151c;
+      --color-street-surface: rgba(18, 21, 28, 0.88);
+      --color-street-card: #161922;
+      --color-street-zinc: #1c222d;
+      --color-street-border: #262c3d;
+      --color-street-borderGlow: rgba(255, 85, 0, 0.3);
+      --color-street-orange: #ff5500;
+      --color-street-orangeHover: #ff6a00;
+      --color-street-orangeGlow: rgba(255, 85, 0, 0.45);
+      --color-street-cement: #94a3b8;
+      --color-street-steel: #8b949e;
+      --font-street: 'Syne', sans-serif;
+      --font-sans: 'Plus Jakarta Sans', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+  </style>
+
+  <!-- Tailwind CSS Fallback Compatibility Engine -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            street: {
-              asphalt: '#0a0b0e',
-              concrete: '#12151c',
-              surface: 'rgba(18, 21, 28, 0.88)',
-              card: '#161922',
-              zinc: '#1c222d',
-              border: '#262c3d',
-              borderGlow: 'rgba(255, 85, 0, 0.3)',
-              orange: '#ff5500',
-              orangeHover: '#ff6a00',
-              orangeGlow: 'rgba(255, 85, 0, 0.45)',
-              cement: '#94a3b8',
-              steel: '#8b949e'
-            }
-          },
-          fontFamily: {
-            street: ['Syne', 'sans-serif'],
-            sans: ['Plus Jakarta Sans', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          },
-          animation: {
-            'radar-pulse': 'radarPulse 2.8s cubic-bezier(0, 0, 0.2, 1) infinite',
-            'radar-sweep': 'radarSweep 3.6s linear infinite'
-          },
-          keyframes: {
-            radarPulse: {
-              '0%': { transform: 'scale(0.35)', opacity: '0.9' },
-              '100%': { transform: 'scale(2.2)', opacity: '0' }
+    if (window.tailwind) {
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              street: {
+                asphalt: '#0a0b0e',
+                concrete: '#12151c',
+                surface: 'rgba(18, 21, 28, 0.88)',
+                card: '#161922',
+                zinc: '#1c222d',
+                border: '#262c3d',
+                borderGlow: 'rgba(255, 85, 0, 0.3)',
+                orange: '#ff5500',
+                orangeHover: '#ff6a00',
+                orangeGlow: 'rgba(255, 85, 0, 0.45)',
+                cement: '#94a3b8',
+                steel: '#8b949e'
+              }
             },
-            radarSweep: {
-              '0%': { transform: 'rotate(0deg)' },
-              '100%': { transform: 'rotate(360deg)' }
+            fontFamily: {
+              street: ['Syne', 'sans-serif'],
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+              mono: ['JetBrains Mono', 'monospace']
+            },
+            animation: {
+              'radar-pulse': 'radarPulse 2.8s cubic-bezier(0, 0, 0.2, 1) infinite',
+              'radar-sweep': 'radarSweep 3.6s linear infinite'
+            },
+            keyframes: {
+              radarPulse: {
+                '0%': { transform: 'scale(0.35)', opacity: '0.9' },
+                '100%': { transform: 'scale(2.2)', opacity: '0' }
+              },
+              radarSweep: {
+                '0%': { transform: 'rotate(0deg)' },
+                '100%': { transform: 'rotate(360deg)' }
+              }
             }
           }
         }
-      }
+      };
     }
   </script>
 
@@ -179,7 +203,7 @@
     }
 
     /* 3D WebGL Layer (z-0) */
-    #asphalt-canvas, #banana-canvas {
+    #asphalt-canvas {
       position: fixed;
       top: 0;
       left: 0;
@@ -269,7 +293,7 @@
   <!-- ======================================================== -->
   <!-- 3D WEBGL ENGINE & AMBIENT CANVAS (LAYER Z-0)              -->
   <!-- ======================================================== -->
-  <canvas id="asphalt-canvas" data-alias="banana-canvas" aria-hidden="true"></canvas>
+  <canvas id="asphalt-canvas" aria-hidden="true"></canvas>
   <div class="street-noise" aria-hidden="true"></div>
 
   <!-- ======================================================== -->
@@ -1098,7 +1122,7 @@
   <!-- ======================================================== -->
   <script>
     (function init3DWebGLBackground() {
-      const canvas = document.getElementById('asphalt-canvas') || document.getElementById('banana-canvas');
+      const canvas = document.getElementById('asphalt-canvas');
       if (!canvas) return;
 
       // Check WebGL availability with graceful 2D fallback
@@ -1213,6 +1237,20 @@
         const particleSystem = new THREE.Points(particleGeo, particleMat);
         scene.add(particleSystem);
 
+        // --- 5B. ANAMORPHIC REFLECTIONS (HORIZONTAL LENS STREAK & SUBTERRANEAN GLOW) ---
+        const flareGeo = new THREE.PlaneGeometry(36, 0.4);
+        const flareMat = new THREE.MeshBasicMaterial({
+          color: 0xff5500,
+          transparent: true,
+          opacity: 0.35,
+          blending: THREE.AdditiveBlending,
+          side: THREE.DoubleSide
+        });
+        const anamorphicFlare = new THREE.Mesh(flareGeo, flareMat);
+        anamorphicFlare.position.set(0, -4.8, 6);
+        anamorphicFlare.rotation.x = -Math.PI / 2.8;
+        scene.add(anamorphicFlare);
+
         // --- 6. MOUSE & SCROLL STATE ---
         const mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
         let scrollY = 0;
@@ -1261,6 +1299,14 @@
           pointLight.position.x = mouse.x * 16;
           pointLight.position.y = 3 + mouse.y * 6;
           pointLight.position.z = 8 + Math.sin(time * 1.2) * 2;
+
+          // Anamorphic reflection tracks mouse point light with horizontal stretch & pulse
+          if (anamorphicFlare) {
+            anamorphicFlare.position.x = pointLight.position.x * 0.75;
+            anamorphicFlare.position.z = 6 + Math.sin(time * 1.5) * 1.2;
+            anamorphicFlare.scale.x = 1.0 + Math.abs(mouse.x) * 0.45;
+            anamorphicFlare.material.opacity = 0.22 + (Math.sin(time * 2.2) + 1) * 0.08;
+          }
 
           // Undulating asphalt sinusoidal waves
           const pos = asphaltGrid.geometry.attributes.position;
@@ -1449,7 +1495,7 @@
   <!-- ======================================================== -->
   <script>
     (function init3DTiltAndGSAP() {
-      // 1. 3D Tilt Effect on cards
+      // 1. 3D Tilt Effect on cards (Cursor & Gyroscope support)
       function setupTilt(el, maxAngle = 6) {
         if (!el) return;
         el.addEventListener('mousemove', (e) => {
@@ -1465,9 +1511,21 @@
         el.addEventListener('mouseleave', () => {
           el.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
         });
+
+        // Gyroscope tilt support for mobile devices
+        if (window.DeviceOrientationEvent) {
+          window.addEventListener('deviceorientation', (e) => {
+            if (e.gamma == null || e.beta == null) return;
+            const normX = Math.max(-1, Math.min(1, e.gamma / 30));
+            const normY = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
+            const rotY = normX * maxAngle;
+            const rotX = -normY * maxAngle;
+            el.style.transform = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) scale3d(1.01, 1.01, 1.01)`;
+          }, { passive: true });
+        }
       }
 
-      // Apply 3D Tilt to entry gate and rule cards
+      // Apply 3D Tilt to entry gate, rule cards, and secret card
       const entryCard = document.getElementById('entry-card');
       if (entryCard) setupTilt(entryCard, 6);
 
@@ -1475,13 +1533,51 @@
         setupTilt(card, 7);
       });
 
-      // 2. GSAP Entrance Stagger
+      const partnerSecretCard = document.getElementById('partner-secret-card');
+      if (partnerSecretCard) setupTilt(partnerSecretCard, 5);
+
+      // 2. GSAP Entrance Stagger & ScrollTrigger Animations
       if (window.gsap) {
         try {
+          if (window.ScrollTrigger) {
+            gsap.registerPlugin(ScrollTrigger);
+          }
+
           gsap.from('#hero-tag', { opacity: 0, y: -20, duration: 0.8, ease: 'power3.out' });
           gsap.from('#hero-title', { opacity: 0, y: 30, duration: 1.0, delay: 0.15, ease: 'power3.out' });
           gsap.from('#hero-subtitle', { opacity: 0, y: 20, duration: 0.9, delay: 0.3, ease: 'power3.out' });
           gsap.from('#entry-card', { opacity: 0, scale: 0.95, y: 35, duration: 1.1, delay: 0.45, ease: 'back.out(1.4)' });
+
+          if (window.ScrollTrigger) {
+            gsap.utils.toArray('.rule-card').forEach((card, idx) => {
+              gsap.from(card, {
+                scrollTrigger: {
+                  trigger: card,
+                  start: 'top 88%',
+                  toggleActions: 'play none none none'
+                },
+                opacity: 0,
+                y: 35,
+                duration: 0.75,
+                delay: idx * 0.1,
+                ease: 'power2.out'
+              });
+            });
+
+            gsap.utils.toArray('details').forEach((faq) => {
+              gsap.from(faq, {
+                scrollTrigger: {
+                  trigger: faq,
+                  start: 'top 92%',
+                  toggleActions: 'play none none none'
+                },
+                opacity: 0,
+                x: -25,
+                duration: 0.6,
+                ease: 'power2.out'
+              });
+            });
+          }
         } catch (e) {}
       }
     })();
@@ -1792,23 +1888,51 @@
       return { valid: true, text: trimmed };
     }
 
-    // View Switching
+    // View Switching with Cinematic GSAP Transition
     function switchView(viewName) {
       const vLanding = document.getElementById('view-landing');
       const vRadar = document.getElementById('view-radar');
       const vChat = document.getElementById('view-chat');
+      const views = { landing: vLanding, radar: vRadar, chat: vChat };
 
+      const targetView = views[viewName];
+      if (!targetView) return;
+
+      const currentActive = [vLanding, vRadar, vChat].find(v => !v.classList.contains('hidden'));
+
+      if (window.gsap && currentActive && currentActive !== targetView) {
+        gsap.to(currentActive, {
+          opacity: 0,
+          y: -15,
+          scale: 0.98,
+          duration: 0.22,
+          ease: 'power2.in',
+          onComplete: () => {
+            vLanding.classList.add('hidden');
+            vRadar.classList.add('hidden');
+            vChat.classList.add('hidden');
+            targetView.classList.remove('hidden');
+
+            if (viewName === 'landing') {
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+
+            gsap.fromTo(targetView,
+              { opacity: 0, y: 20, scale: 0.98 },
+              { opacity: 1, y: 0, scale: 1, duration: 0.35, ease: 'power3.out' }
+            );
+          }
+        });
+        return;
+      }
+
+      // Instant fallback
       vLanding.classList.add('hidden');
       vRadar.classList.add('hidden');
       vChat.classList.add('hidden');
-
+      targetView.classList.remove('hidden');
       if (viewName === 'landing') {
-        vLanding.classList.remove('hidden');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (viewName === 'radar') {
-        vRadar.classList.remove('hidden');
-      } else if (viewName === 'chat') {
-        vChat.classList.remove('hidden');
       }
     }
 
@@ -2452,11 +2576,24 @@
         switchView('chat');
         SoundEngine.playMatchSound();
 
-        // GSAP Stagger Reveal for Secrets in Chat
+        // Explosive GSAP Stagger Reveal for Secrets in Chat
         if (window.gsap) {
           try {
-            gsap.from('#chat-partner-secret-box', { opacity: 0, scale: 0.95, duration: 0.6, ease: 'power2.out' });
-            gsap.from('#chat-my-secret-text', { opacity: 0, scale: 0.95, duration: 0.6, delay: 0.15, ease: 'power2.out' });
+            const secretTl = gsap.timeline();
+            secretTl.fromTo('#partner-secret-card',
+              { scale: 0.85, opacity: 0, filter: 'drop-shadow(0 0 35px #ff5500)' },
+              { scale: 1, opacity: 1, filter: 'drop-shadow(0 0 8px rgba(255,85,0,0.25))', duration: 0.7, ease: 'elastic.out(1.1, 0.4)' }
+            );
+            secretTl.fromTo('#chat-partner-secret-box',
+              { opacity: 0, y: 12, scale: 0.95 },
+              { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'back.out(1.5)' },
+              '-=0.35'
+            );
+            secretTl.fromTo('#chat-my-secret-text',
+              { opacity: 0, y: 8 },
+              { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out' },
+              '-=0.2'
+            );
           } catch (e) {}
         }
 
