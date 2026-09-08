@@ -1114,8 +1114,13 @@
   <!-- TOAST NOTIFICATIONS -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- Socket.io client script -->
-  <script src="/socket.io/socket.io.js"></script>
+  <!-- Socket.io client script (CDN with local fallback) -->
+  <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+  <script>
+    if (typeof io === 'undefined') {
+      document.write('<script src="/socket.io/socket.io.js"><\/script>');
+    }
+  </script>
 
   <!-- ======================================================== -->
   <!-- 4. SKILL: ThreeWebGLRendererOptimizer & 3D SCENE BUILDER  -->
@@ -1602,24 +1607,33 @@
     let typingTimeout = null;
     let isTyping = false;
 
+    // Dynamic Server URL: localhost/127.0.0.1 fallback to local port, otherwise live Render endpoint
+    const SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}` : "http://localhost:3000")
+      : "https://streetalk-server.onrender.com";
+
     // Connect to Socket.io if available
     try {
       if (typeof io !== 'undefined') {
         const urlParams = new URLSearchParams(window.location.search);
-        const customServer = urlParams.get('server')
+        const targetServer = urlParams.get('server')
           || (window.STREETALK_CONFIG && window.STREETALK_CONFIG.SERVER_URL)
-          || (window.location.hostname.includes('vercel.app') ? 'https://streetalk-server.onrender.com' : undefined);
-        socket = customServer ? io(customServer, { reconnectionAttempts: 5 }) : io({ reconnectionAttempts: 5 });
+          || SERVER_URL;
+        socket = io(targetServer, {
+          transports: ["websocket", "polling"],
+          secure: true,
+          reconnectionAttempts: 5
+        });
         socket.on('connect', () => {
           isSocketConnected = true;
-          console.log('[STREETALK] Connesso al server realtime.');
+          console.log('[STREETALK] Connesso al server realtime:', targetServer);
         });
         socket.on('disconnect', () => {
           isSocketConnected = false;
         });
       }
     } catch (e) {
-      console.warn('[STREETALK] Modalità standalone attiva.');
+      console.warn('[STREETALK] Modalità standalone attiva.', e);
     }
 
     // ==========================================
