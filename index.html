@@ -2429,7 +2429,30 @@
   <!-- 5. CLIENT CONTROLLER & SOCKET PROTOCOL                   -->
   <!-- ======================================================== -->
   <script>
-    let socket = null;
+    if (typeof io === 'undefined') {
+      window.io = function() {
+        return {
+          connected: false,
+          on: function() { return this; },
+          emit: function() { return this; },
+          timeout: function() { return this; }
+        };
+      };
+    }
+
+    const SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+      ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}` : "http://localhost:3000")
+      : "https://streetalk.onrender.com";
+
+    const socket = io(SERVER_URL, {
+      transports: ["websocket", "polling"],
+      secure: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000
+    });
+    const targetServer = SERVER_URL;
+
     let isSocketConnected = false;
     let currentRoomId = null;
     let selectedMood = 'Cazzeggio';
@@ -2444,18 +2467,6 @@
     let typingTimeout = null;
     let isTyping = false;
     let pendingQueueJoin = null;
-
-    // Realtime destination is owned by this deployment, never by URL parameters.
-    function resolveRealtimeServer(location) {
-      const page = new URL(location.href);
-      if (['localhost', '127.0.0.1', '[::1]'].includes(page.hostname) &&
-          ['http:', 'https:'].includes(page.protocol)) {
-        return page.origin;
-      }
-      return 'https://streetalk.onrender.com';
-    }
-    const SERVER_URL = resolveRealtimeServer(window.location);
-    const targetServer = SERVER_URL;
     let pingGeneration = 0;
     let pingPending = false;
     let statsExpiryTimer = null;
@@ -2528,16 +2539,9 @@
       });
     }
 
-    // Connect to Socket.io if available.
+    // Connect to Socket.io event handlers.
     try {
-      if (typeof io !== 'undefined') {
-        socket = io(targetServer, {
-          transports: ["websocket", "polling"],
-          secure: true,
-          reconnection: true,
-          reconnectionDelay: 1000,
-          reconnectionDelayMax: 5000
-        });
+      if (socket && typeof socket.on === 'function') {
         socket.on('connect', () => {
           isSocketConnected = true;
           pingGeneration++;
