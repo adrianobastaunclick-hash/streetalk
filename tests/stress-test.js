@@ -1,25 +1,46 @@
+const { installOfflineTestEnvironment, startLocalServer, closeLocalServer, fetchLocalJson } = require('./local-test-runtime');
+installOfflineTestEnvironment();
+const { EventEmitter } = require('node:events');
 const ioClient = require('socket.io-client');
 const http = require('http');
-const { server } = require('../server.js');
+const fs = require('fs');
+const path = require('path');
+const serverModule = require('../server.js');
+const { server } = serverModule;
 
-const PORT = process.env.TEST_PORT || process.env.PORT || 3001;
-const SERVER_URL = process.env.SERVER_URL || `http://localhost:${PORT}`;
+let SERVER_URL;
+const EVENT_TIMEOUT_MS = Number(process.env.TEST_EVENT_TIMEOUT_MS) || 3000;
 
-function fetchStats() {
-  return new Promise((resolve, reject) => {
-    http.get(`${SERVER_URL}/api/stats`, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (e) {
-          reject(e);
-        }
-      });
-    }).on('error', reject);
+function withTimeout(promise, milliseconds, description) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(
+      `Timed out after ${milliseconds}ms waiting for ${description}`
+    )), milliseconds);
   });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
 }
+
+function waitForEvent(socket, event, description = `event "${event}"`, milliseconds = EVENT_TIMEOUT_MS) {
+  let handler;
+  const promise = new Promise((resolve) => {
+    handler = resolve;
+    socket.once(event, handler);
+  });
+  return withTimeout(promise, milliseconds, description)
+    .finally(() => socket.off(event, handler));
+}
+
+function waitForCondition(predicate, description) {
+  let interval;
+  const promise = new Promise((resolve) => {
+    interval = setInterval(() => predicate() && resolve(), 10);
+  });
+  return withTimeout(promise, EVENT_TIMEOUT_MS, description)
+    .finally(() => clearInterval(interval));
+}
+
+function fetchStats() { return fetchLocalJson(SERVER_URL, "/api/stats"); }
 
 function wait(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -32,26 +53,11 @@ async function runAllTests() {
 
   let totalErrors = 0;
   let assertionsPassed = 0;
+  const createdClients = new Set();
 
-  let serverStartedLocally = false;
-  let isAlreadyUp = false;
   try {
-    await fetchStats();
-    isAlreadyUp = true;
-    console.log(`[TEST-RUNNER] Connected to running server on ${SERVER_URL}\n`);
-  } catch (e) {
-    isAlreadyUp = false;
-  }
-
-  if (!isAlreadyUp && !server.listening) {
-    await new Promise((resolve) => {
-      server.listen(PORT, () => {
-        console.log(`[TEST-RUNNER] In-process server booted on port ${PORT}\n`);
-        serverStartedLocally = true;
-        resolve();
-      });
-    });
-  }
+  SERVER_URL = await startLocalServer(serverModule);
+  console.log('[TEST-RUNNER] Fresh isolated server: ' + SERVER_URL);
 
   function assert(condition, message) {
     if (condition) {
@@ -61,6 +67,22 @@ async function runAllTests() {
       console.error(`  [FAIL] ${message}`);
       totalErrors++;
     }
+  }
+
+  try {
+    const emitter = new EventEmitter();
+    const start = Date.now();
+    try {
+      await waitForEvent(emitter, 'missing_event', 'intentional missing_event diagnostic', 30);
+    } finally {
+      if (emitter.listenerCount('missing_event') !== 0 || Date.now() - start > 1000) throw new Error('Missing event cleanup or timing failed');
+    }
+    assert(false, 'Missing-event timeout test did not reject');
+  } catch (err) {
+    assert(
+      err.message.includes('intentional missing_event diagnostic') && err.message.includes('30ms'),
+      'Missing event rejects quickly with a descriptive timeout'
+    );
   }
 
   // ----------------------------------------------------
@@ -76,7 +98,7 @@ async function runAllTests() {
     console.log(`  [INFO] Baseline Heap Used: ${baselineStats.memory.heapUsedMb} MB\n`);
   } catch (err) {
     assert(false, `Failed to reach server at ${SERVER_URL}: ${err.message}`);
-    process.exit(1);
+    throw err;
   }
 
   // ----------------------------------------------------
@@ -84,15 +106,16 @@ async function runAllTests() {
   // ----------------------------------------------------
   console.log('--- TEST 2: Skill SocketContractValidator (Payload Validation) ---');
   const contractTester = ioClient(SERVER_URL, { reconnection: false });
+  createdClients.add(contractTester);
 
-  await new Promise((resolve) => {
+  await withTimeout(new Promise((resolve) => {
     contractTester.on('connect', () => {
       // Test A: Secret > 90 chars
       const overLongSecret = 'A'.repeat(91);
       contractTester.emit('join_queue', {
         gender: 'M',
         targetGender: 'Tutti',
-        mood: 'Confessioni',
+        mood: 'cazzeggio',
         secret: overLongSecret
       });
 
@@ -103,7 +126,7 @@ async function runAllTests() {
         contractTester.emit('join_queue', {
           gender: 'INVALID_GENDER',
           targetGender: 'Tutti',
-          mood: 'Confessioni',
+          mood: 'cazzeggio',
           secret: 'Valid secret'
         });
 
@@ -115,7 +138,7 @@ async function runAllTests() {
         });
       });
     });
-  });
+  }), EVENT_TIMEOUT_MS, 'contract-test client connection and validation events');
 
   // Wait until server has cleaned up contractTester
   for (let i = 0; i < 20; i++) {
@@ -153,11 +176,17 @@ async function runAllTests() {
     const hasExecutableTags = /<script|<img|<svg/i.test(sanitized);
     assert(!hasExecutableTags, `XSS Payload successfully neutralized: "${malicious.substring(0, 30)}..." -> "${sanitized.substring(0, 30)}..."`);
   }
+  // Static DOM-sink verification (separate from the socket integration check below).
+  const indexHtml = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+  assert(
+    indexHtml.includes('safeSetText') && indexHtml.includes('element.textContent'),
+    'Frontend static audit uses safeSetText / textContent for dynamic content'
+  );
   console.log('');
 
   // ----------------------------------------------------
   // TEST 4: MATCHMAKING DETERMINISM & LATENCY (<500ms)
-  // 10 ACCORDI / PAIRINGS (20 virtual clients concurrently)
+  // 10 ABBINAMENTI / PAIRINGS (20 virtual clients concurrently)
   // ----------------------------------------------------
   console.log('--- TEST 4: Concurrency Matchmaking (10 Pairings / 20 Clients) ---');
   const TOTAL_PAIRS = 10;
@@ -169,7 +198,7 @@ async function runAllTests() {
   for (let i = 0; i < TOTAL_CLIENTS; i++) {
     const pairIndex = Math.floor(i / 2);
     const isClientA = (i % 2 === 0);
-    const mood = pairIndex < 5 ? 'Confessioni' : 'Notturno';
+    const mood = pairIndex < 5 ? 'cazzeggio' : 'sfogati';
     const gender = isClientA ? 'M' : 'F';
     const targetGender = isClientA ? 'F' : 'M';
     const secret = `Secret_${i}_Pair_${pairIndex}_${Date.now()}`;
@@ -178,6 +207,7 @@ async function runAllTests() {
       reconnection: false,
       forceNew: true
     });
+    createdClients.add(client);
 
     client.meta = {
       id: i,
@@ -197,7 +227,11 @@ async function runAllTests() {
   }
 
   // Wait for all clients to connect
-  await Promise.all(clients.map(c => new Promise(res => c.on('connect', res))));
+  await withTimeout(
+    Promise.all(clients.map(c => waitForEvent(c, 'connect', `client ${c.meta.id} connection`))),
+    EVENT_TIMEOUT_MS,
+    'all stress-test client connections'
+  );
   console.log(`  [INFO] All ${TOTAL_CLIENTS} virtual socket clients connected.`);
 
   // Setup match_found listeners
@@ -235,7 +269,11 @@ async function runAllTests() {
     });
   });
 
-  const matchResults = await Promise.all(matchPromises);
+  const matchResults = await withTimeout(
+    Promise.all(matchPromises),
+    EVENT_TIMEOUT_MS,
+    'all clients to receive match_found'
+  );
   assert(roomsReceived.size === TOTAL_PAIRS, `Exactly ${TOTAL_PAIRS} unique rooms created (actual: ${roomsReceived.size})`);
 
   // Verify latencies < 500ms
@@ -292,7 +330,7 @@ async function runAllTests() {
   }
 
   // Wait for all messages to be delivered
-  await wait(500);
+  await waitForCondition(() => totalMessagesReceived === 100, '100 receive_message deliveries');
 
   // Assertions
   assert(totalMessagesEmitted === 50, `50 messages emitted across 10 rooms (emitted: ${totalMessagesEmitted})`);
@@ -312,6 +350,22 @@ async function runAllTests() {
     }
   }
   assert(!crossRoomLeak, 'Room Isolation Verified: Zero messages leaked across room boundaries.');
+
+  // Socket integration check: permitted markup is transported verbatim and is
+  // rendered safely by the separately audited textContent sink.
+  const integrationPair = Array.from(roomsReceived.values())[0];
+  const markupPayload = '<b>quartiere & amici</b>';
+  const markupPromise = waitForEvent(
+    integrationPair[1],
+    'receive_message',
+    'markup receive_message delivery'
+  );
+  integrationPair[0].emit('send_message', {
+    roomId: integrationPair[0].meta.matchedRoomId,
+    message: markupPayload
+  });
+  const receivedMarkup = await markupPromise;
+  assert(receivedMarkup.message === markupPayload, 'Allowed markup payload is delivered unchanged');
   console.log('');
 
   // ----------------------------------------------------
@@ -322,7 +376,7 @@ async function runAllTests() {
   const [extClientA, extClientB] = testPair;
   const targetRoomId = extClientA.meta.matchedRoomId;
 
-  const extensionGrantedPromise = new Promise((resolve) => {
+  const extensionGrantedPromise = withTimeout(new Promise((resolve) => {
     let grantCount = 0;
     const check = (data) => {
       grantCount++;
@@ -330,7 +384,7 @@ async function runAllTests() {
     };
     extClientA.once('extension_granted', check);
     extClientB.once('extension_granted', check);
-  });
+  }), EVENT_TIMEOUT_MS, 'extension_granted for both clients');
 
   // Client A requests extension
   extClientA.emit('request_extension', { roomId: targetRoomId });
@@ -347,11 +401,7 @@ async function runAllTests() {
   // TEST 6B: REALTIME EMOJI REACTION BURST
   // ----------------------------------------------------
   console.log('--- TEST 6B: Realtime Emoji Reaction Burst ---');
-  const reactionPromise = new Promise((resolve) => {
-    extClientB.once('receive_reaction', (data) => {
-      resolve(data);
-    });
-  });
+  const reactionPromise = waitForEvent(extClientB, 'receive_reaction');
   extClientA.emit('send_reaction', { roomId: targetRoomId, emoji: '🔥' });
   const reactionData = await reactionPromise;
   assert(reactionData.emoji === '🔥', `Emoji reaction '🔥' delivered in realtime to partner.`);
@@ -365,14 +415,16 @@ async function runAllTests() {
   const [repClientA, repClientB] = reportPair;
   const reportRoomId = repClientA.meta.matchedRoomId;
 
-  const partnerReportPromise = new Promise((resolve) => {
-    repClientB.once('partner_skipped', (data) => {
-      resolve(data);
-    });
-  });
+  const partnerReportPromise = waitForEvent(repClientB, 'partner_skipped', 'partner_skipped after report');
+  const reportConfirmedPromise = waitForEvent(repClientA, 'report_confirmed', 'report_confirmed');
   repClientA.emit('report_user', { roomId: reportRoomId, reason: 'Inappropriate content' });
-  const reportResult = await partnerReportPromise;
+  const [reportResult, reportConfirmation] = await withTimeout(
+    Promise.all([partnerReportPromise, reportConfirmedPromise]),
+    EVENT_TIMEOUT_MS,
+    'partner_skipped and report_confirmed'
+  );
   assert(reportResult.reason.includes('segnalazione'), `Partner received safety shield termination upon report.`);
+  assert(reportConfirmation.success, 'Reporter received report_confirmed acknowledgement.');
   console.log('');
 
   // ----------------------------------------------------
@@ -429,20 +481,25 @@ async function runAllTests() {
   console.log(`  AUDIT COMPLETE: ${assertionsPassed} PASSED, ${totalErrors} FAILED`);
   console.log('====================================================');
 
-  if (serverStartedLocally) {
-    server.close();
-  }
-
   if (totalErrors === 0) {
-    console.log('\n>>> STATUS: ALL HALT CONDITIONS SATISFIED (EXIT CODE 0) <<<');
-    process.exit(0);
+    console.log('\n>>> STATUS: LOCAL CHECKS PASSED; LAUNCH NOT CERTIFIED (EXIT CODE 0) <<<');
+    process.exitCode = 0;
   } else {
     console.error(`\n>>> STATUS: FAILED WITH ${totalErrors} ERRORS (EXIT CODE 1) <<<`);
-    process.exit(1);
+    process.exitCode = 1;
+  }
+  } finally {
+    for (const client of createdClients) {
+      client.removeAllListeners();
+      client.disconnect();
+      client.close();
+    }
+    createdClients.clear();
+    await closeLocalServer(serverModule);
   }
 }
 
 runAllTests().catch(err => {
   console.error('Fatal test error:', err);
-  process.exit(1);
+  process.exitCode = 1;
 });

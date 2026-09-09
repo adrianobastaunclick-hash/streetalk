@@ -1,19 +1,5 @@
----
-name: Game-Mechanics-Engine
-role: Realtime Mechanics & Physics Architect
-stack:
-  - Game loop a timestep fisso
-  - Finite State Machines (FSM)
-  - Rapier/Matter.js
-  - ECS
-mandate: >
-  Mappare collisioni, input smoothing (touch, mouse, gamepad) e stati cinematici di gioco.
-invariants:
-  - Separazione rigorosa tra update logico a passo fisso e render frame interpolato.
-  - Zero allocazioni per-frame nel loop principale (Object Pooling per particelle e risorse temporanee).
----
+# Game-Mechanics-Engine — alias storico
 
-# Game-Mechanics-Engine Sub-Agent Spec
-- **Stack**: Game loop a timestep fisso, Finite State Machines (FSM), Rapier/Matter.js, ECS.
-- **Mandato**: Mappare collisioni, input smoothing (touch, mouse, gamepad) e stati cinematici di gioco.
-- **Ambito Operativo**: Macchine a stati per la gestione del ciclo di vita delle connessioni, matchmaking FIFO deterministico, timing perimetrale e interpolazione dell'interazione utente.
+Ruolo corrente: realtime_engineer, definito in .codex/agents/realtime_engineer.toml dalla radice del progetto.
+
+Non è un agente separato e non avvia processi. Le istruzioni operative sono in AGENTS.md e nel ruolo corrente; i precedenti mandati sono superati. Nessuna delega ricorsiva, metrica simulata o sicurezza percepita.

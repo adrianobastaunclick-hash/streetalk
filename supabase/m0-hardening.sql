@@ -1,40 +1,8 @@
--- STREETALK database schema. Private chat content has no persistence destination.
--- reports contains pseudonymous moderation data; no automated retention is defined.
--- Review configuration and retention before enabling report persistence.
+-- STREETALK M0: prepared local hardening, not executed against a cloud database.
+-- Apply only after reviewing the target schema/grants and preserving existing rows.
+-- No deletion, retention interval, authentication model or public feed is introduced.
 BEGIN;
 
-CREATE TABLE IF NOT EXISTS public.secrets (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  content TEXT NOT NULL CHECK (char_length(content) >= 3 AND char_length(content) <= 90),
-  mood TEXT NOT NULL CHECK (mood IN ('cazzeggio', 'sfogati', 'flirt')),
-  likes_count INTEGER DEFAULT 0 CHECK (likes_count >= 0),
-  is_public BOOLEAN DEFAULT false,
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_secrets_mood_created ON public.secrets(mood, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_secrets_public_created ON public.secrets(is_public, created_at DESC);
-
-CREATE TABLE IF NOT EXISTS public.reports (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  room_id TEXT,
-  reason TEXT NOT NULL,
-  reporter_ip_hash TEXT NOT NULL,
-  reported_ip_hash TEXT NOT NULL,
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'dismissed', 'jailed')),
-  created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-CREATE INDEX IF NOT EXISTS idx_reports_status_created ON public.reports(status, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_reports_reported_hash ON public.reports(reported_ip_hash);
-
-CREATE TABLE IF NOT EXISTS public.telemetry (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  total_matches INTEGER DEFAULT 0,
-  total_messages INTEGER DEFAULT 0,
-  peak_concurrent INTEGER DEFAULT 0,
-  recorded_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
-);
-
--- M0 BOUNDARY: same grants and policies as m0-hardening.sql.
 ALTER TABLE public.secrets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.telemetry ENABLE ROW LEVEL SECURITY;

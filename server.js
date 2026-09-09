@@ -6,21 +6,31 @@ const cors = require('cors');
 const path = require('path');
 const crypto = require('crypto');
 const supabaseClient = require('./lib/supabase');
+const { createNetworkPolicy } = require('./lib/network-policy');
+const networkPolicy = createNetworkPolicy();
 
 const app = express();
 const server = http.createServer(app);
 
-// Enable CORS and JSON parsing
-app.use(cors());
+// Use the same deliberate browser-origin boundary for HTTP and Socket.IO.
+app.set('trust proxy', networkPolicy.trustProxy);
+app.use((req, res, next) => {
+  if (!networkPolicy.isOriginAllowed(req.headers.origin)) {
+    return res.status(403).json({ ok: false, code: 'ORIGIN_NOT_ALLOWED' });
+  }
+  next();
+});
+app.use(cors({ origin: (origin, done) => done(null, networkPolicy.isOriginAllowed(origin)) }));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Socket.io initialization with open CORS
+// allowRequest covers both polling and direct WebSocket handshakes.
 const io = new Server(server, {
   cors: {
-    origin: '*',
+    origin: (origin, done) => done(null, networkPolicy.isOriginAllowed(origin)),
     methods: ['GET', 'POST']
   },
+  allowRequest: (req, done) => done(null, networkPolicy.isOriginAllowed(req.headers.origin)),
   pingInterval: 10000,
   pingTimeout: 5000
 });
@@ -31,24 +41,15 @@ const io = new Server(server, {
 // users: socketId -> { socketId, ip, gender, targetGender, mood, secret, roomId, joinedQueueAt }
 const users = new Map();
 
-// queues: dizionario con code FIFO separate per mood (cazzeggio, sfogati, flirt)
-const queues = {
-  cazzeggio: [],
-  sfogati: [],
-  flirt: []
-};
+const ALLOWED_MOODS = Object.freeze(['cazzeggio', 'sfogati', 'flirt']);
+
+// queues: dizionario con code FIFO separate per ogni mood ammesso
+const queues = Object.fromEntries(ALLOWED_MOODS.map(mood => [mood, []]));
 
 // Backward compatibility helper/proxy for queue
 const queue = new Proxy([], {
   get(target, prop) {
-    const all = [
-      ...(queues.cazzeggio || []),
-      ...(queues.sfogati || []),
-      ...(queues.flirt || []),
-      ...Object.keys(queues)
-        .filter(k => !['cazzeggio', 'sfogati', 'flirt'].includes(k))
-        .flatMap(k => queues[k])
-    ];
+    const all = ALLOWED_MOODS.flatMap(mood => queues[mood]);
     if (prop === 'length') return all.length;
     if (prop === Symbol.iterator) return all[Symbol.iterator].bind(all);
     if (typeof all[prop] === 'function') {
@@ -158,8 +159,12 @@ function validateJoinPayload(payload) {
   if (!targetGender || !validTargets.includes(targetGender)) {
     return { valid: false, error: `Invalid targetGender. Must be one of: ${validTargets.join(', ')}` };
   }
-  if (!mood || typeof mood !== 'string' || mood.trim().length === 0 || mood.trim().length > 30) {
-    return { valid: false, error: 'Mood must be a non-empty string of max 30 characters' };
+  if (typeof mood !== 'string') {
+    return { valid: false, code: 'INVALID_PAYLOAD', error: `Mood non valido. Scegli uno tra: ${ALLOWED_MOODS.join(', ')}` };
+  }
+  const normalizedMood = mood.trim().toLowerCase();
+  if (!ALLOWED_MOODS.includes(normalizedMood)) {
+    return { valid: false, code: 'INVALID_PAYLOAD', error: `Mood non valido. Scegli uno tra: ${ALLOWED_MOODS.join(', ')}` };
   }
   if (!secret || typeof secret !== 'string') {
     return { valid: false, error: 'Secret must be a valid string' };
@@ -195,7 +200,7 @@ function validateJoinPayload(payload) {
     data: {
       gender,
       targetGender,
-      mood: DOMSafetyFilter.sanitize(mood),
+      mood: normalizedMood,
       secret: DOMSafetyFilter.sanitize(trimmedSecret)
     }
   };
@@ -215,16 +220,8 @@ function validateMessagePayload(payload) {
   return { valid: true, data: { roomId, message: DOMSafetyFilter.sanitize(message) } };
 }
 
-// IP Extraction helper
-function getClientIp(socket) {
-  const cf = socket.handshake.headers['cf-connecting-ip'];
-  if (cf) return cf.trim();
-  const forwarded = socket.handshake.headers['x-forwarded-for'];
-  if (forwarded) {
-    return forwarded.split(',')[0].trim();
-  }
-  return socket.handshake.address || socket.conn.remoteAddress || '127.0.0.1';
-}
+// Resolve the network identity only across explicitly configured trusted proxies.
+const getClientIp = networkPolicy.getClientIp;
 
 // IP Jail helper
 function isIpJailed(ip) {
@@ -302,10 +299,15 @@ function generateMoniker() {
 // MATCHMAKING & PAIRING ENGINE (RAM FIFO)
 // ==========================================
 function getMoodQueue(mood) {
-  const key = (mood || '').trim().toLowerCase();
-  if (!queues[key]) {
-    queues[key] = [];
+  if (typeof mood !== 'string') {
+    throw new TypeError('Mood non valido');
   }
+
+  const key = mood.trim().toLowerCase();
+  if (!ALLOWED_MOODS.includes(key)) {
+    throw new RangeError(`Mood non valido. Scegli uno tra: ${ALLOWED_MOODS.join(', ')}`);
+  }
+
   return queues[key];
 }
 
@@ -344,15 +346,12 @@ function findMatch(newCandidate) {
 
 function removeFromQueue(socketId) {
   let removed = false;
-  for (const key of Object.keys(queues)) {
-    const q = queues[key];
+  for (const mood of ALLOWED_MOODS) {
+    const q = queues[mood];
     const index = q.findIndex(item => item.socketId === socketId);
     if (index !== -1) {
       q.splice(index, 1);
       removed = true;
-    }
-    if (q.length === 0 && !['cazzeggio', 'sfogati', 'flirt'].includes(key)) {
-      delete queues[key];
     }
   }
   return removed;
@@ -488,13 +487,7 @@ function createRoom(userA, userB) {
     });
   }
 
-  // Asynchronously archive secrets to Supabase if configured (non-blocking)
-  if (supabaseClient && supabaseClient.isReady()) {
-    Promise.all([
-      supabaseClient.archiveSecret({ content: userA.secret, mood: userA.mood }),
-      supabaseClient.archiveSecret({ content: userB.secret, mood: userB.mood })
-    ]).catch(err => console.warn('[STREETALK:SUPABASE] Match archive warning:', err.message));
-  }
+  // Private secrets remain in the active room and are never sent to storage.
 
   broadcastOnlineStats();
   return room;
@@ -802,10 +795,10 @@ io.on('connection', (socket) => {
         if (supabaseClient && supabaseClient.isReady()) {
           supabaseClient.logReport({
             roomId: room.id,
-            reason: payload.reason || 'safety_report',
+            reason: supabaseClient.normalizeReportReason(payload.reason),
             reporterIp: user.ip,
             reportedIp: partnerIp
-          }).catch(err => console.warn('[STREETALK:SUPABASE] Report log error:', err.message));
+          }).catch(() => console.warn('[STREETALK:SUPABASE] Moderation report write failed.'));
         }
       }
 
@@ -892,12 +885,10 @@ app.get('/api/supabase/status', (req, res) => {
   res.json(supabaseClient ? supabaseClient.getStatus() : { configured: false, mode: 'in_memory_volatile' });
 });
 
-// Community Secrets Feed Endpoint (Wall of Street Confessions)
-app.get('/api/secrets', async (req, res) => {
-  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 100);
-  const mood = req.query.mood || null;
-  const result = await (supabaseClient ? supabaseClient.getPublicSecrets({ limit, mood }) : { ok: true, secrets: [], memoryOnly: true });
-  res.json(result);
+// The private chat never supplies a public feed, including direct API requests.
+app.get('/api/secrets', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.status(410).json({ ok: false, code: 'FEED_DISABLED', secrets: [] });
 });
 
 // Export app and server for testing & running
@@ -906,7 +897,7 @@ const PORT = process.env.PORT || 3000;
 if (require.main === module) {
   server.listen(PORT, () => {
     console.log(`[STREETALK] Server online on http://localhost:${PORT}`);
-    console.log(`[STREETALK] Mode: Zero-DB Volatile RAM Engine + Supabase Cloud Ready`);
+    console.log(`[STREETALK] Mode: ${supabaseClient.isReady() ? 'RAM private chat + optional moderation storage' : 'RAM-only volatile (Supabase not configured)'}`);
   });
 }
 
@@ -915,6 +906,7 @@ module.exports = {
   server, 
   io, 
   users, 
+  ALLOWED_MOODS,
   queues,
   queue, 
   rooms, 
@@ -924,12 +916,15 @@ module.exports = {
   funnelMetrics,
   supabaseClient,
   validateJoinPayload, 
+  getMoodQueue,
   validateMessagePayload, 
   DOMSafetyFilter,
   get destroyedSecretsCount() { return destroyedSecretsCount; },
   setDestroyedSecretsCount(val) { destroyedSecretsCount = val; },
   getTelemetryStats,
   broadcastOnlineStats,
-  statsBroadcastTimer
+  statsBroadcastTimer,
+  ipJailSweeper,
+  getClientIp,
+  networkPolicy
 };
-

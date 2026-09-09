@@ -10,20 +10,55 @@
  * ============================================================================
  */
 
+const { installOfflineTestEnvironment, startLocalServer, closeLocalServer, fetchLocalJson } = require('./local-test-runtime');
+installOfflineTestEnvironment();
+const { EventEmitter } = require('node:events');
 const { io: Client } = require('socket.io-client');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
 // Target server
-const PORT = process.env.TEST_PORT || process.env.PORT || 3001;
-const SERVER_URL = `http://localhost:${PORT}`;
+let SERVER_URL;
 
 let serverInstance = null;
 let serverModule = null;
 
 let testsPassed = 0;
 let testsFailed = 0;
+const createdClients = new Set();
+const EVENT_TIMEOUT_MS = Number(process.env.TEST_EVENT_TIMEOUT_MS) || 3000;
+
+function withTimeout(promise, milliseconds, description) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(
+      `Timed out after ${milliseconds}ms waiting for ${description}`
+    )), milliseconds);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+function waitForEvent(socket, event, description = `event "${event}"`, milliseconds = EVENT_TIMEOUT_MS) {
+  let handler;
+  const eventPromise = new Promise((resolve) => {
+    handler = (data) => resolve(data);
+    socket.once(event, handler);
+  });
+  return withTimeout(eventPromise, milliseconds, description)
+    .finally(() => socket.off(event, handler));
+}
+
+function waitForCondition(predicate, description) {
+  let interval;
+  const promise = new Promise((resolve) => {
+    interval = setInterval(() => {
+      if (predicate()) resolve();
+    }, 10);
+  });
+  return withTimeout(promise, EVENT_TIMEOUT_MS, description)
+    .finally(() => clearInterval(interval));
+}
 
 function pass(desc) {
   testsPassed++;
@@ -41,17 +76,28 @@ function info(msg) {
 
 // Utility to create connected client
 function createClient(options = {}) {
-  return new Promise((resolve, reject) => {
-    const socket = Client(SERVER_URL, {
+  let socket;
+  let onConnect;
+  let onConnectError;
+  const connection = new Promise((resolve, reject) => {
+    socket = Client(SERVER_URL, {
       transports: ['websocket'],
       forceNew: true,
       reconnection: false,
       ...options
     });
+    createdClients.add(socket);
 
-    socket.on('connect', () => resolve(socket));
-    socket.on('connect_error', (err) => reject(err));
+    onConnect = () => resolve(socket);
+    onConnectError = (err) => reject(err);
+    socket.once('connect', onConnect);
+    socket.once('connect_error', onConnectError);
   });
+  return withTimeout(connection, EVENT_TIMEOUT_MS, 'client connection')
+    .finally(() => {
+      socket.off('connect', onConnect);
+      socket.off('connect_error', onConnectError);
+    });
 }
 
 // Main test execution
@@ -60,26 +106,31 @@ async function runAutonomousSuite() {
   console.log('  STREETALK // AUTONOMOUS RUNTIME QA-SECURITY SUITE ');
   console.log('====================================================\n');
 
-  // Boot server on isolated test port
-  process.env.PORT = PORT;
-  serverModule = require('../server.js');
-  
-  if (!serverModule.server.listening) {
-    await new Promise((resolve, reject) => {
-      serverInstance = serverModule.server.listen(PORT, (err) => {
-        if (err) return reject(err);
-        console.log(`[TEST-RUNNER] Server booted on port ${PORT}\n`);
-        resolve();
-      });
-    });
-  } else {
-    serverInstance = serverModule.server;
-    console.log(`[TEST-RUNNER] Server already listening on port ${PORT}\n`);
-  }
-
-    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, funnelMetrics, validateJoinPayload, validateMessagePayload, DOMSafetyFilter } = serverModule;
-
   try {
+    serverModule = require('../server.js');
+    SERVER_URL = await startLocalServer(serverModule);
+    serverInstance = serverModule.server;
+    console.log('[TEST-RUNNER] Fresh isolated server: ' + SERVER_URL);
+    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, funnelMetrics, validateJoinPayload, validateMessagePayload, getMoodQueue, DOMSafetyFilter } = serverModule;
+
+    // A deliberately absent event must fail promptly rather than hang the suite.
+    try {
+      const emitter = new EventEmitter();
+      const start = Date.now();
+      try {
+        await waitForEvent(emitter, 'missing_event', 'intentional missing_event diagnostic', 30);
+      } finally {
+        if (emitter.listenerCount('missing_event') !== 0 || Date.now() - start > 1000) throw new Error('Missing event cleanup or timing failed');
+      }
+      fail('Missing-event timeout test did not reject');
+    } catch (err) {
+      if (err.message.includes('intentional missing_event diagnostic') && err.message.includes('30ms')) {
+        pass('Missing event rejects quickly with a descriptive timeout');
+      } else {
+        throw err;
+      }
+    }
+
     // ----------------------------------------------------
     // TEST 1: Volatile Memory Baseline Audit
     // ----------------------------------------------------
@@ -175,6 +226,39 @@ async function runAutonomousSuite() {
       pass('Payload validation correctly rejected invalid gender');
     } else {
       fail('Failed to reject invalid gender');
+    }
+
+    const unknownMood = 'modalita-inventata';
+    const valUnknownMood = validateJoinPayload({ gender: 'M', targetGender: 'Tutti', mood: unknownMood, secret: 'Valid secret' });
+    if (!valUnknownMood.valid && valUnknownMood.code === 'INVALID_PAYLOAD' && valUnknownMood.error.includes('Mood non valido')) {
+      pass('Payload validation correctly rejected an unknown mood with a clear INVALID_PAYLOAD error');
+    } else {
+      fail('Failed to reject an unknown mood with a clear error');
+    }
+
+    try {
+      getMoodQueue(unknownMood);
+      fail('getMoodQueue accepted an unknown mood');
+    } catch (err) {
+      if (err instanceof RangeError && !Object.prototype.hasOwnProperty.call(queues, unknownMood)) {
+        pass('Unknown mood cannot create an arbitrary key in queues');
+      } else {
+        fail('Unknown mood handling changed the queues dictionary', err);
+      }
+    }
+
+    const normalizedMoodVariants = [' Cazzeggio ', 'SFOGATI', '  FlIrT  '];
+    const expectedMoods = ['cazzeggio', 'sfogati', 'flirt'];
+    const normalizationResults = normalizedMoodVariants.map(mood => validateJoinPayload({
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood,
+      secret: 'Valid secret'
+    }));
+    if (normalizationResults.every((result, index) => result.valid && result.data.mood === expectedMoods[index])) {
+      pass('Mood variants with uppercase letters and spaces are normalized correctly');
+    } else {
+      fail('Failed to normalize mood variants with uppercase letters and spaces');
     }
 
     const valMsg = validateMessagePayload({ roomId: 'street_123', message: 'B'.repeat(505) });
@@ -305,7 +389,7 @@ async function runAutonomousSuite() {
       });
     }
 
-    await Promise.all(pairedPromises);
+    await withTimeout(Promise.all(pairedPromises), EVENT_TIMEOUT_MS, 'all clients to receive match_found');
     const duration = Date.now() - startTime;
 
     if (rooms.size === 10) {
@@ -376,7 +460,10 @@ async function runAutonomousSuite() {
       }
     }
 
-    await new Promise((r) => setTimeout(r, 600));
+    await waitForCondition(
+      () => totalMessagesReceived === 200,
+      '200 receive_message deliveries'
+    );
 
     if (totalMessagesReceived === 200) {
       pass(`200 message deliveries confirmed (10 rooms * 10 msgs * 2 clients = ${totalMessagesReceived})`);
@@ -390,17 +477,27 @@ async function runAutonomousSuite() {
       fail('Cross-room message leakage detected!');
     }
 
-    // ----------------------------------------------------
-    // TEST 7: Room Extension (+5 Min) Mutual Consent
-    // ----------------------------------------------------
-    console.log('\n--- TEST 7: Room Extension (+5 Min) Mutual Consent ---');
     const pairA = clients[0];
     const pairB = clients[1];
     const targetRoomId = pairings.get(pairA.id).roomId;
 
-    const extensionPromise = new Promise((resolve) => {
-      pairA.on('extension_granted', (data) => resolve(data));
-    });
+    // Integration XSS coverage: markup that validation permits must arrive unchanged.
+    // This is intentionally separate from the static textContent audit above.
+    const markupPayload = '<b>quartiere & amici</b>';
+    const markupDelivery = waitForEvent(pairB, 'receive_message', 'markup receive_message delivery');
+    pairA.emit('send_message', { roomId: targetRoomId, message: markupPayload });
+    const receivedMarkup = await markupDelivery;
+    if (receivedMarkup.message === markupPayload) {
+      pass('Allowed markup payload is delivered verbatim for safe textContent rendering');
+    } else {
+      fail(`Markup delivery changed unexpectedly: ${JSON.stringify(receivedMarkup.message)}`);
+    }
+
+    // ----------------------------------------------------
+    // TEST 7: Room Extension (+5 Min) Mutual Consent
+    // ----------------------------------------------------
+    console.log('\n--- TEST 7: Room Extension (+5 Min) Mutual Consent ---');
+    const extensionPromise = waitForEvent(pairA, 'extension_granted', 'extension_granted');
 
     pairA.emit('request_extend', { roomId: targetRoomId });
     await new Promise((r) => setTimeout(r, 50));
@@ -417,9 +514,7 @@ async function runAutonomousSuite() {
     // TEST 8: Realtime Emoji Reaction Bursts
     // ----------------------------------------------------
     console.log('\n--- TEST 8: Realtime Emoji Reaction Bursts ---');
-    const reactionPromise = new Promise((resolve) => {
-      pairB.on('receive_reaction', (data) => resolve(data));
-    });
+    const reactionPromise = waitForEvent(pairB, 'receive_reaction');
 
     pairA.emit('send_reaction', { roomId: targetRoomId, emoji: '⚡' });
     const reactionData = await reactionPromise;
@@ -438,17 +533,16 @@ async function runAutonomousSuite() {
     const reportingClient = clients[3];
     const repRoomId = pairings.get(reportingClient.id).roomId;
 
-    const shieldPromise = new Promise((resolve) => {
-      reportedClient.on('partner_skipped', (data) => resolve(data));
-    });
-
-    const reportConfirmedPromise = new Promise((resolve) => {
-      reportingClient.on('report_confirmed', (data) => resolve(data));
-    });
+    const shieldPromise = waitForEvent(reportedClient, 'partner_skipped', 'partner_skipped after report');
+    const reportConfirmedPromise = waitForEvent(reportingClient, 'report_confirmed', 'report_confirmed');
 
     reportingClient.emit('report_user', { roomId: repRoomId, reason: 'harassment' });
 
-    const [shieldData, reportData] = await Promise.all([shieldPromise, reportConfirmedPromise]);
+    const [shieldData, reportData] = await withTimeout(
+      Promise.all([shieldPromise, reportConfirmedPromise]),
+      EVENT_TIMEOUT_MS,
+      'report safety events'
+    );
     if (shieldData && shieldData.reason.includes('sicurezza')) {
       pass('Reported partner instantly received safety shield shutdown');
     } else {
@@ -468,9 +562,7 @@ async function runAutonomousSuite() {
     }
 
     // Verify jailed client is rejected on queue re-entry with IP_JAILED
-    const jailedPromise = new Promise((resolve) => {
-      reportedClient.once('error_event', (err) => resolve(err));
-    });
+    const jailedPromise = waitForEvent(reportedClient, 'error_event', 'IP_JAILED rejection');
     reportedClient.emit('join_queue', { gender: 'M', targetGender: 'Tutti', mood: 'Cazzeggio', secret: 'Valid secret' });
     const jailedErr = await jailedPromise;
     if (jailedErr && jailedErr.code === 'IP_JAILED') {
@@ -488,9 +580,7 @@ async function runAutonomousSuite() {
     const skipClientB = clients[5];
     const roomsBeforeSkip = rooms.size;
 
-    const skipPromise = new Promise((resolve) => {
-      skipClientB.on('partner_skipped', (data) => resolve(data));
-    });
+    const skipPromise = waitForEvent(skipClientB, 'partner_skipped');
 
     skipClientA.emit('skip_partner');
     await skipPromise;
@@ -647,7 +737,7 @@ async function runAutonomousSuite() {
     }
 
     if (droppedFrames === 0) {
-      pass(`Zero frame drops detected across ${BENCHMARK_FRAMES} profiled animation cycles (0 dropped / ${BENCHMARK_FRAMES} frames)`);
+      pass(`CPU-only iterations within budget across ${BENCHMARK_FRAMES} profiled animation cycles (0 dropped / ${BENCHMARK_FRAMES} frames)`);
     } else {
       fail(`Detected ${droppedFrames} dropped frames (>16.66ms)`);
     }
@@ -706,7 +796,7 @@ async function runAutonomousSuite() {
       secret: 'Live Secret Male'
     });
 
-    await liveMatchPromise;
+    await withTimeout(liveMatchPromise, EVENT_TIMEOUT_MS, 'live clients match_found after ghost pruning');
 
     if (!ghostPaired) {
       pass('Ghost pairing prevented: stale disconnected waiter in queue was successfully pruned');
@@ -731,21 +821,7 @@ async function runAutonomousSuite() {
     console.log('\n--- TEST 13: Supabase Cloud & Resilient REST APIs ---');
     
     // Helper for HTTP GET requests
-    const fetchJson = (urlPath) => {
-      return new Promise((resolve, reject) => {
-        http.get(`http://127.0.0.1:3001${urlPath}`, (res) => {
-          let data = '';
-          res.on('data', (chunk) => { data += chunk; });
-          res.on('end', () => {
-            try {
-              resolve(JSON.parse(data));
-            } catch (e) {
-              reject(e);
-            }
-          });
-        }).on('error', reject);
-      });
-    };
+    const fetchJson = urlPath => fetchLocalJson(SERVER_URL, urlPath);
 
     // 13.1 Check /api/supabase/status
     const statusData = await fetchJson('/api/supabase/status');
@@ -756,11 +832,11 @@ async function runAutonomousSuite() {
     }
 
     // 13.2 Check /api/secrets endpoint
-    const secretsData = await fetchJson('/api/secrets?limit=5');
-    if (secretsData && secretsData.ok === true && Array.isArray(secretsData.secrets)) {
-      pass(`Public secrets endpoint verified: ok=true, returned ${secretsData.secrets.length} items`);
+    const feed = await fetchLocalJson(SERVER_URL, '/api/secrets?limit=5', true);
+    if (feed.status === 410 && feed.body.code === 'FEED_DISABLED' && feed.body.secrets.length === 0) {
+      pass('Private chat: direct public feed returns HTTP 410 with no secrets');
     } else {
-      fail('Public secrets endpoint failed to return valid array');
+      fail('Private chat feed boundary failed');
     }
 
     // 13.3 Check /api/stats includes Supabase metadata
@@ -774,8 +850,8 @@ async function runAutonomousSuite() {
     // 13.4 Check client helper methods gracefully handle unconfigured mode
     const supabaseClient = require('../lib/supabase');
     const archiveResult = await supabaseClient.archiveSecret({ content: 'Test secret payload', mood: 'cazzeggio' });
-    if (archiveResult && archiveResult.ok === true) {
-      pass('Supabase client helper archiveSecret gracefully handles memory-only mode without crashing');
+    if (archiveResult && archiveResult.ok === false && archiveResult.code === 'PRIVATE_CONTENT_NOT_STORED') {
+      pass('archiveSecret explicitly refuses private-content storage');
     } else {
       fail('Supabase client helper archiveSecret threw an unhandled error');
     }
@@ -845,8 +921,8 @@ async function runAutonomousSuite() {
     // 14.6 Verify Crawlable Comparative Table & Moods Content
     if (indexHtml.includes('PERCHÉ STREETALK È DIVERSA') &&
         indexHtml.includes('SCEGLI IL TUO MOOD') &&
-        indexHtml.includes('ARCHITETTURA FORENSE ZERO-LOG')) {
-      pass('On-Page SEO: Verified crawlable comparative table, 3 moods guide, and zero-log privacy manifesto');
+        indexHtml.includes('DATI // CHAT PRIVATA E SEGNALAZIONI')) {
+      pass('On-Page SEO: Verified crawlable comparative table, 3 moods guide, and data-mode disclosure');
     } else {
       fail('On-Page SEO: Missing crawlable comparative table or editorial sections');
     }
@@ -856,56 +932,16 @@ async function runAutonomousSuite() {
     // ----------------------------------------------------
     console.log('\n--- TEST 15: Autonomous Growth Network & Creative Media Engine ---');
 
-    // 15.1 Verify Autonomous Growth Director Manifesto
-    const directorPath = path.join(__dirname, '../.agents/autonomous-growth-director.md');
-    if (fs.existsSync(directorPath)) {
-      const directorContent = fs.readFileSync(directorPath, 'utf8');
-      const hasFrontmatter = directorContent.includes('name: autonomous-growth-director') &&
-                             directorContent.includes('type: Master-Orchestrator-Growth') &&
-                             directorContent.includes('reports_to: god-mode-creative-architect') &&
-                             directorContent.includes('managed_sub_agents:');
-      const hasInvariants = directorContent.includes('Data-Driven Iteration:') &&
-                            directorContent.includes('Zero-Hallucination SEO:') &&
-                            directorContent.includes('High-Voltage Visual Identity:') &&
-                            directorContent.includes('Inter-Agent Continuous Sync:');
-      if (hasFrontmatter && hasInvariants) {
-        pass('Autonomous Growth Director manifesto verified with valid frontmatter & invariants');
-      } else {
-        fail('Autonomous Growth Director missing required YAML frontmatter or invariant declarations');
-      }
-    } else {
-      fail('.agents/autonomous-growth-director.md missing');
-    }
-
-    // 15.2 Verify all 7 Growth Sub-Agents exist with valid specifications
-    const requiredGrowthSubAgents = [
-      'SEO-Data-Strategist',
-      'Neuromarketing-Psychologist',
-      'Color-Cognitive-Scientist',
-      'Viral-Copy-Architect',
-      'Social-Media-Master',
-      'Creative-Media-Synthesizer',
-      'Growth-Data-Analyst'
-    ];
-
-    let allGrowthAgentsValid = true;
-    for (const agentName of requiredGrowthSubAgents) {
-      const agentFile = path.join(__dirname, `../.agents/sub-agents/${agentName}.agent.md`);
-      if (!fs.existsSync(agentFile)) {
-        allGrowthAgentsValid = false;
-        break;
-      }
-      const content = fs.readFileSync(agentFile, 'utf8');
-      if (!content.includes(`name: ${agentName}`) || !content.includes('mandate:')) {
-        allGrowthAgentsValid = false;
-        break;
-      }
-    }
-    if (allGrowthAgentsValid) {
-      pass('All 7 Growth Sub-Agent profiles verified in .agents/sub-agents/');
-    } else {
-      fail('One or more Growth Sub-Agent profiles missing or invalid');
-    }
+    // Configuration checks describe files only; actual Codex loading is validated separately.
+    const roles = ['code_mapper', 'realtime_engineer', 'frontend_engineer', 'security_reviewer', 'qa_reviewer', 'product_growth'];
+    const definitions = roles.map(name => fs.readFileSync(path.join(__dirname, '../.codex/agents', name + '.toml'), 'utf8'));
+    if (definitions.every((text, i) => text.includes('name = "' + roles[i] + '"') && text.includes('developer_instructions ='))) {
+      pass('Six canonical role definition files present (not proof of running agents)');
+    } else fail('Canonical role definition missing');
+    const snapshot = JSON.parse(fs.readFileSync(path.join(__dirname, '../.agents/sync-channel.json'), 'utf8'));
+    if (snapshot.status === 'DOCUMENTARY_SNAPSHOT_NOT_RUNTIME' && snapshot.max_parallel_subagents === 3) {
+      pass('Legacy synchronization file is explicitly documentary, limited to three subagents');
+    } else fail('Legacy snapshot incorrectly claims runtime activation');
 
     // 15.3 Verify Creative Media Templates (Nano Banana 2 & Google Veo)
     const nanoBananaPath = path.join(__dirname, '../.agents/creative-templates/infographics-nano-banana.json');
@@ -959,14 +995,14 @@ async function runAutonomousSuite() {
 
     const learnings = fs.readFileSync(path.join(__dirname, '../.agent_learnings.md'), 'utf8');
     if (learnings.includes('Nano Banana 2') && learnings.includes('Google Veo') && learnings.includes('GROWTH-RALPH-LOOP')) {
-      pass('.agent_learnings.md registers active prompt templates and growth network memories');
+      pass('.agent_learnings.md contains historical template notes (not runtime evidence)');
     } else {
       fail('.agent_learnings.md missing generative media prompt memories');
     }
 
     // 15.5 Verify Growth Funnel Telemetry via /api/stats
     try {
-      const statsRes2 = await fetch('http://localhost:3001/api/stats');
+      const statsRes2 = await fetch(SERVER_URL + '/api/stats', { signal: AbortSignal.timeout(3000) });
       const statsData2 = await statsRes2.json();
       if (statsData2.funnel &&
           typeof statsData2.funnel.landings === 'number' &&
@@ -989,21 +1025,25 @@ async function runAutonomousSuite() {
     console.log('====================================================\n');
 
     if (testsFailed === 0) {
-      console.log('>>> [RALPH LOOP COMPLETE] STREETALK 3D IS LIVE, TESTED AND READY FOR VERCEL/RENDER DEPLOYMENT.\n');
-      process.exit(0);
+      console.log('>>> Local suite completed. Browser performance, cloud policies and launch readiness are separate checks.\n');
+      process.exitCode = 0;
     } else {
       console.error(`>>> STATUS: AUDIT FAILED WITH ${testsFailed} FAILURES (EXIT CODE 1) <<<\n`);
-      process.exit(1);
+      process.exitCode = 1;
     }
 
   } catch (err) {
     console.error('\n[FATAL AUDIT ERROR]', err);
-    process.exit(1);
+    process.exitCode = 1;
   } finally {
-    if (serverInstance) {
-      serverInstance.close();
+    for (const socket of createdClients) {
+      socket.removeAllListeners();
+      socket.disconnect();
+      socket.close();
     }
+    createdClients.clear();
+    await closeLocalServer(serverModule);
   }
 }
 
-runAutonomousSuite();
+runAutonomousSuite().catch(error => { console.error(error); process.exitCode = 1; });

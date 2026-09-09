@@ -43,7 +43,7 @@
 
   <!-- Subtitle / Value Proposition -->
   <text x="600" y="380" text-anchor="middle" fill="#94a3b8" font-family="Arial, sans-serif" font-size="22">
-    Niente account. Nessun dato salvato. Timer 3:00 a cancellazione istantanea.
+    Un segreto a testa. Tre minuti per parlare senza account.
   </text>
 
   <!-- Feature Pills -->
@@ -58,7 +58,7 @@
 
     <!-- Pill 3 -->
     <rect x="500" y="0" width="220" height="52" rx="12" fill="#14171f" stroke="#27272a" stroke-width="1.5"/>
-    <text x="610" y="32" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold">🛡️ 100% MEMORIA RAM</text>
+    <text x="610" y="32" text-anchor="middle" fill="#ffffff" font-family="'JetBrains Mono', monospace" font-size="16" font-weight="bold">⏳ CHAT DA 3 MINUTI</text>
   </g>
 
   <!-- Footer Domain -->

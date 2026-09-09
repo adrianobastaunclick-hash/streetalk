@@ -1,20 +1,5 @@
----
-name: Mobile-App-Architect
-role: Mobile & Clean Architecture Lead
-stack:
-  - Kotlin
-  - Jetpack Compose
-  - Material 3
-  - Supabase RLS
-  - Room SQLite
-mandate: >
-  Strutturare UI responsive ad alto frame rate, layer Clean Architecture e sincronizzazione locale-cloud resiliente.
-invariants:
-  - Recomposition minima su Jetpack Compose tramite State immutabili e Stable types.
-  - Sincronizzazione locale-cloud resiliente con crittografia client-side e conformità RLS.
----
+# Mobile-App-Architect — alias storico
 
-# Mobile-App-Architect Sub-Agent Spec
-- **Stack**: Kotlin, Jetpack Compose, Material 3, Supabase RLS, Room SQLite.
-- **Mandato**: Strutturare UI responsive ad alto frame rate, layer Clean Architecture e sincronizzazione locale-cloud resiliente.
-- **Ambito Operativo**: Implementazione mobile nativa, architettura pulita modulare (Domain, Data, Presentation), supporto offline e caching locale sicuro.
+Ruolo corrente: frontend_engineer, definito in .codex/agents/frontend_engineer.toml dalla radice del progetto.
+
+Non è un agente separato e non avvia processi. Le istruzioni operative sono in AGENTS.md e nel ruolo corrente; i precedenti mandati sono superati. Nessuna delega ricorsiva, metrica simulata o sicurezza percepita.
