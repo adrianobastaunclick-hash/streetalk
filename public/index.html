@@ -2440,7 +2440,7 @@
       };
     }
 
-    const SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
+    const SERVER_URL = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "[::1]"
       ? (window.location.port ? `${window.location.protocol}//${window.location.hostname}:${window.location.port}` : "http://localhost:3000")
       : "https://streetalk.onrender.com";
 
@@ -3354,7 +3354,8 @@
       if (socket && socket.connected && currentRoomId) {
         socket.emit('send_message', {
           roomId: currentRoomId,
-          message: text
+          message: text,
+          text: text
         });
       } else if (!currentRoomId) {
         // Interactive Preview Mode Echo
@@ -3753,7 +3754,7 @@
           : 'bg-[#0d0e14] border border-zinc-800 text-gray-100 rounded-bl-none'
       }`;
 
-      safeSetText(bubble, messageObj.message);
+      safeSetText(bubble, messageObj.message != null ? messageObj.message : (messageObj.text != null ? messageObj.text : ''));
 
       const timeSpan = document.createElement('span');
       timeSpan.className = 'text-[9px] font-mono text-zinc-500 mt-1 px-1';

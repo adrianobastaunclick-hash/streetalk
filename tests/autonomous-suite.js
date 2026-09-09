@@ -262,8 +262,9 @@ async function runAutonomousSuite() {
     }
 
     const valMsg = validateMessagePayload({ roomId: 'street_123', message: 'B'.repeat(505) });
-    if (!valMsg.valid && valMsg.error.includes('500')) {
-      pass('Payload validation correctly rejected message > 500 chars');
+    const valTextMsg = validateMessagePayload({ roomId: 'street_123', text: 'B'.repeat(505) });
+    if (!valMsg.valid && valMsg.error.includes('500') && !valTextMsg.valid && valTextMsg.error.includes('500')) {
+      pass('Payload validation correctly rejected message > 500 chars (message and text payloads)');
     } else {
       fail('Failed to reject message > 500 chars');
     }
@@ -519,8 +520,12 @@ async function runAutonomousSuite() {
     pairA.emit('send_reaction', { roomId: targetRoomId, emoji: '⚡' });
     const reactionData = await reactionPromise;
 
-    if (reactionData && reactionData.emoji === '⚡') {
-      pass('Realtime emoji reaction burst delivered to partner');
+    const rawReactionPromise = waitForEvent(pairA, 'receive_reaction');
+    pairB.emit('send_reaction', '🔥');
+    const rawReactionData = await rawReactionPromise;
+
+    if (reactionData && reactionData.emoji === '⚡' && rawReactionData && rawReactionData.emoji === '🔥') {
+      pass('Realtime emoji reaction burst delivered to partner (object and raw string formats)');
     } else {
       fail('Emoji reaction delivery failed');
     }

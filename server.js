@@ -210,11 +210,15 @@ function validateMessagePayload(payload) {
   if (!payload || typeof payload !== 'object') {
     return { valid: false, error: 'Payload must be a valid JSON object' };
   }
-  const { roomId, message } = payload;
+  const { roomId } = payload;
+  const message = (typeof payload.message === 'string')
+    ? payload.message
+    : (typeof payload.text === 'string' ? payload.text : null);
+
   if (!roomId || typeof roomId !== 'string') {
     return { valid: false, error: 'Invalid or missing roomId' };
   }
-  if (!message || typeof message !== 'string' || message.trim().length === 0 || message.length > 500) {
+  if (!message || message.trim().length === 0 || message.length > 500) {
     return { valid: false, error: 'Message must be a non-empty string of max 500 characters' };
   }
   return { valid: true, data: { roomId, message: DOMSafetyFilter.sanitize(message) } };
@@ -761,15 +765,20 @@ io.on('connection', (socket) => {
   // 7. REALTIME REACTION (EMOJI BURST)
   socket.on('send_reaction', (payload) => {
     if (!checkRateLimit(socket)) return;
-    if (!payload || !payload.roomId || !payload.emoji) return;
+    if (!payload) return;
     const user = users.get(socket.id);
-    if (!user || user.roomId !== payload.roomId) return;
-    const allowedEmojis = ['🔥', '💀', '⚡', '🖤', '🚬', '👀', '🤯', '👏'];
-    if (!allowedEmojis.includes(payload.emoji)) return;
+    if (!user || !user.roomId) return;
 
-    io.to(payload.roomId).emit('receive_reaction', {
+    const emoji = typeof payload === 'string' ? payload : payload.emoji;
+    const roomId = (typeof payload === 'object' && payload.roomId) ? payload.roomId : user.roomId;
+
+    if (!roomId || !emoji || user.roomId !== roomId) return;
+    const allowedEmojis = ['🔥', '💀', '⚡', '🖤', '🚬', '👀', '🤯', '👏'];
+    if (!allowedEmojis.includes(emoji)) return;
+
+    io.to(roomId).emit('receive_reaction', {
       senderId: socket.id,
-      emoji: payload.emoji
+      emoji: emoji
     });
   });
 
