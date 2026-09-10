@@ -923,13 +923,14 @@ async function runAutonomousSuite() {
       fail('Schema.org JSON-LD script block not found');
     }
 
-    // 14.6 Verify Crawlable Comparative Table & Moods Content
-    if (indexHtml.includes('PERCHÉ STREETALK È DIVERSA') &&
-        indexHtml.includes('SCEGLI IL TUO MOOD') &&
-        indexHtml.includes('DATI // CHAT PRIVATA E SEGNALAZIONI')) {
-      pass('On-Page SEO: Verified crawlable comparative table, 3 moods guide, and data-mode disclosure');
+    // The editorial home retains rules, privacy and FAQ instead of repeated marketing sections.
+    const editorialSections = ['rules-title', 'privacy-title', 'faq-section-title'];
+    if (editorialSections.every(id =>
+        indexHtml.includes(`aria-labelledby="${id}"`) &&
+        new RegExp(`<h[1-6]\\b[^>]*id="${id}"[^>]*>\\s*[^<\\s]`).test(indexHtml))) {
+      pass('On-Page SEO: Rules, privacy and FAQ retain crawlable associated headings');
     } else {
-      fail('On-Page SEO: Missing crawlable comparative table or editorial sections');
+      fail('On-Page SEO: Missing rules, privacy or FAQ section with associated heading');
     }
 
     // ----------------------------------------------------
