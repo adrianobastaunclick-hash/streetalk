@@ -1,0 +1,283 @@
+/* ==========================================================================
+   STREETALK // EDITORIAL INCROCIO & HIGH-CONTRAST VISUAL SYSTEM
+   - High-contrast typography (WCAG AAA compliant)
+   - Smooth scrolling and entrance animations
+   - Real 3D WebGL Radar support (no canvas hiding)
+   - High-end tactile cards and lead generation styling
+   ========================================================================== */
+
+/* Global Smooth Scrolling */
+html {
+  scroll-behavior: smooth !important;
+}
+
+/* Base Body System & High-Contrast Colors */
+body[data-design="incrocio"] {
+  --bg-deep: #090a0f;
+  --panel: #11131b;
+  --panel-glass: rgba(17, 19, 27, 0.85);
+  --raised: #181b26;
+  --line: rgba(255, 255, 255, 0.14);
+  --line-strong: rgba(255, 101, 47, 0.4);
+  --ink: #ffffff;
+  --ink-secondary: #e4e4e7;
+  --ink-muted: #a1a1aa;
+  --signal-orange: #ff652f;
+  --signal-amber: #f59e0b;
+  --signal-berry: #e11d48;
+  --signal-mint: #10b981;
+  background: var(--bg-deep) !important;
+  color: var(--ink-secondary);
+}
+
+/* Typography Visibility & Hierarchy Overhaul */
+[data-design="incrocio"] h1,
+[data-design="incrocio"] h2,
+[data-design="incrocio"] h3,
+[data-design="incrocio"] .font-street {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+[data-design="incrocio"] #hero-title {
+  font-size: clamp(32px, 5.2vw, 64px);
+  line-height: 1.08;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #ffffff !important;
+}
+
+[data-design="incrocio"] #hero-subtitle {
+  color: #e4e4e7 !important;
+  font-size: clamp(16px, 1.8vw, 20px);
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Hero Caption & Tag */
+[data-design="incrocio"] #hero-tag {
+  background: rgba(255, 101, 47, 0.12) !important;
+  border: 1px solid rgba(255, 101, 47, 0.45) !important;
+  color: #ff8555 !important;
+}
+
+/* 3D Encounter Scene in Hero */
+.encounter-scene {
+  height: 250px;
+  perspective: 900px;
+  position: relative;
+  margin: 20px auto 14px;
+  max-width: 580px;
+}
+
+.encounter-orbit {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx, -6deg)) rotateY(var(--ry, -8deg));
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.thought {
+  position: absolute;
+  width: 54%;
+  height: 155px;
+  padding: 18px;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  will-change: transform;
+}
+
+.thought span {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  opacity: 0.9;
+}
+
+.thought strong {
+  font-size: 19px;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+
+.thought i {
+  font-size: 24px;
+  font-style: normal;
+  align-self: flex-end;
+}
+
+.thought-you {
+  top: 10px;
+  left: 3%;
+  background: linear-gradient(135deg, #b72e55 0%, #831843 100%);
+  color: #ffffff;
+  transform: rotateZ(-8deg) translateZ(30px);
+  animation: thought-rise 6.5s ease-in-out infinite;
+}
+
+.thought-other {
+  top: 55px;
+  right: 3%;
+  background: linear-gradient(135deg, #0d9488 0%, #064e3b 100%);
+  color: #ffffff;
+  transform: rotateZ(7deg) translateZ(60px);
+  animation: thought-drift 6.5s ease-in-out infinite;
+}
+
+.scene-caption {
+  position: absolute;
+  bottom: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  font: 10px 'Space Mono', monospace;
+  letter-spacing: 0.16em;
+  color: #a1a1aa;
+  background: rgba(10, 12, 18, 0.85);
+  padding: 3px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@keyframes thought-rise {
+  0%, 100% { transform: rotateZ(-8deg) translate3d(0, 0, 30px); }
+  50% { transform: rotateZ(-4deg) translate3d(6px, -10px, 45px); }
+}
+
+@keyframes thought-drift {
+  0%, 100% { transform: rotateZ(7deg) translate3d(0, 0, 60px); }
+  50% { transform: rotateZ(3deg) translate3d(-6px, 8px, 75px); }
+}
+
+.motion-paused .thought {
+  animation-play-state: paused;
+}
+
+/* Reveal-on-Scroll Smooth Micro-Interactions */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* High-Contrast Card System */
+[data-design="incrocio"] #entry-card,
+[data-design="incrocio"] .manifesto-card,
+[data-design="incrocio"] #lead-gen-card,
+[data-design="incrocio"] .rule-card {
+  background: rgba(15, 17, 24, 0.85) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(16px);
+  border-radius: 20px;
+}
+
+[data-design="incrocio"] #entry-card:hover,
+[data-design="incrocio"] .manifesto-card:hover {
+  border-color: rgba(255, 101, 47, 0.45) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 101, 47, 0.12) !important;
+}
+
+/* High-Contrast Form Inputs */
+[data-design="incrocio"] select,
+[data-design="incrocio"] input[type="text"],
+[data-design="incrocio"] input[type="email"],
+[data-design="incrocio"] textarea {
+  background: #0b0d13 !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+[data-design="incrocio"] select:focus,
+[data-design="incrocio"] input[type="text"]:focus,
+[data-design="incrocio"] input[type="email"]:focus,
+[data-design="incrocio"] textarea:focus {
+  border-color: #ff652f !important;
+  box-shadow: 0 0 0 2px rgba(255, 101, 47, 0.25) !important;
+}
+
+/* Primary Action Buttons with High Tactile Feel */
+[data-design="incrocio"] #btn-submit-entry,
+[data-design="incrocio"] #btn-submit-lead {
+  background: linear-gradient(135deg, #ff652f 0%, #e0531f 100%) !important;
+  color: #000000 !important;
+  font-weight: 800 !important;
+  border: none !important;
+  box-shadow: 0 4px 18px rgba(255, 101, 47, 0.45) !important;
+  transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease !important;
+}
+
+[data-design="incrocio"] #btn-submit-entry:hover,
+[data-design="incrocio"] #btn-submit-lead:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 101, 47, 0.6) !important;
+}
+
+[data-design="incrocio"] #btn-submit-entry:active,
+[data-design="incrocio"] #btn-submit-lead:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 10px rgba(255, 101, 47, 0.3) !important;
+}
+
+/* 3D RADAR — ALWAYS VISIBLE & EMPOWERED */
+[data-design="incrocio"] #view-radar canvas,
+#view-radar canvas,
+#radar-3d-canvas {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+[data-design="incrocio"] #view-radar > div {
+  background: rgba(11, 13, 19, 0.92) !important;
+  border: 2px solid rgba(255, 101, 47, 0.4) !important;
+  box-shadow: 0 0 40px rgba(255, 101, 47, 0.18), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .encounter-scene {
+    height: 210px;
+    margin: 10px auto;
+  }
+  .thought {
+    height: 135px;
+    padding: 14px;
+  }
+  .thought strong {
+    font-size: 16px;
+  }
+  .thought-other {
+    top: 42px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .thought {
+    animation: none !important;
+  }
+  .encounter-orbit {
+    transform: none !important;
+    transition: none !important;
+  }
+}

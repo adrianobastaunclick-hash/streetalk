@@ -472,9 +472,11 @@
   </style>
 
   <link rel="stylesheet" href="/street-editorial.css">
+<link rel="stylesheet" href="/incrocio.css">
+<script src="/incrocio.js" defer></script>
 </head>
 
-<body class="min-h-full flex flex-col font-sans relative">
+<body data-design="incrocio" class="min-h-full flex flex-col font-sans relative">
   <a class="skip-link" href="#entry-form">Vai al modulo di ingresso</a>
 
   <!-- ======================================================== -->
@@ -509,7 +511,15 @@
         onclick="switchView('landing')"
         class="px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5"
       >
-        <span>⚡</span> <span>CONFESSIONALE</span>
+        <span>🏠</span> <span>PRESENTAZIONE</span>
+      </button>
+      <button
+        id="nav-btn-app"
+        type="button"
+        onclick="switchView('app')"
+        class="px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 cursor-pointer flex items-center gap-1.5"
+      >
+        <span>⚡</span> <span>WEB APP</span>
       </button>
       <button
         id="nav-btn-bacheca"
@@ -578,213 +588,190 @@
     <!-- ---------------------------------------------------- -->
     <!-- B. HERO SECTION (IL GANCIO IMMEDIATO)                -->
     <!-- ---------------------------------------------------- -->
-    <section class="editorial-hero text-center max-w-4xl mx-auto pt-2 sm:pt-4" aria-labelledby="hero-title">
+    <section class="editorial-hero text-center max-w-4xl mx-auto pt-2 sm:pt-4 reveal-on-scroll" aria-labelledby="hero-title">
 
       <!-- Underground Tag -->
       <div id="hero-tag" class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-street-orange/10 border border-street-orange/30 text-street-orange font-mono text-xs font-bold uppercase tracking-widest mb-6 backdrop-blur-md shadow-sm">
-        <span>ZERO PROFILI</span>
+        <span>ZERO ABBONAMENTI</span>
         <span class="text-zinc-600">•</span>
-        <span>CHAT TESTUALE</span>
+        <span>RISPETTO RECIPROCO</span>
         <span class="text-zinc-600">•</span>
-        <span>SENZA ACCOUNT</span>
+        <span>PERSONE VERE</span>
       </div>
 
       <!-- Main Title (H1) -->
-      <h1 id="hero-title" class="text-3xl sm:text-5xl md:text-6xl font-black font-street tracking-tight text-white uppercase leading-[1.06] mb-5">UN SEGRETO.<br><span class="hero-accent">DUE PERSONE.</span>TRE MINUTI.</h1>
+      <h1 id="hero-title" class="text-3xl sm:text-5xl md:text-6xl font-black font-street tracking-tight text-white uppercase leading-[1.06] mb-5">
+        Le vere connessioni<br><span class="hero-accent text-street-orange">non devono costarti un rene.</span>
+      </h1>
 
       <!-- Subtitle -->
-      <p id="hero-subtitle" class="text-street-cement text-base sm:text-xl font-normal max-w-2xl mx-auto leading-relaxed">Un pensiero che non diresti al primo incontro. Una persona con cui condividerlo. Scrivi, scegli il mood e cominciate da qui.</p>
+      <p id="hero-subtitle" class="text-zinc-200 text-base sm:text-xl font-normal max-w-3xl mx-auto leading-relaxed mb-6">
+        Basta app di dating tossiche con abbonamenti da 30€ al mese per parlare con bot o match fantasma. Su STREETALK incontri persone reali senza pagare un centesimo: per amicizia, amore o dibattito, ma sempre con rispetto reciproco e senza squallore da bar.
+      </p>
 
-      <div class="hero-caption"><strong>01 / SCRIVI. 02 / INCONTRA.</strong><span>03 / SCEGLI SE RESTARE.</span></div>
+      <!-- Quick Action Jump Bar -->
+      <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
+        <button type="button" onclick="switchView('app')" class="px-8 py-4 bg-street-orange hover:bg-orange-500 text-black font-black font-street uppercase tracking-wider rounded-2xl shadow-[0_0_25px_rgba(255,101,47,0.5)] transition transform hover:scale-105 active:scale-95 inline-flex items-center gap-2.5 text-sm sm:text-base cursor-pointer font-bold">
+          <span>⚡ ENTRA NELLA WEB APP</span>
+          <span class="text-lg">➔</span>
+        </button>
+        <a href="#manifesto-pillars" class="px-5 py-3 bg-zinc-900/90 hover:bg-zinc-800 text-white font-bold text-sm rounded-xl border border-zinc-700 transition inline-flex items-center gap-2 cursor-pointer">
+          <span>📜 Il Nostro Manifesto</span>
+        </a>
+      </div>
+
+      <div class="encounter-scene" aria-hidden="true">
+        <div class="encounter-orbit">
+          <div class="thought thought-you">
+            <span>01 / TU</span>
+            <strong>Quello che<br>non dici.</strong>
+            <i>↗</i>
+          </div>
+          <div class="thought thought-other">
+            <span>02 / UN’ALTRA PERSONA</span>
+            <strong>Da qualche parte,<br>qualcuno ascolta.</strong>
+            <i>↙</i>
+          </div>
+        </div>
+        <span class="scene-caption">DUE PENSIERI. UN INCONTRO.</span>
+      </div>
+      
+      <div class="hero-caption">
+        <strong>01 / SCRIVI. 02 / INCONTRA.</strong>
+        <span>03 / SCEGLI SE RESTARE.</span>
+      </div>
     </section>
 
     <!-- ---------------------------------------------------- -->
-    <!-- E. ENTRY GATE (IL BOX DI AVVIO AZIONE CON TILT 3D)    -->
+    <!-- C. IL MANIFESTO DEL RISPETTO & I 3 PILASTRI           -->
     <!-- ---------------------------------------------------- -->
-    <section id="entry-gate-section" class="w-full max-w-xl mx-auto" aria-labelledby="entry-gate-title">
-      <div id="entry-card" class="tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/40 rounded-2xl p-6 sm:p-8 street-glow relative overflow-hidden backdrop-blur-2xl shadow-2xl">
+    <section id="manifesto-pillars" class="w-full max-w-5xl mx-auto reveal-on-scroll my-4" aria-labelledby="manifesto-title">
+      <div class="text-center max-w-2xl mx-auto mb-8">
+        <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-widest">Il Nostro Patto</span>
+        <h2 id="manifesto-title" class="font-street font-black text-2xl sm:text-4xl text-white uppercase tracking-tight mt-1">
+          Basta squallore da bar.<br><span class="text-street-orange">Facciamo le persone per bene.</span>
+        </h2>
+        <p class="text-zinc-300 text-sm sm:text-base mt-2 leading-relaxed">
+          STREETALK non è una roulette anonima degradante. È uno spazio sicuro pensato per chi ha voglia di connettersi sul serio, con intelligenza, rispetto e dignità.
+        </p>
+      </div>
 
-        <!-- Top Neon Accent Glow Line -->
-        <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-street-orange to-transparent opacity-95"></div>
-
-        <div class="flex items-center justify-between mb-5">
-          <div class="flex items-center gap-2">
-            <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-wider">Passaggio 01</span>
-            <span class="text-zinc-700 font-mono text-xs">•</span>
-            <h2 id="entry-gate-title" class="font-street font-black text-lg text-white tracking-wide uppercase">DA QUI SI COMINCIA</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Pilastro 1 -->
+        <div class="manifesto-card bg-[#0d0f17] border border-zinc-800/90 rounded-2xl p-6 flex flex-col justify-between transition hover:border-street-orange/50 hover:shadow-[0_0_25px_rgba(255,101,47,0.15)]">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-xl mb-4 text-street-orange">
+              💎
+            </div>
+            <span class="text-[10px] font-mono font-bold text-street-orange uppercase tracking-wider">Zero Paywall Predator</span>
+            <h3 class="font-street font-black text-lg text-white uppercase mt-1 mb-2">Nessun rene richiesto</h3>
+            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              Niente crediti da acquistare per inviare un messaggio, nessun boost a pagamento, nessun trucco che nasconde i tuoi match per spillarti 30€ al mese. Parlare e conoscere persone non deve essere un privilegio a pagamento.
+            </p>
           </div>
-          <span class="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5 bg-zinc-900/90 px-2.5 py-0.5 rounded-full border border-zinc-800">
-            <span class="w-2 h-2 rounded-full bg-street-orange shadow-[0_0_8px_#ff652f] animate-pulse"></span>
-            Scambio tramite server
-          </span>
+          <div class="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+            ✓ 100% Libera & Aperta
+          </div>
         </div>
 
-        <form id="entry-form" onsubmit="event.preventDefault(); initiateRadarSearch();" class="space-y-5">
-
-          <!-- CHI SEI / CHI CERCHI (CARTE SELEZIONE GENERE CON TILT 3D) -->
-          <div class="grid grid-cols-2 gap-3" id="gender-selection-container">
-            <div id="user-gender-card" class="gender-card transition-all duration-200">
-              <label for="user-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
-                Chi sei
-              </label>
-              <div class="relative">
-                <select id="user-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
-                  <option value="M">Ragazzo (M)</option>
-                  <option value="F">Ragazza (F)</option>
-                  <option value="NB">Altro / Non-Binario</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
-                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                </div>
-              </div>
-            </div>
-
-            <div id="target-gender-card" class="gender-card transition-all duration-200">
-              <label for="target-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
-                Chi cerchi
-              </label>
-              <div class="relative">
-                <select id="target-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
-                  <option value="Tutti">Chiunque (Tutti)</option>
-                  <option value="F">Solo Ragazze (F)</option>
-                  <option value="M">Solo Ragazzi (M)</option>
-                </select>
-                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
-                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- SCELTA MOOD (3 BOTTONI PILLOLA) -->
+        <!-- Pilastro 2 -->
+        <div class="manifesto-card bg-[#0d0f17] border border-zinc-800/90 rounded-2xl p-6 flex flex-col justify-between transition hover:border-street-orange/50 hover:shadow-[0_0_25px_rgba(255,101,47,0.15)]">
           <div>
-            <label class="block text-xs font-mono font-semibold uppercase text-street-cement mb-2">
-              Scegli il tuo Mood
-            </label>
-            <div class="grid grid-cols-3 gap-2" id="mood-pill-group" role="radiogroup" aria-label="Seleziona il mood della conversazione">
-              <button
-                type="button"
-                data-mood="Cazzeggio"
-                role="radio"
-                aria-checked="true"
-                class="mood-pill active bg-street-orange/25 border-2 border-street-orange text-white py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
-              >
-                <span>💬</span> <span>Cazzeggio</span>
-              </button>
-              <button
-                type="button"
-                data-mood="Sfogati"
-                role="radio"
-                aria-checked="false"
-                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
-              >
-                <span>🖤</span> <span>Sfogati</span>
-              </button>
-              <button
-                type="button"
-                data-mood="Flirt"
-                role="radio"
-                aria-checked="false"
-                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
-              >
-                <span>🔥</span> <span>Flirt</span>
-              </button>
+            <div class="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-xl mb-4 text-teal-400">
+              🤝
             </div>
-          </div>
-
-          <!-- CAMPO SEGRETO (MAX 90 CARATTERI) -->
-          <div id="secret-input-card" class="transition-all duration-200">
-            <div class="flex justify-between items-center mb-1.5">
-              <label for="secret-input" class="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
-                <span>Il tuo pensiero, in 90 caratteri</span>
-              </label>
-              <div class="flex items-center gap-2">
-                <span id="secret-emotional-tag" class="text-[10px] font-mono text-zinc-500 transition-colors duration-200 inline">Patto aperto</span>
-                <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
-              </div>
-            </div>
-
-            <div class="relative">
-              <textarea
-                id="secret-input"
-                rows="3"
-                maxlength="90"
-                required
-                placeholder="Una cosa che oggi non hai detto a nessuno…"
-                class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition resize-none font-sans leading-snug"
-              ></textarea>
-
-              <!-- Dynamic Character Bar Indicator -->
-              <div class="w-full h-1.5 bg-zinc-800/90 rounded-full mt-2 overflow-hidden">
-                <div id="secret-progress-bar" class="h-full w-0 bg-street-orange transition-all duration-150"></div>
-              </div>
-            </div>
-
-            <!-- Real-time validation error warning if non-conforming -->
-            <p id="secret-validation-warning" class="hidden text-xs font-mono text-red-400 mt-1.5 flex items-center gap-1.5">
-              <span class="text-red-500">⚠️</span>
-              <span id="secret-validation-warning-text"></span>
-            </p>
-
-            <!-- Avviso Privacy -->
-            <p class="text-[11px] font-mono text-zinc-400 mt-2 flex items-center gap-1.5">
-              <span class="text-street-orange">⚡</span>
-              Il server riceve il segreto in chiaro per mostrarlo al partner, senza archiviarlo nel database. Non è crittografia end-to-end. Il partner può copiarlo: evita dati identificativi (3-90 caratteri).
+            <span class="text-[10px] font-mono font-bold text-teal-400 uppercase tracking-wider">Tutte le Esigenze</span>
+            <h3 class="font-street font-black text-lg text-white uppercase mt-1 mb-2">Amici, amori o rivali</h3>
+            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              Vuoi solo cazzeggiare la sera tardi, confidarti su qualcosa che ti pesa senza essere giudicato, o trovare qualcuno con cui scatta la scintilla? Nessun profilo patinato, nessuna foto trappola: si parte dalla mente e da un pensiero reale.
             </p>
           </div>
+          <div class="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+            ✓ 3 Mood: Cazzeggio, Sfogati, Flirt
+          </div>
+        </div>
 
-          <!-- CALL TO ACTION BUTTON -->
+        <!-- Pilastro 3 -->
+        <div class="manifesto-card bg-[#0d0f17] border border-zinc-800/90 rounded-2xl p-6 flex flex-col justify-between transition hover:border-street-orange/50 hover:shadow-[0_0_25px_rgba(255,101,47,0.15)]">
+          <div>
+            <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-xl mb-4 text-rose-400">
+              🛡️
+            </div>
+            <span class="text-[10px] font-mono font-bold text-rose-400 uppercase tracking-wider">Netiquette di Classe</span>
+            <h3 class="font-street font-black text-lg text-white uppercase mt-1 mb-2">Flirtare sì, squallore no</h3>
+            <p class="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              Flirtare con ironia, eleganza e intelligenza è stupendo ed è il benvenuto. Ma le volgarità corporali non richieste ("quanto ce l'hai lungo", avance da bar o commenti viscidi) qui sono considerate solo squallore: lo Scudo chiude la stanza e isola all'istante chi non rispetta l'altro.
+            </p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] font-mono text-zinc-400">
+            ✓ Scudo Segnalazione & IP Jail
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- D. LEAD GENERATION: CIRCOLO NOTTURNO COMMUNITY        -->
+    <!-- ---------------------------------------------------- -->
+    <section id="lead-gen-section" class="w-full max-w-2xl mx-auto reveal-on-scroll my-4" aria-labelledby="lead-gen-title">
+      <div id="lead-gen-card" class="bg-gradient-to-br from-[#121520] via-[#0d0f17] to-[#15101b] border-2 border-street-orange/40 rounded-3xl p-6 sm:p-8 text-center shadow-2xl relative overflow-hidden backdrop-blur-2xl">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-street-orange/15 border border-street-orange/40 text-street-orange font-mono text-[11px] font-bold uppercase tracking-wider mb-3">
+          <span>🔥</span>
+          <span>Community Esclusiva</span>
+        </div>
+        <h2 id="lead-gen-title" class="font-street font-black text-xl sm:text-2xl text-white uppercase tracking-tight">
+          Entra nel Circolo Notturno di STREETALK
+        </h2>
+        <p class="text-zinc-300 text-xs sm:text-sm mt-2 max-w-lg mx-auto leading-relaxed">
+          Ricevi le confessioni anonime più votate della settimana, aggiornamenti sulle nuove funzionalità e inviti prioritari ai drop serali. Niente spam, rispetto totale della tua privacy.
+        </p>
+
+        <form id="lead-gen-form" onsubmit="event.preventDefault(); submitLeadEmail();" class="flex flex-col sm:flex-row gap-2.5 max-w-md mx-auto mt-5">
+          <input
+            type="email"
+            id="lead-email-input"
+            required
+            placeholder="La tua email (es. notte@streetalk.live)"
+            class="flex-1 bg-zinc-950/90 border border-zinc-700 focus:border-street-orange text-white rounded-xl px-4 py-3 text-xs sm:text-sm font-sans focus:outline-none placeholder-zinc-500 transition"
+          >
           <button
             type="submit"
-            id="btn-submit-entry"
-            class="w-full group relative bg-street-orange hover:bg-street-orangeHover text-black font-street font-black py-4 px-6 rounded-xl text-base sm:text-lg tracking-wider uppercase transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.98] street-glow flex items-center justify-center gap-3 mt-4 overflow-hidden cursor-pointer"
+            id="btn-submit-lead"
+            class="px-5 py-3 bg-street-orange hover:bg-orange-500 text-black font-black font-street uppercase tracking-wider rounded-xl shadow-[0_0_16px_rgba(255,101,47,0.4)] transition transform hover:-translate-y-0.5 active:translate-y-0 text-xs sm:text-sm cursor-pointer whitespace-nowrap"
           >
-            <span class="relative z-10">TROVA QUALCUNO</span>
-            <svg class="w-5 h-5 fill-current transform group-hover:translate-x-1.5 transition-transform duration-200 relative z-10" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M13.025 1l-2.847 2.828 6.176 6.172H0v4h16.354l-6.176 6.172 2.847 2.828 10.975-11z"/>
-            </svg>
-            <div id="btn-ripple" class="absolute inset-0 bg-white/25 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+            Ricevi Invito ✨
           </button>
-          <p class="entry-wait-note">L’attesa dipende dalle persone disponibili. Altri 5 minuti solo se lo volete entrambi.</p>
-
         </form>
 
+        <div id="lead-gen-success" class="hidden text-xs sm:text-sm font-mono text-emerald-400 mt-4 flex items-center justify-center gap-2 bg-emerald-950/60 border border-emerald-500/40 py-2 px-4 rounded-xl">
+          <span>✓</span>
+          <span>Sei nel Circolo Notturno! Email registrata con successo.</span>
+        </div>
+
+        <div class="mt-4 pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] font-mono text-zinc-400">
+          <span>🔒 Zero tracking, zero leak</span>
+          <a href="#entry-gate-section" class="text-street-orange hover:underline font-bold inline-flex items-center gap-1">
+            <span>Vai al Confessionale</span>
+            <span>↓</span>
+          </a>
+        </div>
       </div>
     </section>
 
     <!-- ---------------------------------------------------- -->
-    <!-- C. COME FUNZIONA (LE 3 REGOLE DELLA STRADA)          -->
-    <!-- ---------------------------------------------------- -->
-    <div class="trust-hud-container" id="commercial-trust-hud">
-      <div class="status-indicator">
-        <span id="hud-live-beacon" class="w-2 h-2 rounded-full bg-zinc-500"></span>
-        <span class="mono-label">CHAT TESTUALE // STATO SERVER</span>
-      </div>
-
-      <div class="telemetry-grid">
-        <div class="telemetry-item">
-          <span class="item-key">STANZE ATTIVE</span>
-          <span class="item-val" id="hud-active-vaults">—</span>
-        </div>
-        <div class="telemetry-item">
-          <span class="item-key">SEGRETI RIMOSSI (DAL RIAVVIO)</span>
-          <span class="item-val accent-amber" id="hud-destroyed-secrets">—</span>
-        </div>
-        <div class="telemetry-item">
-          <span class="item-key">LATENZA RETE</span>
-          <span class="item-val" id="hud-latency">N/D</span>
-        </div>
-        <div class="telemetry-item">
-          <span class="item-key">CONNESSIONE AL SERVER</span>
-          <span class="item-val" id="hud-cipher-node">NON CONNESSO</span>
-        </div>
-      </div>
+    
+    <!-- CALLOUT TO WEB APP AT BOTTOM OF MANIFESTO -->
+    <div class="w-full max-w-3xl mx-auto bg-gradient-to-r from-orange-500/15 via-zinc-900 to-orange-500/15 border-2 border-street-orange/60 rounded-3xl p-6 sm:p-8 text-center my-4 shadow-[0_0_35px_rgba(255,101,47,0.25)] reveal-on-scroll">
+      <span class="inline-block px-3 py-1 rounded-full bg-street-orange/20 text-street-orange font-mono text-[10px] font-bold uppercase tracking-widest mb-2">Accesso Diretto</span>
+      <h3 class="font-street font-black text-2xl sm:text-3xl text-white uppercase mb-2">Pronto a parlare con qualcuno senza filtri?</h3>
+      <p class="text-zinc-300 text-xs sm:text-sm max-w-lg mx-auto mb-5 leading-relaxed">Nessun costo, nessun account, nessuna foto profilo. Condividi un segreto di 90 caratteri e parla per 180 secondi con uno sconosciuto.</p>
+      <button type="button" onclick="switchView('app')" class="px-8 py-4 bg-street-orange hover:bg-orange-500 text-black font-black font-street uppercase tracking-wider rounded-xl shadow-[0_0_25px_rgba(255,101,47,0.5)] transition transform hover:scale-105 active:scale-95 cursor-pointer inline-flex items-center gap-2.5 text-sm sm:text-base">
+        <span>⚡ APRI IL CONFESSIONALE ORA</span>
+        <span class="text-lg">➔</span>
+      </button>
     </div>
-
-
     <!-- ---------------------------------------------------- -->
-
-    <section class="w-full max-w-5xl mx-auto pt-2" aria-labelledby="rules-title">
+  <section class="w-full max-w-5xl mx-auto pt-2" aria-labelledby="rules-title">
       <div class="text-center mb-8 sm:mb-10">
         <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-widest">Protocollo Di Strada</span>
         <h2 id="rules-title" class="font-street font-black text-2xl sm:text-3xl md:text-4xl text-white uppercase mt-1">
@@ -1073,6 +1060,222 @@
     </footer>
 
   </main>
+  <!-- ======================================================== -->
+  <!-- VIEW: WEB APP / CONFESSIONALE (LAYER Z-10)               -->
+  <!-- ======================================================== -->
+  <main id="view-app" class="hidden flex-1 w-full max-w-xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col gap-6 z-10 relative">
+    
+    <!-- Top breadcrumb / navigation -->
+    <div class="flex items-center justify-between mb-2">
+      <button
+        type="button"
+        onclick="switchView('landing')"
+        class="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 transition cursor-pointer px-3 py-1.5 rounded-lg bg-zinc-900/80 border border-zinc-800 hover:border-zinc-700"
+      >
+        <span>←</span>
+        <span>Torna alla Presentazione</span>
+      </button>
+      <span class="text-[11px] font-mono text-street-orange bg-street-orange/10 border border-street-orange/30 px-3 py-1 rounded-full font-bold flex items-center gap-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-street-orange animate-pulse"></span>
+        WEB APP ATTIVA
+      </span>
+    </div>
+
+    <!-- E. ENTRY GATE (IL BOX DI AVVIO AZIONE CON TILT 3D)    -->
+    <!-- ---------------------------------------------------- -->
+    <section id="entry-gate-section" class="w-full max-w-xl mx-auto" aria-labelledby="entry-gate-title">
+      <div id="entry-card" class="tilt-card bg-street-surface border-2 border-zinc-800 hover:border-street-orange/40 rounded-2xl p-6 sm:p-8 street-glow relative overflow-hidden backdrop-blur-2xl shadow-2xl">
+
+        <!-- Top Neon Accent Glow Line -->
+        <div class="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-street-orange to-transparent opacity-95"></div>
+
+        <div class="flex items-center justify-between mb-5">
+          <div class="flex items-center gap-2">
+            <span class="text-street-orange font-mono text-xs font-bold uppercase tracking-wider">Passaggio 01</span>
+            <span class="text-zinc-700 font-mono text-xs">•</span>
+            <h2 id="entry-gate-title" class="font-street font-black text-lg text-white tracking-wide uppercase">Il primo passo è tuo.</h2>
+          </div>
+          <span class="text-[11px] font-mono text-zinc-400 flex items-center gap-1.5 bg-zinc-900/90 px-2.5 py-0.5 rounded-full border border-zinc-800">
+            <span class="w-2 h-2 rounded-full bg-street-orange shadow-[0_0_8px_#ff652f] animate-pulse"></span>
+            Scambio tramite server
+          </span>
+        </div>
+
+        <form id="entry-form" onsubmit="event.preventDefault(); initiateRadarSearch();" class="space-y-5">
+
+          <!-- CHI SEI / CHI CERCHI (CARTE SELEZIONE GENERE CON TILT 3D) -->
+          <div class="grid grid-cols-2 gap-3" id="gender-selection-container">
+            <div id="user-gender-card" class="gender-card transition-all duration-200">
+              <label for="user-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
+                Chi sei
+              </label>
+              <div class="relative">
+                <select id="user-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
+                  <option value="M">Ragazzo (M)</option>
+                  <option value="F">Ragazza (F)</option>
+                  <option value="NB">Altro / Non-Binario</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
+                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                </div>
+              </div>
+            </div>
+
+            <div id="target-gender-card" class="gender-card transition-all duration-200">
+              <label for="target-gender" class="block text-xs font-mono font-semibold uppercase text-street-cement mb-1.5">
+                Chi cerchi
+              </label>
+              <div class="relative">
+                <select id="target-gender" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange text-white rounded-xl px-3 py-2.5 text-xs sm:text-sm font-sans focus:outline-none transition appearance-none cursor-pointer">
+                  <option value="Tutti">Chiunque (Tutti)</option>
+                  <option value="F">Solo Ragazze (F)</option>
+                  <option value="M">Solo Ragazzi (M)</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-zinc-500">
+                  <svg class="h-4 w-4 fill-current" viewBox="0 0 20 20" aria-hidden="true"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SCELTA MOOD (3 BOTTONI PILLOLA) -->
+          <div>
+            <label class="block text-xs font-mono font-semibold uppercase text-street-cement mb-2">
+              Scegli il tuo Mood
+            </label>
+            <div class="grid grid-cols-3 gap-2" id="mood-pill-group" role="radiogroup" aria-label="Seleziona il mood della conversazione">
+              <button
+                type="button"
+                data-mood="Cazzeggio"
+                role="radio"
+                aria-checked="true"
+                class="mood-pill active bg-street-orange/25 border-2 border-street-orange text-white py-2.5 px-2 rounded-xl text-xs sm:text-sm font-bold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>💬</span> <span>Cazzeggio</span>
+              </button>
+              <button
+                type="button"
+                data-mood="Sfogati"
+                role="radio"
+                aria-checked="false"
+                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>🖤</span> <span>Sfogati</span>
+              </button>
+              <button
+                type="button"
+                data-mood="Flirt"
+                role="radio"
+                aria-checked="false"
+                class="mood-pill bg-[#0d0e14] border border-zinc-800 hover:border-zinc-600 text-zinc-300 py-2.5 px-2 rounded-xl text-xs sm:text-sm font-medium flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 transition duration-150 transform hover:scale-[1.02]"
+              >
+                <span>🔥</span> <span>Flirt</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- CAMPO SEGRETO (MAX 90 CARATTERI) -->
+          <div id="secret-input-card" class="transition-all duration-200">
+            <div class="flex justify-between items-center mb-1.5">
+              <label for="secret-input" class="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
+                <span>Il tuo pensiero, in 90 caratteri</span>
+              </label>
+              <div class="flex items-center gap-2">
+                <span id="secret-emotional-tag" class="text-[10px] font-mono text-zinc-500 transition-colors duration-200 inline">Patto aperto</span>
+                <span id="char-counter" class="text-xs font-mono font-bold text-street-cement">0/90</span>
+              </div>
+            </div>
+
+            <div class="relative">
+              <textarea
+                id="secret-input"
+                rows="3"
+                maxlength="90"
+                required
+                placeholder="Una cosa che oggi non hai detto a nessuno…"
+                class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl p-3.5 text-sm text-white placeholder-zinc-600 focus:outline-none transition resize-none font-sans leading-snug"
+              ></textarea>
+
+              <!-- Dynamic Character Bar Indicator -->
+              <div class="w-full h-1.5 bg-zinc-800/90 rounded-full mt-2 overflow-hidden">
+                <div id="secret-progress-bar" class="h-full w-0 bg-street-orange transition-all duration-150"></div>
+              </div>
+            </div>
+
+            <!-- Real-time validation error warning if non-conforming -->
+            <p id="secret-validation-warning" class="hidden text-xs font-mono text-red-400 mt-1.5 flex items-center gap-1.5">
+              <span class="text-red-500">⚠️</span>
+              <span id="secret-validation-warning-text"></span>
+            </p>
+
+            <!-- Avviso Privacy -->
+            <p class="text-[11px] font-mono text-zinc-400 mt-2 flex items-center gap-1.5">
+              <span class="text-street-orange">⚡</span>
+              Il server riceve il segreto in chiaro per mostrarlo al partner, senza archiviarlo nel database. Non è crittografia end-to-end. Il partner può copiarlo: evita dati identificativi (3-90 caratteri).
+            </p>
+          </div>
+
+          <!-- CALL TO ACTION BUTTON -->
+          <button
+            type="submit"
+            id="btn-submit-entry"
+            class="w-full group relative bg-street-orange hover:bg-street-orangeHover text-black font-street font-black py-4 px-6 rounded-xl text-base sm:text-lg tracking-wider uppercase transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.98] street-glow flex items-center justify-center gap-3 mt-4 overflow-hidden cursor-pointer"
+          >
+            <span class="relative z-10">TROVA QUALCUNO</span>
+            <svg class="w-5 h-5 fill-current transform group-hover:translate-x-1.5 transition-transform duration-200 relative z-10" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M13.025 1l-2.847 2.828 6.176 6.172H0v4h16.354l-6.176 6.172 2.847 2.828 10.975-11z"/>
+            </svg>
+            <div id="btn-ripple" class="absolute inset-0 bg-white/25 opacity-0 pointer-events-none transition-opacity duration-200"></div>
+          </button>
+          <p class="entry-wait-note">L’attesa dipende dalle persone disponibili. Altri 5 minuti solo se lo volete entrambi.</p>
+
+        </form>
+
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- C. COME FUNZIONA (LE 3 REGOLE DELLA STRADA)          -->
+    <!-- ---------------------------------------------------- -->
+    <div class="trust-hud-container" id="commercial-trust-hud">
+      <div class="status-indicator">
+        <span id="hud-live-beacon" class="w-2 h-2 rounded-full bg-zinc-500"></span>
+        <span class="mono-label">CHAT TESTUALE // STATO SERVER</span>
+      </div>
+
+      <div class="telemetry-grid">
+        <div class="telemetry-item">
+          <span class="item-key">STANZE ATTIVE</span>
+          <span class="item-val" id="hud-active-vaults">—</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">SEGRETI RIMOSSI (DAL RIAVVIO)</span>
+          <span class="item-val accent-amber" id="hud-destroyed-secrets">—</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">LATENZA RETE</span>
+          <span class="item-val" id="hud-latency">N/D</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="item-key">CONNESSIONE AL SERVER</span>
+          <span class="item-val" id="hud-cipher-node">NON CONNESSO</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ---------------------------------------------------- -->
+
+    
+
+    <!-- Quick link to Bacheca -->
+    <div class="text-center pt-2">
+      <button type="button" onclick="switchView('bacheca')" class="text-xs font-mono text-zinc-400 hover:text-white transition cursor-pointer">
+        Oppure leggi i segreti anonimi sulla <span class="text-street-orange underline font-bold">Bacheca Pubblica 📜</span>
+      </button>
+    </div>
+  </main>
+
 
   <!-- ======================================================== -->
   <!-- VIEW 2: RADAR SEARCHING SCREEN WITH 3D SPHERE (LAYER Z-10)-->
@@ -1984,78 +2187,177 @@
         const renderer = new THREE.WebGLRenderer({
           canvas: radarCanvas,
           alpha: true,
-          antialias: true
+          antialias: true,
+          powerPreference: 'high-performance'
         });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
         renderer.setSize(224, 224);
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
-        camera.position.z = 6;
+        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+        camera.position.z = 6.2;
 
-        // Outer Wireframe Sphere
-        const sphereGeo = new THREE.SphereGeometry(2.4, 18, 14);
-        const sphereMat = new THREE.MeshBasicMaterial({
-          color: 0xff5500,
+        const radarGroup = new THREE.Group();
+        scene.add(radarGroup);
+
+        // 1. Outer Geodesic Sphere (Icosahedron Wireframe)
+        const geoSphere = new THREE.IcosahedronGeometry(2.3, 2);
+        const matSphere = new THREE.MeshBasicMaterial({
+          color: 0xff652f,
           wireframe: true,
           transparent: true,
-          opacity: 0.6
+          opacity: 0.75
         });
-        const radarSphere = new THREE.Mesh(sphereGeo, sphereMat);
-        scene.add(radarSphere);
+        const radarSphere = new THREE.Mesh(geoSphere, matSphere);
+        radarGroup.add(radarSphere);
 
-        // Inner Core Sphere
-        const innerGeo = new THREE.SphereGeometry(1.0, 12, 10);
+        // 2. Equatorial Gimbal Ring
+        const eqRingGeo = new THREE.TorusGeometry(2.45, 0.022, 16, 64);
+        const eqRingMat = new THREE.MeshBasicMaterial({
+          color: 0xffaa44,
+          transparent: true,
+          opacity: 0.85
+        });
+        const eqRing = new THREE.Mesh(eqRingGeo, eqRingMat);
+        eqRing.rotation.x = Math.PI / 2;
+        radarGroup.add(eqRing);
+
+        // 3. Polar Gimbal Ring
+        const polarRingGeo = new THREE.TorusGeometry(2.4, 0.02, 16, 64);
+        const polarRingMat = new THREE.MeshBasicMaterial({
+          color: 0xff3b00,
+          transparent: true,
+          opacity: 0.65
+        });
+        const polarRing = new THREE.Mesh(polarRingGeo, polarRingMat);
+        radarGroup.add(polarRing);
+
+        // 4. Inner Core Glowing Beacon
+        const innerGeo = new THREE.SphereGeometry(0.75, 16, 12);
         const innerMat = new THREE.MeshBasicMaterial({
-          color: 0xff8833,
+          color: 0xffaa33,
           wireframe: true,
           transparent: true,
-          opacity: 0.8
+          opacity: 0.85
         });
         const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-        scene.add(innerSphere);
+        radarGroup.add(innerSphere);
 
-        // Dynamic concentric wave ring
-        const ringGeo = new THREE.RingGeometry(0.2, 0.3, 32);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: 0xff5500,
+        // 5. Orbiting 3D Particle Cloud (Blips / Soul Signals)
+        const particleCount = 42;
+        const particleGeo = new THREE.BufferGeometry();
+        const particlePos = new Float32Array(particleCount * 3);
+        for (let i = 0; i < particleCount; i++) {
+          const u = Math.random();
+          const v = Math.random();
+          const theta = u * 2.0 * Math.PI;
+          const phi = Math.acos(2.0 * v - 1.0);
+          const r = 1.9 + Math.random() * 0.9;
+          const sinPhi = Math.sin(phi);
+          particlePos[i * 3] = r * sinPhi * Math.cos(theta);
+          particlePos[i * 3 + 1] = r * sinPhi * Math.sin(theta);
+          particlePos[i * 3 + 2] = r * Math.cos(phi);
+        }
+        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+        const particleMat = new THREE.PointsMaterial({
+          color: 0xffe0b2,
+          size: 0.09,
+          transparent: true,
+          opacity: 0.95
+        });
+        const particleCloud = new THREE.Points(particleGeo, particleMat);
+        radarGroup.add(particleCloud);
+
+        // 6. Expanding Volumetric Radar Ping Rings
+        const wave1Geo = new THREE.RingGeometry(0.25, 0.35, 32);
+        const wave1Mat = new THREE.MeshBasicMaterial({
+          color: 0xff652f,
           side: THREE.DoubleSide,
           transparent: true,
-          opacity: 0.8
+          opacity: 0.85
         });
-        const waveRing = new THREE.Mesh(ringGeo, ringMat);
-        scene.add(waveRing);
+        const wave1 = new THREE.Mesh(wave1Geo, wave1Mat);
+        radarGroup.add(wave1);
 
-        let ringScale = 0.5;
+        const wave2Geo = new THREE.RingGeometry(0.25, 0.35, 32);
+        const wave2Mat = new THREE.MeshBasicMaterial({
+          color: 0xff9944,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.7
+        });
+        const wave2 = new THREE.Mesh(wave2Geo, wave2Mat);
+        radarGroup.add(wave2);
+
+        let wave1Scale = 0.5;
+        let wave2Scale = 2.8;
+
+        // Pointer Parallax on radar card
+        let targetRotX = 0;
+        let targetRotY = 0;
+        const radarCard = radarCanvas.closest('.tilt-card') || radarCanvas.parentElement;
+        if (radarCard) {
+          radarCard.addEventListener('pointermove', (e) => {
+            const rect = radarCard.getBoundingClientRect();
+            const px = (e.clientX - rect.left) / rect.width - 0.5;
+            const py = (e.clientY - rect.top) / rect.height - 0.5;
+            targetRotY = px * 0.45;
+            targetRotX = py * 0.45;
+          });
+          radarCard.addEventListener('pointerleave', () => {
+            targetRotX = 0;
+            targetRotY = 0;
+          });
+        }
 
         function animateRadar() {
           requestAnimationFrame(animateRadar);
 
-          const isRadarActive = !document.getElementById('view-radar').classList.contains('hidden');
-          if (!isRadarActive) return;
+          const radarSection = document.getElementById('view-radar');
+          if (!radarSection || radarSection.classList.contains('hidden')) return;
 
-          radarSphere.rotation.y += 0.018;
-          radarSphere.rotation.x += 0.01;
-          innerSphere.rotation.y -= 0.025;
-          innerSphere.rotation.z += 0.015;
+          // Smooth tilt follow
+          radarGroup.rotation.y += (targetRotY - radarGroup.rotation.y) * 0.08;
+          radarGroup.rotation.x += (targetRotX - radarGroup.rotation.x) * 0.08;
 
-          // Pulse concentric ring outward
-          ringScale += 0.04;
-          if (ringScale > 6) {
-            ringScale = 0.5;
-            waveRing.material.opacity = 0.8;
+          // Rotations
+          radarSphere.rotation.y += 0.014;
+          radarSphere.rotation.x += 0.007;
+
+          eqRing.rotation.z += 0.018;
+          polarRing.rotation.y -= 0.016;
+
+          innerSphere.rotation.y -= 0.022;
+          innerSphere.rotation.z += 0.012;
+
+          particleCloud.rotation.y += 0.008;
+          particleCloud.rotation.x += 0.004;
+
+          // Expand Ping Waves
+          wave1Scale += 0.045;
+          if (wave1Scale > 5.5) {
+            wave1Scale = 0.5;
+            wave1Mat.opacity = 0.85;
           } else {
-            waveRing.material.opacity = Math.max(0, 0.8 * (1 - ringScale / 6));
+            wave1Mat.opacity = Math.max(0, 0.85 * (1 - wave1Scale / 5.5));
           }
-          waveRing.scale.set(ringScale, ringScale, 1);
-          waveRing.rotation.z += 0.01;
+          wave1.scale.set(wave1Scale, wave1Scale, 1);
+
+          wave2Scale += 0.045;
+          if (wave2Scale > 5.5) {
+            wave2Scale = 0.5;
+            wave2Mat.opacity = 0.7;
+          } else {
+            wave2Mat.opacity = Math.max(0, 0.7 * (1 - wave2Scale / 5.5));
+          }
+          wave2.scale.set(wave2Scale, wave2Scale, 1);
 
           renderer.render(scene, camera);
         }
 
         animateRadar();
       } catch (e) {
-        console.warn('[RADAR-3D] Fallback a radar CSS 2D:', e);
+        console.warn('[RADAR-3D] WebGL fallback:', e);
       }
     })();
   </script>
@@ -2564,7 +2866,9 @@
       const hash = window.location.hash;
       if (hash === '#bacheca') {
         switchView('bacheca');
-      } else if (hash === '#confessionale' || hash === '' || hash === '#') {
+      } else if (hash === '#app' || hash === '#confessionale') {
+        switchView('app');
+      } else if (hash === '#presentazione' || hash === '' || hash === '#') {
         switchView('landing');
       }
     });
@@ -2591,6 +2895,34 @@
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
+    }
+
+    
+    // Lead Generation Submission Handler
+    function submitLeadEmail() {
+      const input = document.getElementById('lead-email-input');
+      const successEl = document.getElementById('lead-gen-success');
+      const form = document.getElementById('lead-gen-form');
+      if (!input || !input.value.trim()) return;
+      const email = input.value.trim();
+      if (!email.includes('@') || !email.includes('.')) {
+        showToast('Inserisci un indirizzo email valido.', 'error');
+        return;
+      }
+      try {
+        localStorage.setItem('streetalk_lead_email', email);
+        localStorage.setItem('streetalk_lead_timestamp', Date.now().toString());
+      } catch (e) {}
+
+      if (typeof SoundEngine !== 'undefined' && SoundEngine.playMsgReceived) {
+        SoundEngine.playMsgReceived();
+      }
+      showToast('Registrazione avvenuta con successo! Benvenuto nel Circolo 🔥', 'success');
+      if (form) form.classList.add('hidden');
+      if (successEl) {
+        successEl.classList.remove('hidden');
+        safeSetText(successEl, '✓ Sei nel Circolo Notturno! Ti scriveremo alle prossime novità.');
+      }
     }
 
     function showToast(message, type = 'info') {
@@ -2945,24 +3277,37 @@
 
     function switchView(viewName, onActive) {
       const vLanding = document.getElementById('view-landing');
+      const vApp = document.getElementById('view-app');
       const vRadar = document.getElementById('view-radar');
       const vChat = document.getElementById('view-chat');
       const vBacheca = document.getElementById('view-bacheca');
-      const views = { landing: vLanding, radar: vRadar, chat: vChat, bacheca: vBacheca };
+      const views = { landing: vLanding, app: vApp, radar: vRadar, chat: vChat, bacheca: vBacheca };
 
       const targetView = views[viewName];
       if (!targetView) return;
 
       // Update Nav buttons styling
       const navLanding = document.getElementById('nav-btn-landing');
+      const navApp = document.getElementById('nav-btn-app');
       const navBacheca = document.getElementById('nav-btn-bacheca');
       const mobileNavIcon = document.getElementById('mobile-nav-icon');
+      
+      const activeClass = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
+      const inactiveClass = 'px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 cursor-pointer flex items-center gap-1.5';
+
       if (navLanding && navBacheca) {
+        navLanding.className = inactiveClass;
+        if (navApp) navApp.className = inactiveClass;
+        navBacheca.className = inactiveClass;
+
         if (viewName === 'landing') {
-          navLanding.className = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
-          navBacheca.className = 'px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 cursor-pointer flex items-center gap-1.5';
-          if (mobileNavIcon) mobileNavIcon.textContent = '📜';
-          window.location.hash = '#confessionale';
+          navLanding.className = activeClass;
+          if (mobileNavIcon) mobileNavIcon.textContent = '🏠';
+          window.location.hash = '#presentazione';
+        } else if (viewName === 'app') {
+          if (navApp) navApp.className = activeClass;
+          if (mobileNavIcon) mobileNavIcon.textContent = '⚡';
+          window.location.hash = '#app';
         } else if (viewName === 'bacheca') {
           navBacheca.className = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
           navLanding.className = 'px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 cursor-pointer flex items-center gap-1.5';
@@ -2979,7 +3324,7 @@
       const allViews = [vLanding, vRadar, vChat, vBacheca].filter(Boolean);
       const currentActive = allViews.find(v => !v.classList.contains('hidden'));
 
-      if (window.gsap && currentActive && currentActive !== targetView) {
+      if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches && currentActive && currentActive !== targetView) {
         gsap.to(currentActive, {
           opacity: 0,
           y: -12,
