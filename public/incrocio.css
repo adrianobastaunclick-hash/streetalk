@@ -13,17 +13,17 @@ html {
 
 /* Base Body System & High-Contrast Colors */
 body[data-design="incrocio"] {
-  --bg-deep: #090a0f;
-  --panel: #11131b;
-  --panel-glass: rgba(17, 19, 27, 0.85);
-  --raised: #181b26;
+  --bg-deep: #f5f2eb;
+  --panel: #fffefa;
+  --panel-glass: rgba(255,254,250,.9);
+  --raised: #eee8e1;
   --line: rgba(255, 255, 255, 0.14);
-  --line-strong: rgba(255, 101, 47, 0.4);
-  --ink: #ffffff;
-  --ink-secondary: #e4e4e7;
-  --ink-muted: #a1a1aa;
-  --signal-orange: #ff652f;
-  --signal-amber: #f59e0b;
+  --line-strong: rgba(183, 46, 85, 0.4);
+  --ink: #29252c;
+  --ink-secondary: #49414d;
+  --ink-muted: #6e6570;
+  --signal-orange: #b72e55;
+  --signal-amber: #b72e55;
   --signal-berry: #e11d48;
   --signal-mint: #10b981;
   background: var(--bg-deep) !important;
@@ -35,7 +35,7 @@ body[data-design="incrocio"] {
 [data-design="incrocio"] h2,
 [data-design="incrocio"] h3,
 [data-design="incrocio"] .font-street {
-  color: #ffffff !important;
+  color: #29252c !important;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -44,11 +44,11 @@ body[data-design="incrocio"] {
   line-height: 1.08;
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: #ffffff !important;
+  color: #29252c !important;
 }
 
 [data-design="incrocio"] #hero-subtitle {
-  color: #e4e4e7 !important;
+  color: #49414d !important;
   font-size: clamp(16px, 1.8vw, 20px);
   line-height: 1.6;
   font-weight: 400;
@@ -56,9 +56,9 @@ body[data-design="incrocio"] {
 
 /* Hero Caption & Tag */
 [data-design="incrocio"] #hero-tag {
-  background: rgba(255, 101, 47, 0.12) !important;
-  border: 1px solid rgba(255, 101, 47, 0.45) !important;
-  color: #ff8555 !important;
+  background: rgba(183, 46, 85, 0.12) !important;
+  border: 1px solid rgba(183, 46, 85, 0.45) !important;
+  color: #b72e55 !important;
 }
 
 /* 3D Encounter Scene in Hero */
@@ -117,18 +117,18 @@ body[data-design="incrocio"] {
   top: 10px;
   left: 3%;
   background: linear-gradient(135deg, #b72e55 0%, #831843 100%);
-  color: #ffffff;
+  color: #29252c;
   transform: rotateZ(-8deg) translateZ(30px);
-  animation: thought-rise 6.5s ease-in-out infinite;
+  animation: thought-rise 6.5s ease-in-out 1;
 }
 
 .thought-other {
   top: 55px;
   right: 3%;
   background: linear-gradient(135deg, #0d9488 0%, #064e3b 100%);
-  color: #ffffff;
+  color: #29252c;
   transform: rotateZ(7deg) translateZ(60px);
-  animation: thought-drift 6.5s ease-in-out infinite;
+  animation: thought-drift 6.5s ease-in-out 1;
 }
 
 .scene-caption {
@@ -138,8 +138,8 @@ body[data-design="incrocio"] {
   transform: translateX(-50%);
   font: 10px 'Space Mono', monospace;
   letter-spacing: 0.16em;
-  color: #a1a1aa;
-  background: rgba(10, 12, 18, 0.85);
+  color: #6e6570;
+  background: #f5f2eb;
   padding: 3px 12px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -161,8 +161,8 @@ body[data-design="incrocio"] {
 
 /* Reveal-on-Scroll Smooth Micro-Interactions */
 .reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(22px);
+  opacity: 1;
+  transform: none;
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
@@ -177,8 +177,8 @@ body[data-design="incrocio"] {
 [data-design="incrocio"] .manifesto-card,
 [data-design="incrocio"] #lead-gen-card,
 [data-design="incrocio"] .rule-card {
-  background: rgba(15, 17, 24, 0.85) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  background: #fffefa !important;
+  border: 1px solid #cec4cb !important;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(16px);
   border-radius: 20px;
@@ -186,8 +186,8 @@ body[data-design="incrocio"] {
 
 [data-design="incrocio"] #entry-card:hover,
 [data-design="incrocio"] .manifesto-card:hover {
-  border-color: rgba(255, 101, 47, 0.45) !important;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 101, 47, 0.12) !important;
+  border-color: rgba(183, 46, 85, 0.45) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(183, 46, 85, 0.12) !important;
 }
 
 /* High-Contrast Form Inputs */
@@ -195,40 +195,40 @@ body[data-design="incrocio"] {
 [data-design="incrocio"] input[type="text"],
 [data-design="incrocio"] input[type="email"],
 [data-design="incrocio"] textarea {
-  background: #0b0d13 !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: #fffefa !important;
+  color: #29252c !important;
+  border: 1px solid #8b7b87 !important;
 }
 
 [data-design="incrocio"] select:focus,
 [data-design="incrocio"] input[type="text"]:focus,
 [data-design="incrocio"] input[type="email"]:focus,
 [data-design="incrocio"] textarea:focus {
-  border-color: #ff652f !important;
-  box-shadow: 0 0 0 2px rgba(255, 101, 47, 0.25) !important;
+  border-color: #b72e55 !important;
+  box-shadow: 0 0 0 2px rgba(183, 46, 85, 0.25) !important;
 }
 
 /* Primary Action Buttons with High Tactile Feel */
 [data-design="incrocio"] #btn-submit-entry,
 [data-design="incrocio"] #btn-submit-lead {
-  background: linear-gradient(135deg, #ff652f 0%, #e0531f 100%) !important;
+  background: linear-gradient(135deg, #b72e55 0%, #e0531f 100%) !important;
   color: #000000 !important;
   font-weight: 800 !important;
   border: none !important;
-  box-shadow: 0 4px 18px rgba(255, 101, 47, 0.45) !important;
+  box-shadow: 0 4px 18px rgba(183, 46, 85, 0.45) !important;
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease !important;
 }
 
 [data-design="incrocio"] #btn-submit-entry:hover,
 [data-design="incrocio"] #btn-submit-lead:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 101, 47, 0.6) !important;
+  box-shadow: 0 8px 24px rgba(183, 46, 85, 0.6) !important;
 }
 
 [data-design="incrocio"] #btn-submit-entry:active,
 [data-design="incrocio"] #btn-submit-lead:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(255, 101, 47, 0.3) !important;
+  box-shadow: 0 2px 10px rgba(183, 46, 85, 0.3) !important;
 }
 
 /* 3D RADAR — ALWAYS VISIBLE & EMPOWERED */
@@ -241,9 +241,9 @@ body[data-design="incrocio"] {
 }
 
 [data-design="incrocio"] #view-radar > div {
-  background: rgba(11, 13, 19, 0.92) !important;
-  border: 2px solid rgba(255, 101, 47, 0.4) !important;
-  box-shadow: 0 0 40px rgba(255, 101, 47, 0.18), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+  background: #fffefa !important;
+  border: 2px solid rgba(183, 46, 85, 0.4) !important;
+  box-shadow: 0 0 40px rgba(183, 46, 85, 0.18), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
 }
 
 /* Responsive adjustments */
@@ -281,3 +281,45 @@ body[data-design="incrocio"] {
     transition: none !important;
   }
 }
+
+
+/* Incrocio material and interaction tokens */
+:root { --inc-paper:#f5f2eb; --inc-ink:#29252c; --inc-berry:#b72e55; --inc-mint:#bce9df; }
+html,body[data-design="incrocio"] { background:var(--inc-paper)!important; color:var(--inc-ink); }
+body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; --raised:#eee8e1; --muted:#6e6570; --signal:#b72e55; --line:#cec4cb; --control-line:#8b7b87; }
+[data-design="incrocio"] > header { background:#f5f2ebf5!important; border-color:#cec4cb!important; }
+[data-design="incrocio"] .text-white,[data-design="incrocio"] [class*="text-zinc-"] { color:var(--inc-ink)!important; }
+[data-design="incrocio"] [class*="bg-zinc-"],[data-design="incrocio"] [class*="bg-black"],[data-design="incrocio"] [class*="bg-[#0"],[data-design="incrocio"] [class*="bg-[#1"] { background-color:#fffefa!important; }
+[data-design="incrocio"] [class*="border-zinc-"] { border-color:#cec4cb!important; }
+[data-design="incrocio"] h1,[data-design="incrocio"] h2,[data-design="incrocio"] h3,[data-design="incrocio"] .font-street { text-shadow:none!important; }
+[data-design="incrocio"] .font-street { font-family:'Space Grotesk',sans-serif!important; }
+[data-design="incrocio"] #hero-title { font-size:clamp(38px,5vw,66px); text-transform:none; font-weight:600; letter-spacing:-.055em; }
+[data-design="incrocio"] .street-noise { display:none; }
+[data-design="incrocio"] #entry-card,[data-design="incrocio"] .manifesto-card,[data-design="incrocio"] #lead-gen-card,[data-design="incrocio"] .rule-card { box-shadow:0 14px 40px #29252c0b!important; transform:none!important; }
+[data-design="incrocio"] #btn-submit-entry,[data-design="incrocio"] #chat-input-form button,[data-design="incrocio"] button.bg-street-orange { background:#b72e55!important; color:#fffefa!important; box-shadow:0 4px 0 #842340!important; }
+[data-design="incrocio"] #secret-input,[data-design="incrocio"] #chat-message-input { background:#f5f2eb!important; color:#29252c!important; }
+[data-design="incrocio"] .mood-pill { background:#fffefa!important; color:#29252c!important; }
+[data-design="incrocio"] .mood-pill[aria-checked="true"] { background:#f9e5ec!important; border-color:#b72e55!important; }
+.thought { box-shadow:1px 2px 0 #7c6c76,2px 4px 0 #7c6c76,3px 6px 0 #7c6c76,8px 22px 30px #29252c24; border-radius:16px 16px 3px 16px; }
+.thought-you { background:#b72e55; color:#fffefa; }
+.thought-other { background:#bce9df; color:#24453e; }
+.scene-caption { color:#6e6570; white-space:nowrap; font-size:9px; }
+[data-design="incrocio"] #view-radar > div { background:#fffefa!important; box-shadow:0 15px 40px #29252c10!important; border-color:#cec4cb!important; }
+[data-design="incrocio"] #messages-container > .flex > div:first-child { background:#fffefa!important; color:#29252c!important; }
+[data-design="incrocio"] #messages-container > .items-end > div:first-child { background:#29252c!important; color:#fffefa!important; border-color:#29252c; }
+[data-design="incrocio"] #partner-secret-card { background:#e3f3ed!important; border-color:#8cb5aa!important; }
+[data-design="incrocio"] [id^="modal-"] { background:#29252cd9!important; }
+[data-design="incrocio"] [id^="modal-"] > div { background:#fffefa!important; }
+@media(max-width:640px) { .encounter-scene { height:180px; } .thought { height:120px; } .thought strong { font-size:16px; } .thought-other { top:34px; } }
+
+[data-design="incrocio"] #view-landing > .editorial-hero { grid-column:1/-1; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:12px 48px; width:100%; max-width:none; }
+.editorial-hero > * { grid-column:1; }
+[data-design="incrocio"] .editorial-hero .encounter-scene { grid-column:2; grid-row:1/6; align-self:center; width:100%; height:290px; }
+[data-design="incrocio"] #hero-tag { width:fit-content; padding:8px 12px; border-radius:6px; font-size:9px; }
+[data-design="incrocio"] #hero-title { margin:8px 0 16px; }
+[data-design="incrocio"] #hero-subtitle { margin:0; }
+[data-design="incrocio"] #ping-badge,[data-design="incrocio"] header [role="status"] { background:#fffefa!important; color:#29252c!important; border-color:#cec4cb!important; }
+@media(max-width:900px) { [data-design="incrocio"] #view-landing > .editorial-hero { display:flex; flex-direction:column; gap:12px; } [data-design="incrocio"] .editorial-hero .encounter-scene { height:200px; max-width:430px; } }
+
+[data-design="incrocio"] input::placeholder,[data-design="incrocio"] textarea::placeholder { color:#6e6570!important; opacity:1; }
+[data-design="incrocio"] #entry-card:hover { box-shadow:0 14px 40px #29252c0b!important; }

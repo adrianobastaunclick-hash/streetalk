@@ -34,7 +34,8 @@
       if (document.hidden) reset();
     });
     reduced.addEventListener('change', reset);
-    window.addEventListener('pagehide', () => { reset(); observer.disconnect(); });
+    window.addEventListener('pagehide', () => { reset(); scene.classList.add('motion-paused'); });
+    window.addEventListener('pageshow', () => { observer.observe(scene); scene.classList.toggle('motion-paused', document.hidden); });
   }
 
   // Smooth Scroll Reveal Observer

@@ -73,7 +73,7 @@
           "Scambio istantaneo di segreti anonimi",
           "Match tra partecipanti compatibili disponibili",
           "Contenuti della chat visualizzati come testo",
-          "Motore 3D WebGL a 60 FPS con particelle e onde asfalto"
+          "Interfaccia con effetti tridimensionali e supporto al movimento ridotto"
         ]
       },
       {
@@ -596,18 +596,14 @@
         <span class="text-zinc-600">•</span>
         <span>RISPETTO RECIPROCO</span>
         <span class="text-zinc-600">•</span>
-        <span>PERSONE VERE</span>
+        <span>CHAT TESTUALE</span>
       </div>
 
       <!-- Main Title (H1) -->
-      <h1 id="hero-title" class="text-3xl sm:text-5xl md:text-6xl font-black font-street tracking-tight text-white uppercase leading-[1.06] mb-5">
-        Le vere connessioni<br><span class="hero-accent text-street-orange">non devono costarti un rene.</span>
-      </h1>
+      <h1 id="hero-title" class="text-3xl sm:text-5xl md:text-6xl font-black font-street tracking-tight text-white uppercase leading-[1.06] mb-5">Le nostre strade.<br><span class="hero-accent">Un punto in comune.</span></h1>
 
       <!-- Subtitle -->
-      <p id="hero-subtitle" class="text-zinc-200 text-base sm:text-xl font-normal max-w-3xl mx-auto leading-relaxed mb-6">
-        Basta app di dating tossiche con abbonamenti da 30€ al mese per parlare con bot o match fantasma. Su STREETALK incontri persone reali senza pagare un centesimo: per amicizia, amore o dibattito, ma sempre con rispetto reciproco e senza squallore da bar.
-      </p>
+      <p id="hero-subtitle" class="text-zinc-200 text-base sm:text-xl font-normal max-w-3xl mx-auto leading-relaxed mb-6">Un pensiero a testa. Tre minuti per parlare. Incontra qualcuno partendo da quello che hai da dire, senza creare un profilo.</p>
 
       <!-- Quick Action Jump Bar -->
       <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
@@ -2310,8 +2306,21 @@
           });
         }
 
+        let radarFrame = 0;
+        const radarSection = document.getElementById('view-radar');
+        const radarReduced = matchMedia('(prefers-reduced-motion: reduce)');
+        function radarVisible() { return radarSection && !radarSection.classList.contains('hidden') && !document.hidden; }
+        function syncRadar() { cancelAnimationFrame(radarFrame); radarFrame = 0; if (!radarVisible()) return; if (radarReduced.matches) renderer.render(scene, camera); else radarFrame = requestAnimationFrame(animateRadar); }
+        const radarObserver = new MutationObserver(syncRadar);
+        if (radarSection) radarObserver.observe(radarSection, {attributes:true,attributeFilter:['class']});
+        document.addEventListener('visibilitychange', syncRadar);
+        radarReduced.addEventListener('change', syncRadar);
+        window.addEventListener('pagehide', () => { cancelAnimationFrame(radarFrame); radarFrame = 0; });
+        window.addEventListener('pageshow', syncRadar);
         function animateRadar() {
-          requestAnimationFrame(animateRadar);
+          radarFrame = 0;
+          if (!radarVisible() || radarReduced.matches) return;
+          radarFrame = requestAnimationFrame(animateRadar);
 
           const radarSection = document.getElementById('view-radar');
           if (!radarSection || radarSection.classList.contains('hidden')) return;
@@ -2355,7 +2364,7 @@
           renderer.render(scene, camera);
         }
 
-        animateRadar();
+        syncRadar();
       } catch (e) {
         console.warn('[RADAR-3D] WebGL fallback:', e);
       }
@@ -2367,6 +2376,7 @@
   <!-- ======================================================== -->
   <script>
     (function init3DTiltAndGSAP() {
+      if (document.body.dataset.design === "incrocio") return;
       // 1. 3D Tilt Effect on cards (Cursor & Centralized Gyroscope support)
       const tiltRegisteredElements = [];
 
@@ -3321,7 +3331,7 @@
         }
       }
 
-      const allViews = [vLanding, vRadar, vChat, vBacheca].filter(Boolean);
+      const allViews = [vLanding, vApp, vRadar, vChat, vBacheca].filter(Boolean);
       const currentActive = allViews.find(v => !v.classList.contains('hidden'));
 
       if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches && currentActive && currentActive !== targetView) {
