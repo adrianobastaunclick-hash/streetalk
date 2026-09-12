@@ -583,6 +583,8 @@ if (typeof io === 'undefined') {
       const hash = window.location.hash;
       if (hash === '#bacheca') {
         switchView('bacheca');
+      } else if (hash === '#profilo') {
+        switchView('profilo');
       } else if (hash === '#app' || hash === '#confessionale') {
         switchView('app');
       } else if (hash === '#presentazione' || hash === '' || hash === '#') {
@@ -593,6 +595,8 @@ if (typeof io === 'undefined') {
     document.addEventListener('DOMContentLoaded', () => {
       if (window.location.hash === '#bacheca') {
         switchView('bacheca');
+      } else if (window.location.hash === '#profilo') {
+        switchView('profilo');
       } else {
         renderBacheca('tutti');
       }
@@ -998,17 +1002,20 @@ if (typeof io === 'undefined') {
       const vRadar = document.getElementById('view-radar');
       const vChat = document.getElementById('view-chat');
       const vBacheca = document.getElementById('view-bacheca');
-      const views = { landing: vLanding, app: vApp, radar: vRadar, chat: vChat, bacheca: vBacheca };
+      const vProfilo = document.getElementById('view-profilo');
+      const views = { landing: vLanding, app: vApp, radar: vRadar, chat: vChat, bacheca: vBacheca, profilo: vProfilo };
 
       const targetView = views[viewName];
       if (!targetView) return;
       if (viewName !== 'landing' && !socket.connected && typeof socket.connect === 'function') socket.connect();
       if (viewName === 'radar') loadRadarEngine();
+      if (viewName === 'profilo') loadFullProfileView();
 
       // Update Nav buttons styling
       const navLanding = document.getElementById('nav-btn-landing');
       const navApp = document.getElementById('nav-btn-app');
       const navBacheca = document.getElementById('nav-btn-bacheca');
+      const navProfilo = document.getElementById('nav-btn-profilo');
       const mobileNavIcon = document.getElementById('mobile-nav-icon');
       
       const activeClass = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
@@ -1018,6 +1025,7 @@ if (typeof io === 'undefined') {
         navLanding.className = inactiveClass;
         if (navApp) navApp.className = inactiveClass;
         navBacheca.className = inactiveClass;
+        if (navProfilo) navProfilo.className = inactiveClass;
 
         if (viewName === 'landing') {
           navLanding.className = activeClass;
@@ -1028,11 +1036,14 @@ if (typeof io === 'undefined') {
           if (mobileNavIcon) mobileNavIcon.textContent = '⚡';
           window.location.hash = '#app';
         } else if (viewName === 'bacheca') {
-          navBacheca.className = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
-          navLanding.className = 'px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-zinc-700 cursor-pointer flex items-center gap-1.5';
-          if (mobileNavIcon) mobileNavIcon.textContent = '⚡';
+          navBacheca.className = activeClass;
+          if (mobileNavIcon) mobileNavIcon.textContent = '📜';
           window.location.hash = '#bacheca';
           renderBacheca('tutti');
+        } else if (viewName === 'profilo') {
+          if (navProfilo) navProfilo.className = activeClass;
+          if (mobileNavIcon) mobileNavIcon.textContent = '👤';
+          window.location.hash = '#profilo';
         } else if (viewName === 'radar') {
           window.location.hash = '#radar';
         } else if (viewName === 'chat') {
@@ -1040,7 +1051,7 @@ if (typeof io === 'undefined') {
         }
       }
 
-      const allViews = [vLanding, vApp, vRadar, vChat, vBacheca].filter(Boolean);
+      const allViews = [vLanding, vApp, vRadar, vChat, vBacheca, vProfilo].filter(Boolean);
       const currentActive = allViews.find(v => !v.classList.contains('hidden'));
 
       if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches && currentActive && currentActive !== targetView) {
@@ -1054,7 +1065,7 @@ if (typeof io === 'undefined') {
             allViews.forEach(v => v.classList.add('hidden'));
             targetView.classList.remove('hidden');
 
-            if (viewName === 'landing' || viewName === 'bacheca') {
+            if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo') {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -1074,7 +1085,7 @@ if (typeof io === 'undefined') {
       // Instant fallback
       allViews.forEach(v => v.classList.add('hidden'));
       targetView.classList.remove('hidden');
-      if (viewName === 'landing' || viewName === 'bacheca') {
+      if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       if (typeof onActive === 'function') {
@@ -1379,6 +1390,41 @@ if (typeof io === 'undefined') {
       return `${name}_${num}`;
     }
 
+    const STREET_PROFILE_DEFAULTS = {
+      bio: 'Qui per parlare con rispetto ed educazione',
+      motto: 'Cerco conversazioni che lasciano il segno dopo le due di notte.',
+      vision: 'Fame di futuro, progetti creativi e confronto vero con persone che non hanno paura di pensare fuori dal coro.',
+      topics: 'Musica notturna, filosofia da marciapiede, sfoghi senza maschere, cinema.',
+      avoids: 'Chi fa il fenomeno da bar, giudizi sul corpo, risposte a monosillabi e perditempo.'
+    };
+
+    const INSPIRATIONAL_PROFILES = [
+      {
+        motto: 'Cerco verità non dette dopo le due di notte.',
+        vision: 'Fame di futuro, progetti musicali underground e confronto reale senza filtri.',
+        topics: 'Beatmaking, filosofia urbana, viaggi in solitaria, cinema d\'autore.',
+        avoids: 'Fenomeni da bar, giudizi sul corpo, ipocrisia e risposte a monosillabi.'
+      },
+      {
+        motto: 'La notte amplifica le idee che il giorno ignora.',
+        vision: 'Voglio creare qualcosa che resti, circondandomi di menti curiose che non si accontentano.',
+        topics: 'Sogni lucidi, innovazione radicale, architettura brutale, sfoghi autentici.',
+        avoids: 'Pettegolezzi da marciapiede, chi si prende troppo sul serio, pose social.'
+      },
+      {
+        motto: 'Meno estetica, più anima.',
+        vision: 'Confrontarmi con chi ha vissuto cadute e rinascite. La vulnerabilità è forza, non debolezza.',
+        topics: 'Psicologia notturna, poesie di strada, dischi rari, dilemmi etici.',
+        avoids: 'Chi giudica la copertina prima del libro, violenza verbale, spam.'
+      },
+      {
+        motto: 'Silenzio per ascoltare, parole per costruire.',
+        vision: 'Un mondo in cui la conversazione tra sconosciuti torni a essere un\'arte autentica.',
+        topics: 'Astronomia amatoriale, tecnologia etica, storie di quartiere, libri letti a metà.',
+        avoids: 'Trolling aggressivo, mancanza di rispetto, atteggiamento da maestro di vita.'
+      }
+    ];
+
     function getUserProfile() {
       try {
         const stored = localStorage.getItem('streetalk_profile_v1');
@@ -1388,7 +1434,11 @@ if (typeof io === 'undefined') {
             return {
               moniker: parsed.moniker.trim().substring(0, 25) || generateRandomStreetNick(),
               avatar: STREET_AVATARS.includes(parsed.avatar) ? parsed.avatar : '⚡',
-              bio: typeof parsed.bio === 'string' ? parsed.bio.trim().substring(0, 70) : ''
+              bio: typeof parsed.bio === 'string' && parsed.bio.trim() ? parsed.bio.trim().substring(0, 70) : STREET_PROFILE_DEFAULTS.bio,
+              motto: typeof parsed.motto === 'string' && parsed.motto.trim() ? parsed.motto.trim().substring(0, 100) : STREET_PROFILE_DEFAULTS.motto,
+              vision: typeof parsed.vision === 'string' && parsed.vision.trim() ? parsed.vision.trim().substring(0, 200) : STREET_PROFILE_DEFAULTS.vision,
+              topics: typeof parsed.topics === 'string' && parsed.topics.trim() ? parsed.topics.trim().substring(0, 150) : STREET_PROFILE_DEFAULTS.topics,
+              avoids: typeof parsed.avoids === 'string' && parsed.avoids.trim() ? parsed.avoids.trim().substring(0, 150) : STREET_PROFILE_DEFAULTS.avoids
             };
           }
         }
@@ -1397,7 +1447,11 @@ if (typeof io === 'undefined') {
       const defaultProfile = {
         moniker: generateRandomStreetNick(),
         avatar: '⚡',
-        bio: 'Qui per parlare con rispetto ed educazione'
+        bio: STREET_PROFILE_DEFAULTS.bio,
+        motto: STREET_PROFILE_DEFAULTS.motto,
+        vision: STREET_PROFILE_DEFAULTS.vision,
+        topics: STREET_PROFILE_DEFAULTS.topics,
+        avoids: STREET_PROFILE_DEFAULTS.avoids
       };
       saveUserProfile(defaultProfile);
       return defaultProfile;
@@ -1419,6 +1473,7 @@ if (typeof io === 'undefined') {
     }
 
     let tempSelectedAvatar = '⚡';
+    let fullProfileAvatar = '⚡';
 
     function renderAvatarGrid(containerId, activeAvatar, onSelect) {
       const container = document.getElementById(containerId);
@@ -1491,12 +1546,14 @@ if (typeof io === 'undefined') {
     function saveProfileFromModal() {
       const nickInput = document.getElementById('profile-nick-input');
       const bioInput = document.getElementById('profile-bio-input');
+      const current = getUserProfile();
       const moniker = (nickInput && nickInput.value.trim().length >= 2)
         ? nickInput.value.trim().substring(0, 20)
         : generateRandomStreetNick();
       const bio = bioInput ? bioInput.value.trim().substring(0, 70) : '';
 
       const updated = {
+        ...current,
         moniker,
         avatar: tempSelectedAvatar,
         bio
@@ -1504,6 +1561,143 @@ if (typeof io === 'undefined') {
       saveUserProfile(updated);
       closeProfileModal();
       showToast('Profilo salvato con successo!', 'success');
+    }
+
+    // Full Descriptive Profile View (#view-profilo)
+    function loadFullProfileView() {
+      const prof = getUserProfile();
+      fullProfileAvatar = prof.avatar || '⚡';
+
+      const nickInput = document.getElementById('full-profile-nick');
+      const mottoInput = document.getElementById('full-profile-motto');
+      const visionInput = document.getElementById('full-profile-vision');
+      const topicsInput = document.getElementById('full-profile-topics');
+      const avoidsInput = document.getElementById('full-profile-avoids');
+
+      if (nickInput) nickInput.value = prof.moniker || '';
+      if (mottoInput) mottoInput.value = prof.motto || '';
+      if (visionInput) visionInput.value = prof.vision || '';
+      if (topicsInput) topicsInput.value = prof.topics || '';
+      if (avoidsInput) avoidsInput.value = prof.avoids || '';
+
+      renderAvatarGrid('full-profile-avatar-grid', fullProfileAvatar, (av) => {
+        fullProfileAvatar = av;
+        updateCardLivePreview();
+      });
+
+      updateCardLivePreview();
+    }
+
+    function updateCardLivePreview() {
+      const nickInput = document.getElementById('full-profile-nick');
+      const mottoInput = document.getElementById('full-profile-motto');
+      const visionInput = document.getElementById('full-profile-vision');
+      const topicsInput = document.getElementById('full-profile-topics');
+      const avoidsInput = document.getElementById('full-profile-avoids');
+
+      const nick = (nickInput && nickInput.value.trim()) ? nickInput.value.trim() : 'Anonimo';
+      const motto = (mottoInput && mottoInput.value.trim()) ? mottoInput.value.trim() : STREET_PROFILE_DEFAULTS.motto;
+      const vision = (visionInput && visionInput.value.trim()) ? visionInput.value.trim() : STREET_PROFILE_DEFAULTS.vision;
+      const topics = (topicsInput && topicsInput.value.trim()) ? topicsInput.value.trim() : STREET_PROFILE_DEFAULTS.topics;
+      const avoids = (avoidsInput && avoidsInput.value.trim()) ? avoidsInput.value.trim() : STREET_PROFILE_DEFAULTS.avoids;
+
+      // Update counters
+      const counterMotto = document.getElementById('counter-full-motto');
+      const counterVision = document.getElementById('counter-full-vision');
+      const counterTopics = document.getElementById('counter-full-topics');
+      const counterAvoids = document.getElementById('counter-full-avoids');
+
+      if (counterMotto && mottoInput) counterMotto.textContent = `${mottoInput.value.length}/90`;
+      if (counterVision && visionInput) counterVision.textContent = `${visionInput.value.length}/180`;
+      if (counterTopics && topicsInput) counterTopics.textContent = `${topicsInput.value.length}/140`;
+      if (counterAvoids && avoidsInput) counterAvoids.textContent = `${avoidsInput.value.length}/140`;
+
+      // Update live preview card (Asphalt Passport)
+      const cardAvatar = document.getElementById('card-display-avatar');
+      const cardNick = document.getElementById('card-display-nick');
+      const cardMotto = document.getElementById('card-display-motto');
+      const cardVision = document.getElementById('card-display-vision');
+      const cardTopics = document.getElementById('card-display-topics');
+      const cardAvoids = document.getElementById('card-display-avoids');
+
+      if (cardAvatar) safeSetText(cardAvatar, fullProfileAvatar);
+      if (cardNick) safeSetText(cardNick, nick);
+      if (cardMotto) safeSetText(cardMotto, `"${motto}"`);
+      if (cardVision) safeSetText(cardVision, vision);
+      if (cardTopics) safeSetText(cardTopics, topics);
+      if (cardAvoids) safeSetText(cardAvoids, avoids);
+    }
+
+    function randomizeFullProfileNick() {
+      const newNick = generateRandomStreetNick();
+      const nickInput = document.getElementById('full-profile-nick');
+      if (nickInput) {
+        nickInput.value = newNick;
+        updateCardLivePreview();
+      }
+    }
+
+    function appendTopicPreset(text) {
+      const topicsInput = document.getElementById('full-profile-topics');
+      if (!topicsInput) return;
+      let cur = topicsInput.value.trim();
+      if (cur.length > 0) {
+        if (!cur.endsWith(',')) cur += ', ';
+        else cur += ' ';
+      }
+      cur += text;
+      if (cur.length > 140) cur = cur.substring(0, 140);
+      topicsInput.value = cur;
+      updateCardLivePreview();
+    }
+
+    function inspireRandomProfile() {
+      const idx = Math.floor(Math.random() * INSPIRATIONAL_PROFILES.length);
+      const chosen = INSPIRATIONAL_PROFILES[idx];
+
+      const mottoInput = document.getElementById('full-profile-motto');
+      const visionInput = document.getElementById('full-profile-vision');
+      const topicsInput = document.getElementById('full-profile-topics');
+      const avoidsInput = document.getElementById('full-profile-avoids');
+
+      if (mottoInput) mottoInput.value = chosen.motto;
+      if (visionInput) visionInput.value = chosen.vision;
+      if (topicsInput) topicsInput.value = chosen.topics;
+      if (avoidsInput) avoidsInput.value = chosen.avoids;
+
+      updateCardLivePreview();
+      showToast('Scheda ispirata dal flusso notturno! ✨', 'success');
+    }
+
+    function saveFullProfile() {
+      const nickInput = document.getElementById('full-profile-nick');
+      const mottoInput = document.getElementById('full-profile-motto');
+      const visionInput = document.getElementById('full-profile-vision');
+      const topicsInput = document.getElementById('full-profile-topics');
+      const avoidsInput = document.getElementById('full-profile-avoids');
+
+      const current = getUserProfile();
+      const moniker = (nickInput && nickInput.value.trim().length >= 2)
+        ? nickInput.value.trim().substring(0, 20)
+        : generateRandomStreetNick();
+      const motto = mottoInput ? mottoInput.value.trim().substring(0, 90) : '';
+      const vision = visionInput ? visionInput.value.trim().substring(0, 180) : '';
+      const topics = topicsInput ? topicsInput.value.trim().substring(0, 140) : '';
+      const avoids = avoidsInput ? avoidsInput.value.trim().substring(0, 140) : '';
+
+      const updated = {
+        ...current,
+        moniker,
+        avatar: fullProfileAvatar,
+        bio: 'Qui per parlare con rispetto ed educazione',
+        motto,
+        vision,
+        topics,
+        avoids
+      };
+
+      saveUserProfile(updated);
+      showToast('Scheda personale salvata con successo! 🛡️', 'success');
     }
 
     // Onboarding Gate (First Access)
@@ -1554,12 +1748,14 @@ if (typeof io === 'undefined') {
 
       const nickInput = document.getElementById('onboarding-nick-input');
       const bioInput = document.getElementById('onboarding-bio-input');
+      const current = getUserProfile();
       const moniker = (nickInput && nickInput.value.trim().length >= 2)
         ? nickInput.value.trim().substring(0, 20)
         : generateRandomStreetNick();
       const bio = bioInput ? bioInput.value.trim().substring(0, 70) : '';
 
       const prof = {
+        ...current,
         moniker,
         avatar: tempOnboardingAvatar,
         bio
@@ -1577,6 +1773,51 @@ if (typeof io === 'undefined') {
       showToast(`Benvenuto, ${moniker}! Patto di rispetto accettato.`, 'success');
     }
 
+    // Partner Personal Profile Sheet in Chat (100% descriptive, zero photos)
+    let currentPartnerProfile = null;
+
+    function openPartnerProfileModal() {
+      const modal = document.getElementById('modal-partner-profile');
+      if (!modal) return;
+
+      const p = currentPartnerProfile || {
+        moniker: partnerNick || 'SHADOW',
+        avatar: '⚡',
+        motto: '',
+        vision: '',
+        topics: '',
+        avoids: '',
+        bio: ''
+      };
+
+      const avatarEl = document.getElementById('partner-modal-avatar');
+      const nickEl = document.getElementById('partner-modal-nick');
+      const mottoEl = document.getElementById('partner-modal-motto');
+      const visionEl = document.getElementById('partner-modal-vision');
+      const topicsEl = document.getElementById('partner-modal-topics');
+      const avoidsEl = document.getElementById('partner-modal-avoids');
+      const bioEl = document.getElementById('partner-modal-bio');
+
+      if (avatarEl) safeSetText(avatarEl, p.avatar || '⚡');
+      if (nickEl) safeSetText(nickEl, p.moniker || 'SHADOW');
+      if (mottoEl) safeSetText(mottoEl, p.motto ? `"${p.motto}"` : 'Nessun motto impostato');
+      if (visionEl) safeSetText(visionEl, p.vision || 'Nessuna visione inserita.');
+      if (topicsEl) safeSetText(topicsEl, p.topics || 'Aperto a qualsiasi argomento con rispetto.');
+      if (avoidsEl) safeSetText(avoidsEl, p.avoids || 'Mancanza di rispetto e superficialità.');
+      if (bioEl) safeSetText(bioEl, p.bio || 'Qui per parlare con educazione.');
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closePartnerProfileModal() {
+      const modal = document.getElementById('modal-partner-profile');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
     window.openProfileModal = openProfileModal;
     window.closeProfileModal = closeProfileModal;
     window.randomizeProfileNick = randomizeProfileNick;
@@ -1584,6 +1825,14 @@ if (typeof io === 'undefined') {
     window.openOnboardingModal = openOnboardingModal;
     window.randomizeOnboardingNick = randomizeOnboardingNick;
     window.submitOnboarding = submitOnboarding;
+    window.loadFullProfileView = loadFullProfileView;
+    window.updateCardLivePreview = updateCardLivePreview;
+    window.randomizeFullProfileNick = randomizeFullProfileNick;
+    window.appendTopicPreset = appendTopicPreset;
+    window.inspireRandomProfile = inspireRandomProfile;
+    window.saveFullProfile = saveFullProfile;
+    window.openPartnerProfileModal = openPartnerProfileModal;
+    window.closePartnerProfileModal = closePartnerProfileModal;
 
     function drawStoryCard() {
       const canvas = document.getElementById('story-card-canvas');
@@ -2038,6 +2287,16 @@ if (typeof io === 'undefined') {
 
         const partnerAvatar = data.partnerAvatar || '⚡';
         const partnerBio = data.partnerBio || '';
+
+        currentPartnerProfile = data.partnerProfile || {
+          moniker: partnerNick,
+          avatar: partnerAvatar,
+          bio: partnerBio,
+          motto: data.partnerMotto || '',
+          vision: data.partnerVision || '',
+          topics: data.partnerTopics || '',
+          avoids: data.partnerAvoids || ''
+        };
 
         safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
         const partnerAvatarEl = document.getElementById('chat-partner-avatar');

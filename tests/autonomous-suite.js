@@ -1163,6 +1163,140 @@ async function runAutonomousSuite() {
     ipJail.clear();
 
     // ----------------------------------------------------
+    // TEST 17: Non-Typical Descriptive Profile Area (Art. 1 Compliance, Zero Photos)
+    // ----------------------------------------------------
+    console.log('\n--- TEST 17: Non-Typical Descriptive Profile Area (Art. 1 Compliance, Zero Photos) ---');
+
+    // 17.1 Verification of Art. 1 Compliance: Strictly zero photos / photo inputs
+    const viewProfiloHtml = indexHtml.includes('id="view-profilo"');
+    const modalPartnerProfileHtml = indexHtml.includes('id="modal-partner-profile"');
+    const navBtnProfiloHtml = indexHtml.includes('id="nav-btn-profilo"');
+    const hasPhotoInput = indexHtml.includes('type="file"');
+
+    if (viewProfiloHtml && modalPartnerProfileHtml && navBtnProfiloHtml && !hasPhotoInput) {
+      pass('Art. 1 Compliance: Dedicated Profile Area exists with STRICT ZERO photo uploads/inputs (100% textual descriptions)');
+    } else {
+      fail(`Profile area failed Art. 1 verification: view=${viewProfiloHtml}, modal=${modalPartnerProfileHtml}, nav=${navBtnProfiloHtml}, hasPhotoInput=${hasPhotoInput}`);
+    }
+
+    // 17.2 Verification of Descriptive Profile Fields Sanitization in Backend
+    const valMaliciousProfile = validateJoinPayload({
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'Cazzeggio',
+      secret: 'Valid secret description',
+      profile: {
+        moniker: 'Asfalto_01',
+        avatar: '🌙',
+        bio: 'Solo rispetto <script>evil()</script>',
+        motto: 'Cerco verità notturne <script>alert(1)</script>',
+        vision: 'Fame di futuro e sogni veri',
+        topics: 'Musica indie, filosofia e cinema',
+        avoids: 'Fenomeni da bar http://spam.xyz'
+      }
+    });
+
+    const malData = valMaliciousProfile.data && valMaliciousProfile.data.profile;
+    const isScriptBlocked = malData && !malData.motto.includes('<script>') && malData.motto === '';
+    const isUrlBlocked = malData && !malData.avoids.includes('http') && malData.avoids === '';
+
+    const valCleanProfile = validateJoinPayload({
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'Cazzeggio',
+      secret: 'Valid secret description',
+      profile: {
+        moniker: 'Asfalto_01',
+        avatar: '🌙',
+        bio: 'Solo rispetto ed educazione',
+        motto: 'Cerco verità notturne senza maschere',
+        vision: 'Fame di futuro e sogni condivisi',
+        topics: 'Musica indie, filosofia da marciapiede, cinema',
+        avoids: 'Fenomeni da bar, superficialità e maleducazione'
+      }
+    });
+
+    const cleanData = valCleanProfile.data && valCleanProfile.data.profile;
+    const isCleanValid = cleanData &&
+      cleanData.motto === 'Cerco verità notturne senza maschere' &&
+      cleanData.vision === 'Fame di futuro e sogni condivisi' &&
+      cleanData.topics === 'Musica indie, filosofia da marciapiede, cinema' &&
+      cleanData.avoids === 'Fenomeni da bar, superficialità e maleducazione';
+
+    if (valMaliciousProfile.valid && isScriptBlocked && isUrlBlocked && valCleanProfile.valid && isCleanValid) {
+      pass('Backend validation: motto, vision (Art. 2), topics (Art. 5), avoids (Art. 3) validated and sanitized against XSS/URLs');
+    } else {
+      fail(`Descriptive profile validation failed: mal=${JSON.stringify(valMaliciousProfile)}, clean=${JSON.stringify(valCleanProfile)}`);
+    }
+
+    // 17.3 Socket Matchmaking: Full Descriptive Profile Exchange
+    const testProfileClientA = await createClient();
+    const testProfileClientB = await createClient();
+
+    const profileMatchPromiseA = waitForEvent(testProfileClientA, 'match_found', 'match_found client A');
+    const profileMatchPromiseB = waitForEvent(testProfileClientB, 'match_found', 'match_found client B');
+
+    testProfileClientA.emit('join_queue', {
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'Cazzeggio',
+      secret: 'Segreto A per scambio scheda descrittiva',
+      profile: {
+        moniker: 'Alpha_Walker',
+        avatar: '🐺',
+        bio: 'Cammino solo di notte',
+        motto: 'La notte amplifica le idee che il giorno ignora',
+        vision: 'Voglio creare qualcosa di autentico senza compromessi commerciali',
+        topics: 'Sogni lucidi, musica synthwave, dialoghi profondi',
+        avoids: 'Superficialità, giudizi sul corpo, pose social'
+      }
+    });
+
+    testProfileClientB.emit('join_queue', {
+      gender: 'F',
+      targetGender: 'Tutti',
+      mood: 'Cazzeggio',
+      secret: 'Segreto B per scambio scheda descrittiva',
+      profile: {
+        moniker: 'Beta_Neon',
+        avatar: '🔥',
+        bio: 'Ascolto e rispondo con calma',
+        motto: 'Meno estetica, più sostanza e rispetto reciproco',
+        vision: 'Confrontarmi con chi sa ascoltare davvero',
+        topics: 'Filosofia urbana, cinema underground, scrittura creativa',
+        avoids: 'Fenomeni da bar, volgarità gratuita, troll'
+      }
+    });
+
+    const profileMatchDataA = await profileMatchPromiseA;
+    const profileMatchDataB = await profileMatchPromiseB;
+
+    const aReceivedB = profileMatchDataA.partnerProfile &&
+      profileMatchDataA.partnerProfile.moniker === 'Beta_Neon' &&
+      profileMatchDataA.partnerProfile.avatar === '🔥' &&
+      profileMatchDataA.partnerProfile.motto.includes('Meno estetica') &&
+      profileMatchDataA.partnerProfile.vision.includes('ascoltare davvero') &&
+      profileMatchDataA.partnerProfile.topics.includes('Filosofia urbana') &&
+      profileMatchDataA.partnerProfile.avoids.includes('Fenomeni da bar');
+
+    const bReceivedA = profileMatchDataB.partnerProfile &&
+      profileMatchDataB.partnerProfile.moniker === 'Alpha_Walker' &&
+      profileMatchDataB.partnerProfile.avatar === '🐺' &&
+      profileMatchDataB.partnerProfile.motto.includes('La notte amplifica') &&
+      profileMatchDataB.partnerProfile.vision.includes('creare qualcosa') &&
+      profileMatchDataB.partnerProfile.topics.includes('synthwave') &&
+      profileMatchDataB.partnerProfile.avoids.includes('Superficialità');
+
+    if (aReceivedB && bReceivedA) {
+      pass('Realtime Socket Exchange: Both paired peers securely receive complete Partner Personal Profile in volatile RAM');
+    } else {
+      fail(`Partner profile exchange incomplete: aReceivedB=${aReceivedB}, bReceivedA=${bReceivedA}`);
+    }
+
+    testProfileClientA.disconnect();
+    testProfileClientB.disconnect();
+
+    // ----------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------
     console.log('\n====================================================');

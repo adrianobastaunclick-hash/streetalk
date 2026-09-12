@@ -196,14 +196,18 @@ function validateJoinPayload(payload) {
     return { valid: false, error: 'Il segreto non può contenere numeri di telefono' };
   }
 
-  // Optional profile validation (moniker, avatar, bio)
+  // Optional profile validation (moniker, avatar, bio, motto, vision, topics, avoids)
   const ALLOWED_AVATARS = ['⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'];
   let sanitizedMoniker = null;
   let sanitizedAvatar = '⚡';
   let sanitizedBio = '';
+  let sanitizedMotto = '';
+  let sanitizedVision = '';
+  let sanitizedTopics = '';
+  let sanitizedAvoids = '';
 
   if (payload.profile && typeof payload.profile === 'object') {
-    const { moniker, avatar, bio } = payload.profile;
+    const { moniker, avatar, bio, motto, vision, topics, avoids } = payload.profile;
     if (typeof moniker === 'string') {
       const trimmedMoniker = moniker.trim().substring(0, 25);
       if (trimmedMoniker.length >= 2 && !/<\s*\/?\s*script/i.test(trimmedMoniker) && !/https?:/i.test(trimmedMoniker)) {
@@ -219,6 +223,30 @@ function validateJoinPayload(payload) {
         sanitizedBio = DOMSafetyFilter.sanitize(trimmedBio);
       }
     }
+    if (typeof motto === 'string') {
+      const trimmedMotto = motto.trim().substring(0, 100);
+      if (!/<\s*\/?\s*script/i.test(trimmedMotto) && !/https?:/i.test(trimmedMotto)) {
+        sanitizedMotto = DOMSafetyFilter.sanitize(trimmedMotto);
+      }
+    }
+    if (typeof vision === 'string') {
+      const trimmedVision = vision.trim().substring(0, 200);
+      if (!/<\s*\/?\s*script/i.test(trimmedVision) && !/https?:/i.test(trimmedVision)) {
+        sanitizedVision = DOMSafetyFilter.sanitize(trimmedVision);
+      }
+    }
+    if (typeof topics === 'string') {
+      const trimmedTopics = topics.trim().substring(0, 150);
+      if (!/<\s*\/?\s*script/i.test(trimmedTopics) && !/https?:/i.test(trimmedTopics)) {
+        sanitizedTopics = DOMSafetyFilter.sanitize(trimmedTopics);
+      }
+    }
+    if (typeof avoids === 'string') {
+      const trimmedAvoids = avoids.trim().substring(0, 150);
+      if (!/<\s*\/?\s*script/i.test(trimmedAvoids) && !/https?:/i.test(trimmedAvoids)) {
+        sanitizedAvoids = DOMSafetyFilter.sanitize(trimmedAvoids);
+      }
+    }
   }
 
   return {
@@ -231,7 +259,11 @@ function validateJoinPayload(payload) {
       profile: {
         moniker: sanitizedMoniker,
         avatar: sanitizedAvatar,
-        bio: sanitizedBio
+        bio: sanitizedBio,
+        motto: sanitizedMotto,
+        vision: sanitizedVision,
+        topics: sanitizedTopics,
+        avoids: sanitizedAvoids
       }
     }
   };
@@ -493,6 +525,14 @@ function createRoom(userA, userB) {
   const avatarB = (userB.profile && userB.profile.avatar) || '⚡';
   const bioA = (userA.profile && userA.profile.bio) || '';
   const bioB = (userB.profile && userB.profile.bio) || '';
+  const mottoA = (userA.profile && userA.profile.motto) || '';
+  const mottoB = (userB.profile && userB.profile.motto) || '';
+  const visionA = (userA.profile && userA.profile.vision) || '';
+  const visionB = (userB.profile && userB.profile.vision) || '';
+  const topicsA = (userA.profile && userA.profile.topics) || '';
+  const topicsB = (userB.profile && userB.profile.topics) || '';
+  const avoidsA = (userA.profile && userA.profile.avoids) || '';
+  const avoidsB = (userB.profile && userB.profile.avoids) || '';
 
   // Swap secrets securely!
   // User A receives User B's secret & profile
@@ -505,6 +545,19 @@ function createRoom(userA, userB) {
       partnerMoniker: nickB,
       partnerAvatar: avatarB,
       partnerBio: bioB,
+      partnerMotto: mottoB,
+      partnerVision: visionB,
+      partnerTopics: topicsB,
+      partnerAvoids: avoidsB,
+      partnerProfile: {
+        moniker: nickB,
+        avatar: avatarB,
+        bio: bioB,
+        motto: mottoB,
+        vision: visionB,
+        topics: topicsB,
+        avoids: avoidsB
+      },
       myMoniker: nickA,
       myAvatar: avatarA,
       myBio: bioA,
@@ -525,6 +578,19 @@ function createRoom(userA, userB) {
       partnerMoniker: nickA,
       partnerAvatar: avatarA,
       partnerBio: bioA,
+      partnerMotto: mottoA,
+      partnerVision: visionA,
+      partnerTopics: topicsA,
+      partnerAvoids: avoidsA,
+      partnerProfile: {
+        moniker: nickA,
+        avatar: avatarA,
+        bio: bioA,
+        motto: mottoA,
+        vision: visionA,
+        topics: topicsA,
+        avoids: avoidsA
+      },
       myMoniker: nickB,
       myAvatar: avatarB,
       myBio: bioB,
