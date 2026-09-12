@@ -43,6 +43,10 @@ body {
   --signal-berry: #ff652f;
   --signal-mint: #10b981;
   background-color: #0b0d10 !important;
+  background-image: radial-gradient(circle at 50% 10%, rgba(255, 101, 47, 0.08) 0%, transparent 60%), url('/assets/street/asphalt_grunge.jpg') !important;
+  background-repeat: no-repeat, repeat !important;
+  background-size: 100% 600px, 320px 320px !important;
+  background-blend-mode: normal, soft-light !important;
   color: #f1f5f9;
 }
 

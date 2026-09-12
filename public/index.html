@@ -566,9 +566,9 @@
 
       <!-- Ambient Visual Stage (Higgsfield AI Video Loop / Graphic Stage) -->
       <div class="higgsfield-ambient-stage w-full max-w-2xl mx-auto h-40 sm:h-48 my-5 relative flex items-center justify-center border border-zinc-800/80 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
-        <video class="higgsfield-ambient-video absolute inset-0 w-full h-full object-cover opacity-60" autoplay loop muted playsinline poster="/assets/street/hero_ambient_fallback.svg">
+        <video class="higgsfield-ambient-video absolute inset-0 w-full h-full object-cover opacity-75" autoplay loop muted playsinline poster="/assets/street/hero_ambient.jpg">
           <source src="/assets/street/hero_ambient.mp4" type="video/mp4">
-          <img src="/assets/street/hero_ambient_fallback.svg" alt="Streetalk Night Alley" class="w-full h-full object-cover">
+          <img src="/assets/street/hero_ambient.jpg" alt="Streetalk Night Alley" class="w-full h-full object-cover">
         </video>
         <div class="absolute inset-0 bg-gradient-to-t from-[#0b0d10] via-transparent to-[#0b0d10]/70 pointer-events-none"></div>
         <div class="relative z-10 text-center px-4 py-2 bg-black/70 backdrop-blur-md rounded-xl border border-zinc-800">
@@ -1265,6 +1265,9 @@
 
       <!-- 3D WIREFRAME SPHERE & RADAR SONAR CONTAINER -->
       <div class="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center my-5 overflow-hidden rounded-full border-2 border-street-orange/40 bg-[#0b0d10] shadow-[inset_0_0_30px_rgba(255,101,47,0.3)]">
+        <!-- AI Radar Sonar Backdrop Texture -->
+        <img src="/assets/street/radar_sonar.jpg" alt="Radar Sonar Terminal" class="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-screen pointer-events-none z-0">
+
         <!-- Three.js 3D Wireframe Sphere Canvas -->
         <canvas id="radar-3d-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-10"></canvas>
 
