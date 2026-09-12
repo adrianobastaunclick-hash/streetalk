@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="40" viewBox="0 0 1200 40">
+  <defs>
+    <pattern id="hazardStripes" width="40" height="40" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="20" height="40" fill="#ff652f"/>
+      <rect x="20" width="20" height="40" fill="#0b0d10"/>
+    </pattern>
+  </defs>
+  <!-- Background Stripes -->
+  <rect width="100%" height="100%" fill="url(#hazardStripes)"/>
+  <!-- Top and Bottom Border -->
+  <line x1="0" y1="0" x2="1200" y2="0" stroke="#000000" stroke-width="2"/>
+  <line x1="0" y1="40" x2="1200" y2="40" stroke="#000000" stroke-width="2"/>
+  <!-- Text Label Plates -->
+  <rect x="20" y="6" width="340" height="28" fill="#0b0d10" rx="2"/>
+  <text x="30" y="25" fill="#ff652f" font-family="monospace, Impact, sans-serif" font-weight="900" font-size="13" letter-spacing="2">⚠️ ART. 1: ZERO FOTO // NO VETRINE</text>
+
+  <rect x="420" y="6" width="370" height="28" fill="#0b0d10" rx="2"/>
+  <text x="430" y="25" fill="#ffffff" font-family="monospace, Impact, sans-serif" font-weight="900" font-size="13" letter-spacing="2">⚡ MEMORIA VOLATILE // BUFFER 180s</text>
+
+  <rect x="850" y="6" width="320" height="28" fill="#0b0d10" rx="2"/>
+  <text x="860" y="25" fill="#ff652f" font-family="monospace, Impact, sans-serif" font-weight="900" font-size="13" letter-spacing="2">🧠 ATTIVA IL CERVELLO // STREET PURO</text>
+</svg>

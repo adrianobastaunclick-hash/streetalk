@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="100%" height="100%">
+  <defs>
+    <radialGradient id="neonGlow" cx="50%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#ff652f" stop-opacity="0.18"/>
+      <stop offset="60%" stop-color="#0b0d10" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#050608" stop-opacity="1"/>
+    </radialGradient>
+    <linearGradient id="rainLine" x1="0%" y1="0%" x2="20%" y2="100%">
+      <stop offset="0%" stop-color="#ff652f" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.03"/>
+    </linearGradient>
+    <pattern id="streetGrid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ff652f" stroke-width="0.75" stroke-opacity="0.08"/>
+    </pattern>
+    <pattern id="scanlines" width="100%" height="4" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="100%" y2="0" stroke="#000000" stroke-width="1.5" stroke-opacity="0.35"/>
+    </pattern>
+  </defs>
+
+  <!-- Deep Asphalt Base -->
+  <rect width="100%" height="100%" fill="#0b0d10"/>
+  <rect width="100%" height="100%" fill="url(#neonGlow)"/>
+  <rect width="100%" height="100%" fill="url(#streetGrid)"/>
+
+  <!-- Rain Streaks & Reflections -->
+  <g opacity="0.6">
+    <line x1="100" y1="0" x2="160" y2="400" stroke="url(#rainLine)" stroke-width="1.5"/>
+    <line x1="450" y1="50" x2="520" y2="600" stroke="url(#rainLine)" stroke-width="2"/>
+    <line x1="820" y1="0" x2="890" y2="500" stroke="url(#rainLine)" stroke-width="1.2"/>
+    <line x1="1240" y1="100" x2="1310" y2="700" stroke="url(#rainLine)" stroke-width="1.8"/>
+    <line x1="1600" y1="20" x2="1670" y2="550" stroke="url(#rainLine)" stroke-width="1.5"/>
+    <line x1="300" y1="400" x2="360" y2="900" stroke="url(#rainLine)" stroke-width="1"/>
+    <line x1="980" y1="350" x2="1040" y2="950" stroke="url(#rainLine)" stroke-width="2.2"/>
+    <line x1="1450" y1="450" x2="1520" y2="1050" stroke="url(#rainLine)" stroke-width="1.4"/>
+  </g>
+
+  <!-- Ground Asphalt Wet Horizon -->
+  <ellipse cx="960" cy="980" rx="800" ry="120" fill="#ff652f" opacity="0.06"/>
+  <ellipse cx="400" cy="920" rx="300" ry="50" fill="#ff652f" opacity="0.04"/>
+
+  <!-- Ambient CCTV Grain & Scanlines -->
+  <rect width="100%" height="100%" fill="url(#scanlines)" pointer-events="none"/>
+
+  <!-- Telemetry HUD Stamp -->
+  <text x="60" y="90" fill="#ff652f" font-family="monospace" font-size="14" letter-spacing="3" opacity="0.75">CAM_08 // UNDERGROUND SECTOR // ASYNC_NODE</text>
+  <text x="60" y="115" fill="#71717a" font-family="monospace" font-size="11" letter-spacing="2" opacity="0.6">LATENCY: VOLATILE // BUFFER: 180s // ENCRYPT: IN_MEMORY</text>
+  <circle cx="45" cy="85" r="4" fill="#ff652f">
+    <animate attributeName="opacity" values="1;0.2;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+</svg>

@@ -1,9 +1,10 @@
 /* ==========================================================================
-   STREETALK // EDITORIAL INCROCIO & HIGH-CONTRAST VISUAL SYSTEM
+   STREETALK // STREET PURO HIGH-CONTRAST VISUAL SYSTEM
+   - Deep Asphalt (#0b0d10) & Neon Street Orange (#ff652f)
    - High-contrast typography (WCAG AAA compliant)
-   - Smooth scrolling and entrance animations
+   - Neo-brutalist tactile cards, modals & telemetry HUD
    - Real 3D WebGL Radar support (no canvas hiding)
-   - High-end tactile cards and lead generation styling
+   - Higgsfield AI ambient loop integration & SVG street glyphs
    ========================================================================== */
 
 /* Global Smooth Scrolling */
@@ -11,54 +12,66 @@ html {
   scroll-behavior: smooth !important;
 }
 
-/* Base Body System & High-Contrast Colors */
-body[data-design="incrocio"] {
-  --bg-deep: #f5f2eb;
-  --panel: #fffefa;
-  --panel-glass: rgba(255,254,250,.9);
-  --raised: #eee8e1;
-  --line: rgba(255, 255, 255, 0.14);
-  --line-strong: rgba(183, 46, 85, 0.4);
-  --ink: #29252c;
-  --ink-secondary: #49414d;
-  --ink-muted: #6e6570;
-  --signal-orange: #b72e55;
-  --signal-amber: #b72e55;
-  --signal-berry: #e11d48;
+/* Base Body System & High-Contrast Street Colors */
+:root {
+  --street-asphalt: #0b0d10;
+  --street-card: #12151f;
+  --street-card-elevated: #1a1e2e;
+  --street-orange: #ff652f;
+  --street-orange-glow: rgba(255, 101, 47, 0.45);
+  --street-border: #27272a;
+  --street-border-glow: rgba(255, 101, 47, 0.6);
+  --street-text: #ffffff;
+  --street-text-muted: #94a3b8;
+  --street-text-dim: #64748b;
+}
+
+body[data-design="incrocio"],
+body[data-theme="street-pure"],
+body {
+  --bg-deep: #0b0d10;
+  --panel: #12151f;
+  --panel-glass: rgba(18, 21, 31, 0.92);
+  --raised: #1a1e2e;
+  --line: #27272a;
+  --line-strong: rgba(255, 101, 47, 0.6);
+  --ink: #ffffff;
+  --ink-secondary: #f1f5f9;
+  --ink-muted: #94a3b8;
+  --signal-orange: #ff652f;
+  --signal-amber: #f59e0b;
+  --signal-berry: #ff652f;
   --signal-mint: #10b981;
-  background: var(--bg-deep) !important;
-  color: var(--ink-secondary);
+  background-color: #0b0d10 !important;
+  color: #f1f5f9;
 }
 
-/* Typography Visibility & Hierarchy Overhaul */
-[data-design="incrocio"] h1,
-[data-design="incrocio"] h2,
-[data-design="incrocio"] h3,
-[data-design="incrocio"] .font-street {
-  color: #29252c !important;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+/* Typography Visibility & Street Neo-Brutalism */
+h1, h2, h3, .font-street {
+  color: #ffffff !important;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.9);
 }
 
-[data-design="incrocio"] #hero-title {
+#hero-title {
   font-size: clamp(32px, 5.2vw, 64px);
   line-height: 1.08;
   font-weight: 900;
   letter-spacing: -0.04em;
-  color: #29252c !important;
+  color: #ffffff !important;
 }
 
-[data-design="incrocio"] #hero-subtitle {
-  color: #49414d !important;
+#hero-subtitle {
+  color: #cbd5e1 !important;
   font-size: clamp(16px, 1.8vw, 20px);
   line-height: 1.6;
   font-weight: 400;
 }
 
 /* Hero Caption & Tag */
-[data-design="incrocio"] #hero-tag {
-  background: rgba(183, 46, 85, 0.12) !important;
-  border: 1px solid rgba(183, 46, 85, 0.45) !important;
-  color: #b72e55 !important;
+#hero-tag {
+  background: rgba(255, 101, 47, 0.12) !important;
+  border: 1px solid rgba(255, 101, 47, 0.45) !important;
+  color: #ff652f !important;
 }
 
 /* 3D Encounter Scene in Hero */
@@ -87,8 +100,8 @@ body[data-design="incrocio"] {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(14px);
   will-change: transform;
 }
 
@@ -116,19 +129,20 @@ body[data-design="incrocio"] {
 .thought-you {
   top: 10px;
   left: 3%;
-  background: linear-gradient(135deg, #b72e55 0%, #831843 100%);
-  color: #29252c;
+  background: linear-gradient(135deg, #ff652f 0%, #b83a14 100%);
+  color: #ffffff;
   transform: rotateZ(-8deg) translateZ(30px);
-  animation: thought-rise 6.5s ease-in-out 1;
+  animation: thought-rise 6.5s ease-in-out infinite;
 }
 
 .thought-other {
   top: 55px;
   right: 3%;
-  background: linear-gradient(135deg, #0d9488 0%, #064e3b 100%);
-  color: #29252c;
+  background: linear-gradient(135deg, #182030 0%, #0d121c 100%);
+  border: 1px solid rgba(255, 101, 47, 0.35);
+  color: #ffffff;
   transform: rotateZ(7deg) translateZ(60px);
-  animation: thought-drift 6.5s ease-in-out 1;
+  animation: thought-drift 6.5s ease-in-out infinite;
 }
 
 .scene-caption {
@@ -138,11 +152,11 @@ body[data-design="incrocio"] {
   transform: translateX(-50%);
   font: 10px 'Space Mono', monospace;
   letter-spacing: 0.16em;
-  color: #6e6570;
-  background: #f5f2eb;
-  padding: 3px 12px;
+  color: #94a3b8;
+  background: #0b0d10;
+  padding: 4px 14px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #27272a;
 }
 
 @keyframes thought-rise {
@@ -172,67 +186,67 @@ body[data-design="incrocio"] {
   transform: translateY(0);
 }
 
-/* High-Contrast Card System */
-[data-design="incrocio"] #entry-card,
-[data-design="incrocio"] .manifesto-card,
-[data-design="incrocio"] #lead-gen-card,
-[data-design="incrocio"] .rule-card {
-  background: #fffefa !important;
-  border: 1px solid #cec4cb !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+/* High-Contrast Asphalt Card System */
+#entry-card,
+.manifesto-card,
+#lead-gen-card,
+.rule-card {
+  background: #12151f !important;
+  border: 1px solid #27272a !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(16px);
   border-radius: 20px;
 }
 
-[data-design="incrocio"] #entry-card:hover,
-[data-design="incrocio"] .manifesto-card:hover {
-  border-color: rgba(183, 46, 85, 0.45) !important;
-  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6), 0 0 25px rgba(183, 46, 85, 0.12) !important;
+#entry-card:hover,
+.manifesto-card:hover {
+  border-color: rgba(255, 101, 47, 0.6) !important;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(255, 101, 47, 0.2) !important;
 }
 
 /* High-Contrast Form Inputs */
-[data-design="incrocio"] select,
-[data-design="incrocio"] input[type="text"],
-[data-design="incrocio"] input[type="email"],
-[data-design="incrocio"] textarea {
-  background: #fffefa !important;
-  color: #29252c !important;
-  border: 1px solid #8b7b87 !important;
+select,
+input[type="text"],
+input[type="email"],
+textarea {
+  background: #0d0f15 !important;
+  color: #ffffff !important;
+  border: 1px solid #27272a !important;
 }
 
-[data-design="incrocio"] select:focus,
-[data-design="incrocio"] input[type="text"]:focus,
-[data-design="incrocio"] input[type="email"]:focus,
-[data-design="incrocio"] textarea:focus {
-  border-color: #b72e55 !important;
-  box-shadow: 0 0 0 2px rgba(183, 46, 85, 0.25) !important;
+select:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+textarea:focus {
+  border-color: #ff652f !important;
+  box-shadow: 0 0 0 2px rgba(255, 101, 47, 0.35) !important;
 }
 
-/* Primary Action Buttons with High Tactile Feel */
-[data-design="incrocio"] #btn-submit-entry,
-[data-design="incrocio"] #btn-submit-lead {
-  background: linear-gradient(135deg, #b72e55 0%, #e0531f 100%) !important;
+/* Primary Action Buttons with High Tactile Street Feel */
+#btn-submit-entry,
+#btn-submit-lead {
+  background: #ff652f !important;
   color: #000000 !important;
   font-weight: 800 !important;
-  border: none !important;
-  box-shadow: 0 4px 18px rgba(183, 46, 85, 0.45) !important;
+  border: 1px solid #ff7b4d !important;
+  box-shadow: 0 4px 18px rgba(255, 101, 47, 0.45) !important;
   transition: transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.16s ease !important;
 }
 
-[data-design="incrocio"] #btn-submit-entry:hover,
-[data-design="incrocio"] #btn-submit-lead:hover {
+#btn-submit-entry:hover,
+#btn-submit-lead:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(183, 46, 85, 0.6) !important;
+  background: #ff7b4d !important;
+  box-shadow: 0 8px 24px rgba(255, 101, 47, 0.65) !important;
 }
 
-[data-design="incrocio"] #btn-submit-entry:active,
-[data-design="incrocio"] #btn-submit-lead:active {
+#btn-submit-entry:active,
+#btn-submit-lead:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 10px rgba(183, 46, 85, 0.3) !important;
+  box-shadow: 0 2px 10px rgba(255, 101, 47, 0.3) !important;
 }
 
 /* 3D RADAR — ALWAYS VISIBLE & EMPOWERED */
-[data-design="incrocio"] #view-radar canvas,
 #view-radar canvas,
 #radar-3d-canvas {
   display: block !important;
@@ -240,10 +254,42 @@ body[data-design="incrocio"] {
   visibility: visible !important;
 }
 
-[data-design="incrocio"] #view-radar > div {
-  background: #fffefa !important;
-  border: 2px solid rgba(183, 46, 85, 0.4) !important;
-  box-shadow: 0 0 40px rgba(183, 46, 85, 0.18), inset 0 0 30px rgba(0, 0, 0, 0.8) !important;
+#view-radar > div {
+  background: #12151f !important;
+  border: 2px solid rgba(255, 101, 47, 0.5) !important;
+  box-shadow: 0 0 40px rgba(255, 101, 47, 0.25), inset 0 0 30px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Chat Bubbles High-Contrast Street Dark System */
+#messages-container > .flex > div:first-child {
+  background: #181c28 !important;
+  color: #ffffff !important;
+  border: 1px solid #27272a !important;
+}
+
+#messages-container > .items-end > div:first-child {
+  background: #ff652f !important;
+  color: #000000 !important;
+  font-weight: 600;
+}
+
+/* Partner Secret Box */
+#partner-secret-card {
+  background: #131722 !important;
+  border: 1px solid rgba(255, 101, 47, 0.5) !important;
+  color: #ffffff !important;
+}
+
+/* Modals Overlay & Panels */
+[id^="modal-"] {
+  background: rgba(11, 13, 16, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+[id^="modal-"] > div {
+  background: #12151f !important;
+  border: 1px solid #27272a !important;
+  color: #ffffff !important;
 }
 
 /* Responsive adjustments */
@@ -282,74 +328,39 @@ body[data-design="incrocio"] {
   }
 }
 
+/* Street UI Elements & Micro-styling */
+.street-noise {
+  opacity: 0.04 !important;
+  display: block !important;
+}
 
-/* Incrocio material and interaction tokens */
-:root { --inc-paper:#f5f2eb; --inc-ink:#29252c; --inc-berry:#b72e55; --inc-mint:#bce9df; }
-html,body[data-design="incrocio"] { background:var(--inc-paper)!important; color:var(--inc-ink); }
-body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; --raised:#eee8e1; --muted:#6e6570; --signal:#b72e55; --line:#cec4cb; --control-line:#8b7b87; }
-[data-design="incrocio"] > header { background:#f5f2ebf5!important; border-color:#cec4cb!important; }
-[data-design="incrocio"] .text-white,[data-design="incrocio"] [class*="text-zinc-"] { color:var(--inc-ink)!important; }
-[data-design="incrocio"] [class*="bg-zinc-"],[data-design="incrocio"] [class*="bg-black"],[data-design="incrocio"] [class*="bg-[#0"],[data-design="incrocio"] [class*="bg-[#1"] { background-color:#fffefa!important; }
-[data-design="incrocio"] [class*="border-zinc-"] { border-color:#cec4cb!important; }
-[data-design="incrocio"] h1,[data-design="incrocio"] h2,[data-design="incrocio"] h3,[data-design="incrocio"] .font-street { text-shadow:none!important; }
-[data-design="incrocio"] .font-street { font-family:'Space Grotesk',sans-serif!important; }
-[data-design="incrocio"] #hero-title { font-size:clamp(38px,5vw,66px); text-transform:none; font-weight:600; letter-spacing:-.055em; }
-[data-design="incrocio"] .street-noise { display:none; }
-[data-design="incrocio"] #entry-card,[data-design="incrocio"] .manifesto-card,[data-design="incrocio"] #lead-gen-card,[data-design="incrocio"] .rule-card { box-shadow:0 14px 40px #29252c0b!important; transform:none!important; }
-[data-design="incrocio"] #btn-submit-entry,[data-design="incrocio"] #chat-input-form button,[data-design="incrocio"] button.bg-street-orange { background:#b72e55!important; color:#fffefa!important; box-shadow:0 4px 0 #842340!important; }
-[data-design="incrocio"] #secret-input,[data-design="incrocio"] #chat-message-input { background:#f5f2eb!important; color:#29252c!important; }
-[data-design="incrocio"] .mood-pill { background:#fffefa!important; color:#29252c!important; }
-[data-design="incrocio"] .mood-pill[aria-checked="true"] { background:#f9e5ec!important; border-color:#b72e55!important; }
-.thought { box-shadow:1px 2px 0 #7c6c76,2px 4px 0 #7c6c76,3px 6px 0 #7c6c76,8px 22px 30px #29252c24; border-radius:16px 16px 3px 16px; }
-.thought-you { background:#b72e55; color:#fffefa; }
-.thought-other { background:#bce9df; color:#24453e; }
-.scene-caption { color:#6e6570; white-space:nowrap; font-size:9px; }
-[data-design="incrocio"] #view-radar > div { background:#fffefa!important; box-shadow:0 15px 40px #29252c10!important; border-color:#cec4cb!important; }
-[data-design="incrocio"] #messages-container > .flex > div:first-child { background:#fffefa!important; color:#29252c!important; }
-[data-design="incrocio"] #messages-container > .items-end > div:first-child { background:#29252c!important; color:#fffefa!important; border-color:#29252c; }
-[data-design="incrocio"] #partner-secret-card { background:#e3f3ed!important; border-color:#8cb5aa!important; }
-[data-design="incrocio"] [id^="modal-"] { background:#29252cd9!important; }
-[data-design="incrocio"] [id^="modal-"] > div { background:#fffefa!important; }
-@media(max-width:640px) { .encounter-scene { height:180px; } .thought { height:120px; } .thought strong { font-size:16px; } .thought-other { top:34px; } }
+#ping-badge,
+header [role="status"] {
+  background: #12151f !important;
+  color: #ffffff !important;
+  border-color: #27272a !important;
+}
 
-[data-design="incrocio"] #view-landing > .editorial-hero { grid-column:1/-1; display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:12px 48px; width:100%; max-width:none; }
-.editorial-hero > * { grid-column:1; }
-[data-design="incrocio"] .editorial-hero .encounter-scene { grid-column:2; grid-row:1/6; align-self:center; width:100%; height:290px; }
-[data-design="incrocio"] #hero-tag { width:fit-content; padding:8px 12px; border-radius:6px; font-size:9px; }
-[data-design="incrocio"] #hero-title { margin:8px 0 16px; }
-[data-design="incrocio"] #hero-subtitle { margin:0; }
-[data-design="incrocio"] #ping-badge,[data-design="incrocio"] header [role="status"] { background:#fffefa!important; color:#29252c!important; border-color:#cec4cb!important; }
-@media(max-width:900px) { [data-design="incrocio"] #view-landing > .editorial-hero { display:flex; flex-direction:column; gap:12px; } [data-design="incrocio"] .editorial-hero .encounter-scene { height:200px; max-width:430px; } }
+input::placeholder,
+textarea::placeholder {
+  color: #71717a !important;
+  opacity: 1;
+}
 
-[data-design="incrocio"] input::placeholder,[data-design="incrocio"] textarea::placeholder { color:#6e6570!important; opacity:1; }
-[data-design="incrocio"] #entry-card:hover { box-shadow:0 14px 40px #29252c0b!important; }
-
-/* Accessible foregrounds on the Incrocio palette. */
-[data-design="incrocio"] header button > .bg-street-orange { color: #fffefa !important; }
-[data-design="incrocio"] #secret-validation-warning { color: #a51d39 !important; }
-
-[data-design="incrocio"] #hero-tag { color: #a52249 !important; }
-[data-design="incrocio"] .text-teal-400 { color: #17675a !important; }
-[data-design="incrocio"] .text-rose-400 { color: #a51d39 !important; }
-[data-design="incrocio"] .bg-street-surface { background: var(--inc-panel, #fffefa) !important; }
-
-/* High-Contrast Asphalt Passport (#street-id-card) Protection */
-#street-id-card,
-[data-design="incrocio"] #street-id-card {
+/* High-Contrast Asphalt Passport (#street-id-card) */
+#street-id-card {
   background: #0d0f15 !important;
   background-image: linear-gradient(180deg, #161a24 0%, #0c0e14 100%) !important;
   border: 2px solid #ff652f !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 101, 47, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 101, 47, 0.35) !important;
   color: #f8fafc !important;
 }
 
-[data-design="incrocio"] #street-id-card *,
 #street-id-card * {
   text-shadow: none !important;
 }
 
-[data-design="incrocio"] #street-id-card h3,
-[data-design="incrocio"] #street-id-card #card-display-nick,
+#street-id-card h3,
 #street-id-card #card-display-nick {
   color: #ffffff !important;
   font-weight: 900 !important;
@@ -357,27 +368,21 @@ body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; 
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
 }
 
-[data-design="incrocio"] #street-id-card span.text-zinc-500,
 #street-id-card span.text-zinc-500,
-[data-design="incrocio"] #street-id-card .card-stamp-sub,
 #street-id-card .card-stamp-sub {
   color: #94a3b8 !important;
 }
 
-[data-design="incrocio"] #street-id-card #card-display-motto,
 #street-id-card #card-display-motto {
-  background: rgba(0, 0, 0, 0.6) !important;
-  background-color: rgba(0, 0, 0, 0.6) !important;
-  border: 1px solid rgba(255, 101, 47, 0.45) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  background-color: rgba(0, 0, 0, 0.7) !important;
+  border: 1px solid rgba(255, 101, 47, 0.5) !important;
   color: #ffffff !important;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
 }
 
-[data-design="incrocio"] #street-id-card #card-display-vision,
 #street-id-card #card-display-vision,
-[data-design="incrocio"] #street-id-card #card-display-topics,
 #street-id-card #card-display-topics,
-[data-design="incrocio"] #street-id-card #card-display-avoids,
 #street-id-card #card-display-avoids {
   color: #f1f5f9 !important;
   font-size: 13px !important;
@@ -385,38 +390,65 @@ body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; 
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
 }
 
-[data-design="incrocio"] #street-id-card .text-amber-400,
 #street-id-card .text-amber-400 {
   color: #fbbf24 !important;
   font-weight: 700 !important;
 }
 
-[data-design="incrocio"] #street-id-card .text-teal-400,
 #street-id-card .text-teal-400 {
   color: #2dd4bf !important;
   font-weight: 700 !important;
 }
 
-[data-design="incrocio"] #street-id-card .text-red-400,
 #street-id-card .text-red-400 {
   color: #f87171 !important;
   font-weight: 700 !important;
 }
 
-[data-design="incrocio"] #street-id-card .text-street-orange,
 #street-id-card .text-street-orange {
   color: #ff652f !important;
   font-weight: 700 !important;
 }
 
-[data-design="incrocio"] #street-id-card .border-zinc-800\/80,
 #street-id-card .border-zinc-800\/80 {
   border-color: rgba(255, 255, 255, 0.15) !important;
 }
 
-/* Partner Modal High Contrast */
-[data-design="incrocio"] #modal-partner-profile .text-amber-400 { color: #b45309 !important; }
-[data-design="incrocio"] #modal-partner-profile .text-teal-400 { color: #0f766e !important; }
-[data-design="incrocio"] #modal-partner-profile .text-red-400 { color: #b91c1c !important; }
-[data-design="incrocio"] #modal-partner-profile .text-street-orange { color: #c2410c !important; }
+/* Custom Street Glyph Helper Classes */
+.street-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+}
 
+.street-glyph-lg {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+.street-glyph img,
+.street-glyph svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Ambient Higgsfield Visual Container */
+.higgsfield-ambient-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid #27272a;
+  background: #0b0d10;
+}
+
+.higgsfield-ambient-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.75;
+  filter: contrast(1.15) saturate(1.2);
+}

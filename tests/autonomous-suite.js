@@ -17,6 +17,7 @@ const { io: Client } = require('socket.io-client');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const assert = require('assert');
 
 // Target server
 let SERVER_URL;
@@ -1295,6 +1296,83 @@ async function runAutonomousSuite() {
 
     testProfileClientA.disconnect();
     testProfileClientB.disconnect();
+
+    // ----------------------------------------------------
+    // TEST 18: Street Puro Visual Identity, Higgsfield AI Pipeline & Vector Iconography
+    // ----------------------------------------------------
+    console.log('\n--- TEST 18: Street Puro Visual Identity & Higgsfield AI Pipeline ---');
+
+    // 18.1 Manifest Verification
+    const manifestPath = path.join(__dirname, '..', 'assets', 'higgsfield-manifest.json');
+    assert(fs.existsSync(manifestPath), 'assets/higgsfield-manifest.json must exist');
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    assert.strictEqual(manifest.theme, 'street-puro', 'Manifest theme must be street-puro');
+    assert(manifest.assets.hero_ambient_loop && manifest.assets.hero_ambient_loop.higgsfield_prompt, 'hero_ambient_loop prompt must be defined');
+    assert(manifest.assets.radar_sonar_backdrop && manifest.assets.radar_sonar_backdrop.higgsfield_prompt, 'radar_sonar_backdrop prompt must be defined');
+    assert(manifest.assets.asphalt_grunge_texture && manifest.assets.asphalt_grunge_texture.higgsfield_prompt, 'asphalt_grunge_texture prompt must be defined');
+    assert(manifest.assets.hazard_tape_banner && manifest.assets.hazard_tape_banner.higgsfield_prompt, 'hazard_tape_banner prompt must be defined');
+    pass('Higgsfield AI Manifest: Valid JSON with prompts and parameters for ambient video loop, sonar radar and textures');
+
+    // 18.2 Higgsfield Client Library Verification
+    const higgsfieldClient = require('../lib/higgsfield-client.js');
+    const assetStatuses = higgsfieldClient.getAssetStatus();
+    assert(assetStatuses.hero_ambient_loop && assetStatuses.hero_ambient_loop.fallbackExists, 'Hero ambient fallback must exist');
+    assert(assetStatuses.radar_sonar_backdrop && assetStatuses.radar_sonar_backdrop.fallbackExists, 'Radar sonar fallback must exist');
+    const heroPrompt = higgsfieldClient.getPromptForAsset('hero_ambient_loop');
+    assert(heroPrompt && heroPrompt.prompt.includes('underground urban street'), 'Prompt retriever must return valid prompt formula');
+    pass('Higgsfield Client Module: Operational with local asset resolution, fallback checking and prompt generation');
+
+    // 18.3 Street Fallback Graphics Verification
+    const streetAssets = [
+      'public/assets/street/hero_ambient_fallback.svg',
+      'public/assets/street/radar_sonar_fallback.svg',
+      'public/assets/street/asphalt_grunge_fallback.svg',
+      'public/assets/street/hazard_tape.svg'
+    ];
+    for (const file of streetAssets) {
+      assert(fs.existsSync(path.join(__dirname, '..', file)), `Street asset ${file} must exist`);
+    }
+    pass('Street Visual Assets: Dark asphalt and neon orange fallback vectors (hero, radar, textures, hazard tape) verified');
+
+    // 18.4 Custom Street Iconography Pack Verification (10 SVG glyphs)
+    const requiredGlyphs = [
+      'street-bolt.svg',
+      'street-spray.svg',
+      'street-mask.svg',
+      'street-radar.svg',
+      'street-chain.svg',
+      'street-asphalt.svg',
+      'street-flame.svg',
+      'street-tape.svg',
+      'street-cassette.svg',
+      'street-seal.svg'
+    ];
+    for (const glyph of requiredGlyphs) {
+      const glyphPath = path.join(__dirname, '..', 'public', 'assets', 'icons', glyph);
+      assert(fs.existsSync(glyphPath), `Custom street glyph ${glyph} must exist in public/assets/icons/`);
+      const content = fs.readFileSync(glyphPath, 'utf8');
+      assert(content.includes('<svg') && content.includes('</svg>'), `Glyph ${glyph} must be valid SVG`);
+    }
+    pass('Street Iconography Pack: All 10 custom neo-brutalist SVG vector glyphs verified in public/assets/icons/');
+
+    // 18.5 CSS & HTML Theme Parity and Dark Asphalt Integrity
+    const indexContent = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+    const publicIndexContent = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+    assert.strictEqual(indexContent, publicIndexContent, 'index.html and public/index.html must maintain byte-for-byte parity');
+
+    const incrocioCss = fs.readFileSync(path.join(__dirname, '..', 'incrocio.css'), 'utf8');
+    const publicIncrocioCss = fs.readFileSync(path.join(__dirname, '..', 'public', 'incrocio.css'), 'utf8');
+    assert.strictEqual(incrocioCss, publicIncrocioCss, 'incrocio.css and public/incrocio.css must maintain byte-for-byte parity');
+
+    assert(indexContent.includes('data-design="street-pure"') || indexContent.includes('data-theme="street-pure"'), 'index.html must use street-pure theme');
+    assert(incrocioCss.includes('--street-asphalt: #0b0d10'), 'CSS must define deep asphalt palette #0b0d10');
+    assert(incrocioCss.includes('--street-orange: #ff652f'), 'CSS must define neon street orange #ff652f');
+    assert(!incrocioCss.includes('--inc-paper:#f5f2eb'), 'CSS must not force light paper #f5f2eb background');
+
+    const frontendAppJs = fs.readFileSync(path.join(__dirname, '..', 'frontend', 'app.js'), 'utf8');
+    assert(frontendAppJs.includes('STREET_GLYPHS'), 'frontend/app.js must define STREET_GLYPHS');
+    assert(frontendAppJs.includes('setAvatarDisplay'), 'frontend/app.js must provide setAvatarDisplay helper');
+    pass('Pure Street Theme & Code Parity: Deep asphalt (#0b0d10) + neon orange (#ff652f), zero beige, 100% HTML/CSS parity');
 
     // ----------------------------------------------------
     // SUMMARY

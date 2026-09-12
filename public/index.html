@@ -399,7 +399,7 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 
-<body data-design="incrocio" class="min-h-full flex flex-col font-sans relative">
+<body data-design="street-pure" class="min-h-full flex flex-col font-sans relative bg-[#0b0d10] text-[#f1f5f9] selection:bg-[#ff652f] selection:text-black">
   <a class="skip-link" href="#entry-form">Vai al modulo di ingresso</a>
 
   <!-- ======================================================== -->
@@ -557,6 +557,27 @@
         <a href="#manifesto-pillars" class="px-5 py-3 bg-zinc-900/90 hover:bg-zinc-800 text-white font-bold text-sm rounded-xl border border-zinc-700 transition inline-flex items-center gap-2 cursor-pointer">
           <span>📜 Il Nostro Manifesto</span>
         </a>
+      </div>
+
+      <!-- Hazard Warning Tape (Art. 1 Compliance & Street Vibe) -->
+      <div class="w-full max-w-2xl mx-auto overflow-hidden rounded-lg border border-zinc-800 my-4 shadow-lg">
+        <img src="/assets/street/hazard_tape.svg" alt="Art. 1: Zero Foto // Memoria Volatile" class="w-full h-8 object-cover object-left" />
+      </div>
+
+      <!-- Ambient Visual Stage (Higgsfield AI Video Loop / Graphic Stage) -->
+      <div class="higgsfield-ambient-stage w-full max-w-2xl mx-auto h-40 sm:h-48 my-5 relative flex items-center justify-center border border-zinc-800/80 shadow-[0_0_30px_rgba(0,0,0,0.8)]">
+        <video class="higgsfield-ambient-video absolute inset-0 w-full h-full object-cover opacity-60" autoplay loop muted playsinline poster="/assets/street/hero_ambient_fallback.svg">
+          <source src="/assets/street/hero_ambient.mp4" type="video/mp4">
+          <img src="/assets/street/hero_ambient_fallback.svg" alt="Streetalk Night Alley" class="w-full h-full object-cover">
+        </video>
+        <div class="absolute inset-0 bg-gradient-to-t from-[#0b0d10] via-transparent to-[#0b0d10]/70 pointer-events-none"></div>
+        <div class="relative z-10 text-center px-4 py-2 bg-black/70 backdrop-blur-md rounded-xl border border-zinc-800">
+          <div class="flex items-center justify-center gap-2 text-xs font-mono text-street-orange font-bold tracking-widest uppercase">
+            <span class="w-2 h-2 rounded-full bg-street-orange animate-ping"></span>
+            <span>HIGGSFIELD AI // AMBIENT STREET MOTOR</span>
+          </div>
+          <p class="text-[11px] font-mono text-zinc-300 mt-1">CCTV Telemetry • Memoria volatile 180s • Zero archiviazione</p>
+        </div>
       </div>
 
       <div class="encounter-scene" aria-hidden="true">
@@ -1727,7 +1748,7 @@
 
             <div>
               <span class="block text-xs font-mono text-zinc-300 font-bold mb-1.5">Glifo / Icona Street (No foto):</span>
-              <div class="grid grid-cols-7 gap-1" id="full-profile-avatar-grid">
+              <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="full-profile-avatar-grid">
                 <!-- Injected via JS -->
               </div>
             </div>
@@ -2090,8 +2111,8 @@
           </div>
 
           <div>
-            <span class="block text-[11px] font-mono text-zinc-400 mb-1.5">Scegli la tua Vibe / Avatar:</span>
-            <div class="grid grid-cols-7 gap-1.5" id="onboarding-avatar-grid">
+            <span class="block text-[11px] font-mono text-zinc-400 mb-1.5">Scegli la tua Vibe / Glifo Street:</span>
+            <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="onboarding-avatar-grid">
               <!-- Rendered dynamically -->
             </div>
           </div>
@@ -2159,8 +2180,8 @@
         </div>
 
         <div>
-          <span class="block text-xs font-mono text-zinc-300 font-bold mb-1.5">Icona / Avatar:</span>
-          <div class="grid grid-cols-7 gap-1.5" id="profile-avatar-grid">
+          <span class="block text-xs font-mono text-zinc-300 font-bold mb-1.5">Glifo / Icona Street (No foto):</span>
+          <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="profile-avatar-grid">
             <!-- Populated with avatars -->
           </div>
         </div>

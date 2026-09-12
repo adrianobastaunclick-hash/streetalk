@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "project": "Streetalk",
+  "theme": "street-puro",
+  "version": "1.0.0",
+  "description": "Configurazione e mapping asset generati con Higgsfield AI per l'interfaccia Streetalk.",
+  "palette": {
+    "asphalt_deep": "#0b0d10",
+    "asphalt_card": "#12151f",
+    "orange_neon": "#ff652f",
+    "white_pure": "#ffffff",
+    "zinc_muted": "#71717a",
+    "border_industrial": "#27272a"
+  },
+  "pipeline": {
+    "free_tier_workflow": "Canale A: copia il prompt specificato per ciascun asset in Higgsfield AI (https://higgsfield.ai), genera il visual/video gratuito, scarica il file e salvalo nel percorso 'target_path'. Se il file generato non è presente, l'interfaccia utilizzerà automaticamente il 'fallback_path' SVG ad alto contrasto.",
+    "api_tier_workflow": "Canale B: configura HIGGSFIELD_API_KEY nel file .env ed esegui 'node lib/higgsfield-client.js --generate <asset_id>'."
+  },
+  "assets": {
+    "hero_ambient_loop": {
+      "id": "hero_ambient_loop",
+      "name": "Video Loop Ambientale Hero & Radar",
+      "type": "video/mp4",
+      "target_path": "public/assets/street/hero_ambient.mp4",
+      "fallback_path": "public/assets/street/hero_ambient_fallback.svg",
+      "aspect_ratio": "16:9",
+      "loop": true,
+      "higgsfield_prompt": "Cinematic underground urban street alley at night, continuous heavy rain dripping on dark wet asphalt with glowing reflections of neon orange street lamps and distant shadows, gritty atmospheric smoke and fog, subtle VHS CCTV camera texture, slow hypnotic seamless loop, pitch black #0b0d10 and vibrant electric orange #ff652f accent, raw neo-brutalist realism.",
+      "motion_intensity": 4,
+      "fps": 24
+    },
+    "radar_sonar_backdrop": {
+      "id": "radar_sonar_backdrop",
+      "name": "Animazione Sonar Radar Underground",
+      "type": "video/mp4",
+      "target_path": "public/assets/street/radar_sonar.mp4",
+      "fallback_path": "public/assets/street/radar_sonar_fallback.svg",
+      "aspect_ratio": "1:1",
+      "loop": true,
+      "higgsfield_prompt": "Dark terminal radar display, circular neon orange #ff652f sonar ping sweeping across dark charcoal asphalt background, digital HUD telemetry coordinates, geometric grid scan, high contrast cyber-brutalist telemetry.",
+      "motion_intensity": 3,
+      "fps": 24
+    },
+    "asphalt_grunge_texture": {
+      "id": "asphalt_grunge_texture",
+      "name": "Texture Asfalto e Cemento Stradale",
+      "type": "image/webp",
+      "target_path": "public/assets/street/asphalt_grunge.webp",
+      "fallback_path": "public/assets/street/asphalt_grunge_fallback.svg",
+      "aspect_ratio": "1:1",
+      "tileable": true,
+      "higgsfield_prompt": "Seamless top-down dark asphalt concrete pavement texture, subtle cracks, fine gravel aggregate, distressed street surface, deep charcoal #0b0d10 with matte finish, high contrast micro-textures.",
+      "style": "photorealistic-texture"
+    },
+    "hazard_tape_banner": {
+      "id": "hazard_tape_banner",
+      "name": "Nastro Segnaletico Hazard Zero Foto",
+      "type": "image/svg+xml",
+      "target_path": "public/assets/street/hazard_tape.svg",
+      "fallback_path": "public/assets/street/hazard_tape.svg",
+      "aspect_ratio": "12:1",
+      "tileable": true,
+      "higgsfield_prompt": "Industrial hazard warning tape, bold diagonal black and neon orange #ff652f hazard stripes with stencil typography '// ART. 1 NO FOTO // SOLO TESTO // MEMORIA VOLATILE //'."
+    }
+  }
+}

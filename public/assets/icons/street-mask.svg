@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Balaclava head shape -->
+  <path d="M4 14 C4 6 7 2 12 2 C17 2 20 6 20 14 C20 19 18 22 17 22 L7 22 C6 22 4 19 4 14 Z" fill="#12151f" stroke="#ff652f" stroke-width="2"/>
+  <!-- Eyes horizontal cutout -->
+  <rect x="7" y="9" width="10" height="4" rx="2" fill="#0b0d10" stroke="#ffffff" stroke-width="1.5"/>
+  <!-- Glowing Eye dots -->
+  <circle cx="9.5" cy="11" r="1" fill="#ff652f"/>
+  <circle cx="14.5" cy="11" r="1" fill="#ff652f"/>
+</svg>

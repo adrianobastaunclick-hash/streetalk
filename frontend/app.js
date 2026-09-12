@@ -1382,7 +1382,41 @@ if (typeof io === 'undefined') {
     // URBAN PROFILE & ONBOARDING SYSTEM
     // ==========================================
     const STREET_RANDOM_NICKS = ['Shadow', 'Neon', 'Viper', 'Ghost', 'Drifter', 'Phantom', 'Hacker', 'Rebel', 'Rogue', 'Blade', 'Voltage', 'Echo', 'Specter', 'Apex', 'Asfalto', 'Notturno', 'Freccia', 'Zenit'];
-    const STREET_AVATARS = ['⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'];
+
+    // Custom Street Vector Glyphs (SVG) & Legacy Emoji Fallbacks
+    const STREET_GLYPHS = [
+      { id: 'street-bolt', label: 'Fulmine Neon', path: '/assets/icons/street-bolt.svg', fallback: '⚡' },
+      { id: 'street-spray', label: 'Spray Underground', path: '/assets/icons/street-spray.svg', fallback: '🎨' },
+      { id: 'street-mask', label: 'Maschera Anonima', path: '/assets/icons/street-mask.svg', fallback: '🎭' },
+      { id: 'street-radar', label: 'Radar Sonar', path: '/assets/icons/street-radar.svg', fallback: '🎯' },
+      { id: 'street-chain', label: 'Catena Inox', path: '/assets/icons/street-chain.svg', fallback: '⛓️' },
+      { id: 'street-asphalt', label: 'Asfalto & Gomma', path: '/assets/icons/street-asphalt.svg', fallback: '🛣️' },
+      { id: 'street-flame', label: 'Fiamma Street', path: '/assets/icons/street-flame.svg', fallback: '🔥' },
+      { id: 'street-tape', label: 'Nastro Hazard', path: '/assets/icons/street-tape.svg', fallback: '⚠️' },
+      { id: 'street-cassette', label: 'Tape 808', path: '/assets/icons/street-cassette.svg', fallback: '📼' },
+      { id: 'street-seal', label: 'Sigillo 180s', path: '/assets/icons/street-seal.svg', fallback: '⏱️' }
+    ];
+
+    const STREET_AVATARS = [
+      'street-bolt', 'street-spray', 'street-mask', 'street-radar', 'street-chain',
+      'street-asphalt', 'street-flame', 'street-tape', 'street-cassette', 'street-seal',
+      '⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'
+    ];
+
+    function setAvatarDisplay(element, avatarValue, sizeClass) {
+      if (!element) return;
+      element.innerHTML = '';
+      const glyph = STREET_GLYPHS.find(g => g.id === avatarValue || g.fallback === avatarValue);
+      if (glyph) {
+        const img = document.createElement('img');
+        img.src = glyph.path;
+        img.alt = glyph.label;
+        img.className = sizeClass ? `${sizeClass} inline-block object-contain pointer-events-none` : 'w-6 h-6 inline-block object-contain pointer-events-none';
+        element.appendChild(img);
+      } else {
+        safeSetText(element, avatarValue || '⚡');
+      }
+    }
 
     function generateRandomStreetNick() {
       const name = STREET_RANDOM_NICKS[Math.floor(Math.random() * STREET_RANDOM_NICKS.length)];
@@ -1433,7 +1467,7 @@ if (typeof io === 'undefined') {
           if (parsed && typeof parsed.moniker === 'string') {
             return {
               moniker: parsed.moniker.trim().substring(0, 25) || generateRandomStreetNick(),
-              avatar: STREET_AVATARS.includes(parsed.avatar) ? parsed.avatar : '⚡',
+              avatar: (STREET_AVATARS.includes(parsed.avatar) || STREET_GLYPHS.some(g => g.id === parsed.avatar)) ? parsed.avatar : 'street-bolt',
               bio: typeof parsed.bio === 'string' && parsed.bio.trim() ? parsed.bio.trim().substring(0, 70) : STREET_PROFILE_DEFAULTS.bio,
               motto: typeof parsed.motto === 'string' && parsed.motto.trim() ? parsed.motto.trim().substring(0, 100) : STREET_PROFILE_DEFAULTS.motto,
               vision: typeof parsed.vision === 'string' && parsed.vision.trim() ? parsed.vision.trim().substring(0, 200) : STREET_PROFILE_DEFAULTS.vision,
@@ -1446,7 +1480,7 @@ if (typeof io === 'undefined') {
 
       const defaultProfile = {
         moniker: generateRandomStreetNick(),
-        avatar: '⚡',
+        avatar: 'street-bolt',
         bio: STREET_PROFILE_DEFAULTS.bio,
         motto: STREET_PROFILE_DEFAULTS.motto,
         vision: STREET_PROFILE_DEFAULTS.vision,
@@ -1469,28 +1503,34 @@ if (typeof io === 'undefined') {
       const nickEl = document.getElementById('header-profile-nick');
       const avatarEl = document.getElementById('header-profile-avatar');
       if (nickEl) safeSetText(nickEl, p.moniker);
-      if (avatarEl) safeSetText(avatarEl, p.avatar);
+      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar, 'w-4 h-4');
     }
 
-    let tempSelectedAvatar = '⚡';
-    let fullProfileAvatar = '⚡';
+    let tempSelectedAvatar = 'street-bolt';
+    let fullProfileAvatar = 'street-bolt';
 
     function renderAvatarGrid(containerId, activeAvatar, onSelect) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
-      STREET_AVATARS.forEach((av) => {
+      STREET_GLYPHS.forEach((glyph) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `p-1.5 rounded-lg text-lg border transition cursor-pointer flex items-center justify-center ${
-          av === activeAvatar
-            ? 'bg-street-orange/25 border-street-orange text-white scale-110 shadow-sm'
+        btn.title = glyph.label;
+        const isActive = activeAvatar === glyph.id || activeAvatar === glyph.fallback;
+        btn.className = `p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+          isActive
+            ? 'bg-street-orange/25 border-street-orange text-white scale-110 shadow-[0_0_12px_rgba(255,101,47,0.4)]'
             : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'
         }`;
-        safeSetText(btn, av);
+        const img = document.createElement('img');
+        img.src = glyph.path;
+        img.alt = glyph.label;
+        img.className = 'w-6 h-6 object-contain pointer-events-none';
+        btn.appendChild(img);
         btn.onclick = () => {
-          onSelect(av);
-          renderAvatarGrid(containerId, av, onSelect);
+          onSelect(glyph.id);
+          renderAvatarGrid(containerId, glyph.id, onSelect);
         };
         container.appendChild(btn);
       });
@@ -1509,12 +1549,12 @@ if (typeof io === 'undefined') {
 
       if (nickInput) nickInput.value = prof.moniker;
       if (bioInput) bioInput.value = prof.bio;
-      if (previewAvatar) safeSetText(previewAvatar, prof.avatar);
+      if (previewAvatar) setAvatarDisplay(previewAvatar, prof.avatar, 'w-7 h-7');
       if (previewNick) safeSetText(previewNick, prof.moniker);
 
       renderAvatarGrid('profile-avatar-grid', tempSelectedAvatar, (av) => {
         tempSelectedAvatar = av;
-        if (previewAvatar) safeSetText(previewAvatar, av);
+        if (previewAvatar) setAvatarDisplay(previewAvatar, av, 'w-7 h-7');
       });
 
       if (nickInput) {
@@ -1620,7 +1660,7 @@ if (typeof io === 'undefined') {
       const cardTopics = document.getElementById('card-display-topics');
       const cardAvoids = document.getElementById('card-display-avoids');
 
-      if (cardAvatar) safeSetText(cardAvatar, fullProfileAvatar);
+      if (cardAvatar) setAvatarDisplay(cardAvatar, fullProfileAvatar, 'w-10 h-10');
       if (cardNick) safeSetText(cardNick, nick);
       if (cardMotto) safeSetText(cardMotto, `"${motto}"`);
       if (cardVision) safeSetText(cardVision, vision);
@@ -1701,7 +1741,7 @@ if (typeof io === 'undefined') {
     }
 
     // Onboarding Gate (First Access)
-    let tempOnboardingAvatar = '⚡';
+    let tempOnboardingAvatar = 'street-bolt';
 
     function initProfileAndOnboarding() {
       const prof = getUserProfile();
@@ -1798,7 +1838,7 @@ if (typeof io === 'undefined') {
       const avoidsEl = document.getElementById('partner-modal-avoids');
       const bioEl = document.getElementById('partner-modal-bio');
 
-      if (avatarEl) safeSetText(avatarEl, p.avatar || '⚡');
+      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar || 'street-bolt', 'w-8 h-8');
       if (nickEl) safeSetText(nickEl, p.moniker || 'SHADOW');
       if (mottoEl) safeSetText(mottoEl, p.motto ? `"${p.motto}"` : 'Nessun motto impostato');
       if (visionEl) safeSetText(visionEl, p.vision || 'Nessuna visione inserita.');
@@ -2300,7 +2340,7 @@ if (typeof io === 'undefined') {
 
         safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
         const partnerAvatarEl = document.getElementById('chat-partner-avatar');
-        if (partnerAvatarEl) safeSetText(partnerAvatarEl, partnerAvatar);
+        if (partnerAvatarEl) setAvatarDisplay(partnerAvatarEl, partnerAvatar, 'w-6 h-6');
 
         const partnerBioContainer = document.getElementById('chat-partner-bio-container');
         const partnerBioText = document.getElementById('chat-partner-bio-text');

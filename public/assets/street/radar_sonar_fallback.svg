@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="100%" height="100%">
+  <defs>
+    <radialGradient id="radarSweepGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ff652f" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#ff652f" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#0b0d10" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sweepGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff652f" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ff652f" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Deep Background Circle -->
+  <rect width="600" height="600" fill="#0b0d10"/>
+  <circle cx="300" cy="300" r="280" fill="#12151f" stroke="#27272a" stroke-width="2"/>
+
+  <!-- Concentric Sonar Distance Rings -->
+  <circle cx="300" cy="300" r="70" fill="none" stroke="#ff652f" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="4 4"/>
+  <circle cx="300" cy="300" r="140" fill="none" stroke="#ff652f" stroke-width="1" stroke-opacity="0.25"/>
+  <circle cx="300" cy="300" r="210" fill="none" stroke="#ff652f" stroke-width="1" stroke-opacity="0.2" stroke-dasharray="6 6"/>
+  <circle cx="300" cy="300" r="280" fill="none" stroke="#ff652f" stroke-width="2" stroke-opacity="0.5"/>
+
+  <!-- Crosshair Reticle -->
+  <line x1="300" y1="20" x2="300" y2="580" stroke="#ff652f" stroke-width="1" stroke-opacity="0.25"/>
+  <line x1="20" y1="300" x2="580" y2="300" stroke="#ff652f" stroke-width="1" stroke-opacity="0.25"/>
+
+  <!-- Sweep Line with Animation -->
+  <g transform="translate(300, 300)">
+    <line x1="0" y1="0" x2="280" y2="0" stroke="url(#sweepGradient)" stroke-width="3">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite"/>
+    </line>
+    <!-- Sweep Sector Trail -->
+    <path d="M 0 0 L 280 0 A 280 280 0 0 0 242 -140 Z" fill="url(#radarSweepGlow)">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="4s" repeatCount="indefinite"/>
+    </path>
+  </g>
+
+  <!-- Center Pulse Target -->
+  <circle cx="300" cy="300" r="6" fill="#ff652f"/>
+  <circle cx="300" cy="300" r="16" fill="none" stroke="#ff652f" stroke-width="2" opacity="0.8">
+    <animate attributeName="r" values="6;24;6" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.9;0.1;0.9" dur="2s" repeatCount="indefinite"/>
+  </circle>
+
+  <!-- Degrees / Telemetry Marks -->
+  <text x="310" y="45" fill="#ff652f" font-family="monospace" font-size="11" font-weight="bold" opacity="0.8">N 000°</text>
+  <text x="535" y="315" fill="#ff652f" font-family="monospace" font-size="11" font-weight="bold" opacity="0.8">E 090°</text>
+  <text x="310" y="575" fill="#ff652f" font-family="monospace" font-size="11" font-weight="bold" opacity="0.8">S 180°</text>
+  <text x="30" y="315" fill="#ff652f" font-family="monospace" font-size="11" font-weight="bold" opacity="0.8">W 270°</text>
+
+  <!-- Random detected street nodes in range -->
+  <circle cx="210" cy="180" r="4" fill="#ff652f" opacity="0.9">
+    <animate attributeName="opacity" values="0.2;1;0.2" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  <text x="220" y="184" fill="#ffffff" font-family="monospace" font-size="10" opacity="0.75">NODE_ALPHA</text>
+
+  <circle cx="420" cy="390" r="4" fill="#ff652f" opacity="0.8">
+    <animate attributeName="opacity" values="0.9;0.3;0.9" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <text x="430" y="394" fill="#ffffff" font-family="monospace" font-size="10" opacity="0.75">NODE_GAMMA</text>
+</svg>
