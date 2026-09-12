@@ -1,0 +1,35 @@
+const fs = require('fs');
+const p='public/index.html';
+let html=fs.readFileSync(p,'utf8');
+const config=html.match(/tailwind\.config = (\{[\s\S]*?\n      \});/)[1];
+fs.writeFileSync('tailwind.config.cjs', 'module.exports = '+config.replace('theme: {', "content: ['./public/index.html'],\n        theme: {")+';\n');
+fs.writeFileSync('scripts/tailwind.css','@tailwind base;\n@tailwind components;\n@tailwind utilities;\n');
+const begin=html.indexOf('  <link rel="preconnect" href="https://fonts.googleapis.com">');
+const end=html.indexOf('  <style>',begin);
+html=html.slice(0,begin)+'  <link rel="stylesheet" href="/fonts.css">\n  <link rel="stylesheet" href="/utilities.css">\n\n'+html.slice(end);
+const socketStart=html.indexOf('  <!-- Socket.io client script');
+const socketEnd=html.indexOf('  </script>',socketStart)+11;
+html=html.slice(0,socketStart)+'  <script src="/vendor/socket.io.min.js"></script>'+html.slice(socketEnd);
+html=html.replace('    (function init3DRadar() {','    function init3DRadar() {');
+const radarEnd=html.indexOf('    })();',html.indexOf('    function init3DRadar()'));
+html=html.slice(0,radarEnd)+'    }\n'+html.slice(radarEnd+10);
+html=html.replace('    function init3DRadar() {',`    let radarEngineLoading = false;
+    function loadRadarEngine() {
+      if (radarEngineLoading || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      radarEngineLoading = true;
+      const script = document.createElement('script');
+      script.src = '/vendor/three.min.js';
+      script.onload = init3DRadar;
+      script.onerror = () => { radarEngineLoading = false; };
+      document.head.appendChild(script);
+    }
+    function init3DRadar() {`);
+html=html.replace('const socket = io(SERVER_URL, {','const socket = io(SERVER_URL, {\n      autoConnect: false,');
+html=html.replace('      if (!targetView) return;',`      if (!targetView) return;
+      if (viewName !== 'landing' && !socket.connected && typeof socket.connect === 'function') socket.connect();
+      if (viewName === 'radar') loadRadarEngine();`);
+html=html.replace('<div class="flex items-center gap-3 cursor-pointer group" onclick="backToLanding()" role="button"','<button type="button" class="flex items-center gap-3 cursor-pointer group" onclick="backToLanding()"');
+html=html.replace('    </div>\n\n    <!-- Global Navigation Tabs','    </button>\n\n    <!-- Global Navigation Tabs');
+fs.writeFileSync(p,html);fs.writeFileSync('index.html',html);
+fs.copyFileSync('node_modules/socket.io/client-dist/socket.io.min.js','public/vendor/socket.io.min.js');
+for (const p of ['public/incrocio.css','incrocio.css']) fs.appendFileSync(p, '\n/* Accessible foregrounds on the Incrocio palette. */\n[data-design="incrocio"] header button > .bg-street-orange { color: #fffefa !important; }\n[data-design="incrocio"] #secret-validation-warning { color: #a51d39 !important; }\n');

@@ -296,7 +296,7 @@ async function runAutonomousSuite() {
     });
 
     // Verify index.html strictly uses textContent / safeSetText
-    const indexHtml = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8');
+    const indexHtml = fs.readFileSync(path.join(__dirname, '../public/index.html'), 'utf8') + '\n' + fs.readFileSync(path.join(__dirname, '../frontend/app.js'), 'utf8');
     if (indexHtml.includes('safeSetText') && indexHtml.includes('element.textContent')) {
       pass('Frontend strictly binds dynamic text through safeSetText / textContent');
     } else {
@@ -931,6 +931,18 @@ async function runAutonomousSuite() {
       pass('On-Page SEO: Rules, privacy and FAQ retain crawlable associated headings');
     } else {
       fail('On-Page SEO: Missing rules, privacy or FAQ section with associated heading');
+    }
+
+    // Legal & Regulatory Compliance Check (DSA Reg. UE 2022/2065 & D.lgs. 101/2018 14+ minimum age)
+    const termsDocExists = fs.existsSync(path.join(__dirname, '../docs/TERMINI_E_CONDIZIONI.md'));
+    const termsDoc = termsDocExists ? fs.readFileSync(path.join(__dirname, '../docs/TERMINI_E_CONDIZIONI.md'), 'utf8') : '';
+    const hasTermsModal = indexHtml.includes('id="modal-terms"') && indexHtml.includes('openTermsModal');
+    const hasAgeNotice = indexHtml.includes('14 anni') && indexHtml.includes('Termini &amp; Condizioni');
+    const hasDsaContact = indexHtml.includes('contatto@streetalk.live');
+    if (termsDocExists && termsDoc.includes('ART. 1') && termsDoc.includes('ART. 4') && hasTermsModal && hasAgeNotice && hasDsaContact) {
+      pass('Legal Compliance (12/09/2026): Terms & Conditions documentation, modal, 14+ age check and DSA contact verified');
+    } else {
+      fail('Legal Compliance: Incomplete terms documentation, modal or age gate notice');
     }
 
     // ----------------------------------------------------

@@ -4,16 +4,21 @@
   "type": "commonjs",
   "scripts": {
     "start": "node server.js",
-    "test": "node tests/autonomous-suite.js"
+    "test": "node tests/autonomous-suite.js",
+    "build": "tailwindcss -i scripts/tailwind.css -o public/utilities.css --minify && esbuild frontend/app.js --outfile=public/app.min.js --minify"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
+    "compression": "^1.8.2",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.19.2",
     "socket.io": "^4.7.5"
   },
   "devDependencies": {
-    "socket.io-client": "^4.7.5"
+    "esbuild": "^0.28.2",
+    "lighthouse": "^12.8.2",
+    "socket.io-client": "^4.7.5",
+    "tailwindcss": "^3.4.17"
   }
 }

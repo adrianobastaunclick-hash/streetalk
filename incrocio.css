@@ -323,3 +323,12 @@ body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; 
 
 [data-design="incrocio"] input::placeholder,[data-design="incrocio"] textarea::placeholder { color:#6e6570!important; opacity:1; }
 [data-design="incrocio"] #entry-card:hover { box-shadow:0 14px 40px #29252c0b!important; }
+
+/* Accessible foregrounds on the Incrocio palette. */
+[data-design="incrocio"] header button > .bg-street-orange { color: #fffefa !important; }
+[data-design="incrocio"] #secret-validation-warning { color: #a51d39 !important; }
+
+[data-design="incrocio"] #hero-tag { color: #a52249 !important; }
+[data-design="incrocio"] .text-teal-400 { color: #17675a !important; }
+[data-design="incrocio"] .text-rose-400 { color: #a51d39 !important; }
+[data-design="incrocio"] .bg-street-surface { background: var(--inc-panel, #fffefa) !important; }

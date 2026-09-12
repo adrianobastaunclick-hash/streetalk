@@ -1,13 +1,38 @@
 {
   "outputDirectory": "public",
   "rewrites": [
-    { "source": "/robots.txt", "destination": "/robots.txt" },
-    { "source": "/sitemap.xml", "destination": "/sitemap.xml" },
-    { "source": "/sw.js", "destination": "/sw.js" },
-    { "source": "/manifest.json", "destination": "/manifest.json" },
-    { "source": "/og-streetalk.svg", "destination": "/og-streetalk.svg" },
-    { "source": "/google33c12d417a750cbf.html", "destination": "/google33c12d417a750cbf.html" },
-    { "source": "/api/:match*", "destination": "https://streetalk.onrender.com/api/:match*" },
-    { "source": "/((?!.*\\.).*)", "destination": "/index.html" }
-  ]
+    {
+      "source": "/robots.txt",
+      "destination": "/robots.txt"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/sw.js",
+      "destination": "/sw.js"
+    },
+    {
+      "source": "/manifest.json",
+      "destination": "/manifest.json"
+    },
+    {
+      "source": "/og-streetalk.svg",
+      "destination": "/og-streetalk.svg"
+    },
+    {
+      "source": "/google33c12d417a750cbf.html",
+      "destination": "/google33c12d417a750cbf.html"
+    },
+    {
+      "source": "/api/:match*",
+      "destination": "https://streetalk.onrender.com/api/:match*"
+    },
+    {
+      "source": "/((?!.*\\.).*)",
+      "destination": "/index.html"
+    }
+  ],
+  "buildCommand": "npm run build"
 }
