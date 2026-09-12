@@ -332,3 +332,91 @@ body[data-design="incrocio"] { --ink:#29252c; --paper:#29252c; --panel:#fffefa; 
 [data-design="incrocio"] .text-teal-400 { color: #17675a !important; }
 [data-design="incrocio"] .text-rose-400 { color: #a51d39 !important; }
 [data-design="incrocio"] .bg-street-surface { background: var(--inc-panel, #fffefa) !important; }
+
+/* High-Contrast Asphalt Passport (#street-id-card) Protection */
+#street-id-card,
+[data-design="incrocio"] #street-id-card {
+  background: #0d0f15 !important;
+  background-image: linear-gradient(180deg, #161a24 0%, #0c0e14 100%) !important;
+  border: 2px solid #ff652f !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 101, 47, 0.3) !important;
+  color: #f8fafc !important;
+}
+
+[data-design="incrocio"] #street-id-card *,
+#street-id-card * {
+  text-shadow: none !important;
+}
+
+[data-design="incrocio"] #street-id-card h3,
+[data-design="incrocio"] #street-id-card #card-display-nick,
+#street-id-card #card-display-nick {
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.04em !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-design="incrocio"] #street-id-card span.text-zinc-500,
+#street-id-card span.text-zinc-500,
+[data-design="incrocio"] #street-id-card .card-stamp-sub,
+#street-id-card .card-stamp-sub {
+  color: #94a3b8 !important;
+}
+
+[data-design="incrocio"] #street-id-card #card-display-motto,
+#street-id-card #card-display-motto {
+  background: rgba(0, 0, 0, 0.6) !important;
+  background-color: rgba(0, 0, 0, 0.6) !important;
+  border: 1px solid rgba(255, 101, 47, 0.45) !important;
+  color: #ffffff !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-design="incrocio"] #street-id-card #card-display-vision,
+#street-id-card #card-display-vision,
+[data-design="incrocio"] #street-id-card #card-display-topics,
+#street-id-card #card-display-topics,
+[data-design="incrocio"] #street-id-card #card-display-avoids,
+#street-id-card #card-display-avoids {
+  color: #f1f5f9 !important;
+  font-size: 13px !important;
+  line-height: 1.55 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9) !important;
+}
+
+[data-design="incrocio"] #street-id-card .text-amber-400,
+#street-id-card .text-amber-400 {
+  color: #fbbf24 !important;
+  font-weight: 700 !important;
+}
+
+[data-design="incrocio"] #street-id-card .text-teal-400,
+#street-id-card .text-teal-400 {
+  color: #2dd4bf !important;
+  font-weight: 700 !important;
+}
+
+[data-design="incrocio"] #street-id-card .text-red-400,
+#street-id-card .text-red-400 {
+  color: #f87171 !important;
+  font-weight: 700 !important;
+}
+
+[data-design="incrocio"] #street-id-card .text-street-orange,
+#street-id-card .text-street-orange {
+  color: #ff652f !important;
+  font-weight: 700 !important;
+}
+
+[data-design="incrocio"] #street-id-card .border-zinc-800\/80,
+#street-id-card .border-zinc-800\/80 {
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+/* Partner Modal High Contrast */
+[data-design="incrocio"] #modal-partner-profile .text-amber-400 { color: #b45309 !important; }
+[data-design="incrocio"] #modal-partner-profile .text-teal-400 { color: #0f766e !important; }
+[data-design="incrocio"] #modal-partner-profile .text-red-400 { color: #b91c1c !important; }
+[data-design="incrocio"] #modal-partner-profile .text-street-orange { color: #c2410c !important; }
+
