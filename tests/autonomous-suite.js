@@ -111,7 +111,7 @@ async function runAutonomousSuite() {
     SERVER_URL = await startLocalServer(serverModule);
     serverInstance = serverModule.server;
     console.log('[TEST-RUNNER] Fresh isolated server: ' + SERVER_URL);
-    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, funnelMetrics, validateJoinPayload, validateMessagePayload, getMoodQueue, DOMSafetyFilter } = serverModule;
+    const { users, rooms, queue, queues, rateLimits, ipJail, reportCounts, funnelMetrics, validateJoinPayload, validateMessagePayload, getMoodQueue, DOMSafetyFilter, streetBot } = serverModule;
 
     // A deliberately absent event must fail promptly rather than hang the suite.
     try {
@@ -619,6 +619,7 @@ async function runAutonomousSuite() {
     // Clear IP Jail & Report Counts for audit
     ipJail.clear();
     if (reportCounts) reportCounts.clear();
+    if (streetBot) streetBot.reset();
 
     if (users.size === 0) pass('RAM Users map 100% deallocated: usersCount === 0');
     else fail(`Users in RAM not deallocated: ${users.size}`);
@@ -1057,6 +1058,109 @@ async function runAutonomousSuite() {
     } catch (err) {
       fail(`Failed to verify funnel stats: ${err.message}`);
     }
+
+    // ----------------------------------------------------
+    // TEST 16: StreetBot — Realtime Moderation & 3-Strike Rule (Art. 4)
+    // ----------------------------------------------------
+    console.log('\n--- TEST 16: StreetBot Realtime Moderation & 3-Strike Rule (Art. 4) ---');
+
+    // 16.1 Pattern Analysis Unit Tests
+    const threatCheck = streetBot.analyze('ti ammazzo se non rispondi', 'sock_test_1');
+    const insultCheck = streetBot.analyze('sei proprio un bastardo', 'sock_test_1');
+    const spamCheck = streetBot.analyze('unisciti subito a https://t.me/crypto_scam', 'sock_test_1');
+    const doxxingCheck = streetBot.analyze('ecco la mia carta 4000 1234 5678 9010', 'sock_test_1');
+    const cleanCheck = streetBot.analyze('ciao piacere di conoscerti, bella serata', 'sock_test_1');
+
+    if (threatCheck.violated && threatCheck.category === 'threat' &&
+        insultCheck.violated && insultCheck.category === 'insult' &&
+        spamCheck.violated && spamCheck.category === 'spam' &&
+        doxxingCheck.violated && doxxingCheck.category === 'doxxing' &&
+        !cleanCheck.violated) {
+      pass('StreetBot Flow Analysis: Correctly detects threats, insults, spam, doxxing and passes clean chat');
+    } else {
+      fail(`StreetBot pattern analysis failed: threat=${threatCheck.violated}, insult=${insultCheck.violated}, spam=${spamCheck.violated}, doxxing=${doxxingCheck.violated}, clean=${cleanCheck.violated}`);
+    }
+
+    // 16.2 Live Socket Flow & 3-Strike Enforcement
+    const testBotClientA = await createClient();
+    const testBotClientB = await createClient();
+
+    const botMatchA = waitForEvent(testBotClientA, 'match_found', 'bot client A match');
+    const botMatchB = waitForEvent(testBotClientB, 'match_found', 'bot client B match');
+
+    testBotClientA.emit('join_queue', {
+      gender: 'M', targetGender: 'Tutti', mood: 'cazzeggio', secret: 'Segreto Bot Alpha'
+    });
+    testBotClientB.emit('join_queue', {
+      gender: 'F', targetGender: 'Tutti', mood: 'cazzeggio', secret: 'Segreto Bot Beta'
+    });
+
+    const [matchDataA, matchDataB] = await Promise.all([botMatchA, botMatchB]);
+    const botRoomId = matchDataA.roomId;
+
+    // Strike 1: Client A sends an insult
+    const strike1Promise = waitForEvent(testBotClientA, 'bot_strike_warning', 'bot strike 1 warning');
+    const roomBotMessagePromise = waitForEvent(testBotClientB, 'receive_message', 'room bot message alert');
+
+    testBotClientA.emit('send_message', {
+      roomId: botRoomId,
+      message: 'sei un bastardo'
+    });
+
+    const strike1Data = await strike1Promise;
+    const roomBotMsg = await roomBotMessagePromise;
+
+    if (strike1Data.strike === 1 && roomBotMsg.isBot && roomBotMsg.senderId === 'STREET_BOT') {
+      pass('StreetBot Strike 1: Abusive message blocked, strike 1 warning received, bot alert sent to room');
+    } else {
+      fail(`StreetBot Strike 1 unexpected output: strike=${strike1Data.strike}, isBot=${roomBotMsg.isBot}`);
+    }
+
+    // Strike 2: Client A sends another toxic message -> Trigger Temporary Jail & room shutdown
+    const strike2ErrorPromise = waitForEvent(testBotClientA, 'error_event', 'bot strike 2 jailed');
+    const partnerSkipPromise = waitForEvent(testBotClientB, 'partner_skipped', 'partner skipped by bot');
+
+    testBotClientA.emit('send_message', {
+      roomId: botRoomId,
+      message: 'ti spacco la faccia'
+    });
+
+    const strike2Error = await strike2ErrorPromise;
+    const partnerSkipData = await partnerSkipPromise;
+
+    if (strike2Error.code === 'STRIKE_2_JAILED' && partnerSkipData.reason.includes('Bot')) {
+      pass('StreetBot Strike 2: Offender temporarily jailed (IP Jail), room destroyed and partner notified');
+    } else {
+      fail(`StreetBot Strike 2 failed: err=${JSON.stringify(strike2Error)}, partnerReason=${partnerSkipData.reason}`);
+    }
+
+    // Strike 3: Escalation to Permanent Ban
+    const fakeIp = '198.51.100.99';
+    streetBot.recordStrike(fakeIp, '1° sgarro');
+    streetBot.recordStrike(fakeIp, '2° sgarro');
+    const strike3Result = streetBot.recordStrike(fakeIp, '3° sgarro: minacce ripetute');
+
+    if (strike3Result.action === 'permaban' && streetBot.isBanned(fakeIp)) {
+      pass('StreetBot Strike 3: 3rd strike automatically escalates to permanent ban (Art. 4)');
+    } else {
+      fail(`StreetBot Strike 3 permaban failed: action=${strike3Result.action}, isBanned=${streetBot.isBanned(fakeIp)}`);
+    }
+
+    // 16.3 Frontend UI Contract Verification
+    const hasBotBubbleUi = indexHtml.includes('STREET BOT // MODERAZIONE FLUSSO') && indexHtml.includes('isBot');
+    const hasBotStrikeListener = indexHtml.includes('bot_strike_warning') && indexHtml.includes('STRIKE_2_JAILED') && indexHtml.includes('STRIKE_3_PERMABAN');
+
+    if (hasBotBubbleUi && hasBotStrikeListener) {
+      pass('StreetBot UI: Neo-brutalist bot system message bubble and strike error modals verified');
+    } else {
+      fail(`StreetBot UI contract missing in frontend: bubble=${hasBotBubbleUi}, listener=${hasBotStrikeListener}`);
+    }
+
+    // Clean up test sockets and bot state
+    testBotClientA.disconnect();
+    testBotClientB.disconnect();
+    streetBot.reset();
+    ipJail.clear();
 
     // ----------------------------------------------------
     // SUMMARY

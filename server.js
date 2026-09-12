@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const supabaseClient = require('./lib/supabase');
 const { createNetworkPolicy } = require('./lib/network-policy');
 const networkPolicy = createNetworkPolicy();
+const { streetBot } = require('./lib/street-bot');
 
 const app = express();
 const server = http.createServer(app);
@@ -612,6 +613,7 @@ function handleUserDisconnectOrSkip(socketId, action = 'disconnect') {
 
   if (action === 'disconnect') {
     users.delete(socketId);
+    streetBot.cleanSocket(socketId);
   }
 }
 
@@ -621,6 +623,16 @@ function handleUserDisconnectOrSkip(socketId, action = 'disconnect') {
 io.on('connection', (socket) => {
   funnelMetrics.landings++;
   const clientIp = getClientIp(socket);
+
+  // Check StreetBot Permanent Ban (Strike 3)
+  if (streetBot.isBanned(clientIp)) {
+    socket.emit('error_event', {
+      code: 'IP_PERMABAN',
+      message: 'Accesso vietato: Ban permanente per violazione delle Regole della Strada (Art. 4). Per richiedere revisione umana ex DSA scrivi a contatto@streetalk.live.'
+    });
+    socket.disconnect(true);
+    return;
+  }
 
   // Check IP Jail
   if (isIpJailed(clientIp)) {
@@ -647,6 +659,15 @@ io.on('connection', (socket) => {
 
   // 1. JOIN QUEUE
   socket.on('join_queue', (payload) => {
+    if (streetBot.isBanned(clientIp)) {
+      socket.emit('error_event', {
+        code: 'IP_PERMABAN',
+        message: 'Accesso vietato: Ban permanente per violazione delle Regole della Strada (Art. 4).'
+      });
+      socket.disconnect(true);
+      return;
+    }
+
     if (isIpJailed(clientIp)) {
       socket.emit('error_event', { code: 'IP_JAILED', message: 'Indirizzo IP temporaneamente sospeso.' });
       socket.disconnect(true);
@@ -725,6 +746,15 @@ io.on('connection', (socket) => {
 
   // 3. SEND MESSAGE
   socket.on('send_message', (payload) => {
+    if (streetBot.isBanned(clientIp)) {
+      socket.emit('error_event', {
+        code: 'IP_PERMABAN',
+        message: 'Accesso vietato: Ban permanente per violazione dell\'Art. 4. Revisione umana: contatto@streetalk.live.'
+      });
+      socket.disconnect(true);
+      return;
+    }
+
     if (isIpJailed(clientIp)) {
       socket.emit('error_event', { code: 'IP_JAILED', message: 'Indirizzo IP temporaneamente sospeso.' });
       socket.disconnect(true);
@@ -750,6 +780,72 @@ io.on('connection', (socket) => {
     const room = rooms.get(roomId);
     if (!room) {
       return socket.emit('error_event', { code: 'ROOM_NOT_FOUND', message: 'Stanza inesistente o chiusa.' });
+    }
+
+    // --- STREETBOT REAL-TIME FLOW AUDIT (ART. 4) ---
+    const botAnalysis = streetBot.analyze(message, socket.id);
+    if (botAnalysis.violated) {
+      const strikeResult = streetBot.recordStrike(clientIp, botAnalysis.reason);
+
+      if (strikeResult.action === 'warn') {
+        // Strike 1: Block message, warn sender, notify room from StreetBot
+        socket.emit('bot_strike_warning', {
+          strike: 1,
+          maxStrikes: 3,
+          reason: botAnalysis.reason,
+          message: strikeResult.message
+        });
+
+        // Send system warning bubble into the chatroom from StreetBot
+        io.to(roomId).emit('receive_message', {
+          id: 'bot_' + crypto.randomUUID().substring(0, 8),
+          senderId: 'STREET_BOT',
+          isBot: true,
+          message: `🤖 [STREET BOT]: Messaggio bloccato per violazione dell'Art. 4 (${botAnalysis.reason}). Ricorda: 3 sgarri e sei fuori.`,
+          timestamp: Date.now()
+        });
+        return;
+      } else if (strikeResult.action === 'jail') {
+        // Strike 2: Temporary suspension (15 min IP Jail), terminate room
+        ipJail.set(clientIp, Date.now() + (strikeResult.jailDurationMs || DEFAULT_JAIL_TIME_MS));
+
+        socket.emit('error_event', {
+          code: 'STRIKE_2_JAILED',
+          strike: 2,
+          message: strikeResult.message
+        });
+
+        const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
+        const partnerSocket = io.sockets.sockets.get(partnerId);
+        if (partnerSocket) {
+          partnerSocket.emit('partner_skipped', {
+            reason: 'Il partner è stato sospeso temporaneamente dal Bot per violazione delle regole di rispetto (Art. 4).'
+          });
+        }
+
+        destroyRoom(roomId, 'bot_strike_jail');
+        socket.disconnect(true);
+        return;
+      } else if (strikeResult.action === 'permaban') {
+        // Strike 3: Permanent ban, terminate room
+        socket.emit('error_event', {
+          code: 'STRIKE_3_PERMABAN',
+          strike: 3,
+          message: strikeResult.message
+        });
+
+        const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
+        const partnerSocket = io.sockets.sockets.get(partnerId);
+        if (partnerSocket) {
+          partnerSocket.emit('partner_skipped', {
+            reason: 'Il partner è stato espulso definitivamente per ripetute violazioni (Art. 4).'
+          });
+        }
+
+        destroyRoom(roomId, 'bot_strike_permaban');
+        socket.disconnect(true);
+        return;
+      }
     }
 
     const messageEvent = {
@@ -844,6 +940,7 @@ io.on('connection', (socket) => {
         const count = (reportCounts.get(partnerIp) || 0) + 1;
         reportCounts.set(partnerIp, count);
         ipJail.set(partnerIp, Date.now() + DEFAULT_JAIL_TIME_MS);
+        streetBot.recordStrike(partnerIp, 'Segnalazione utente per: ' + (payload.reason || 'abuso'));
 
         // Asynchronously log abuse report to Supabase if configured
         if (supabaseClient && supabaseClient.isReady()) {
@@ -882,6 +979,7 @@ io.on('connection', (socket) => {
 
   // 10. DISCONNECT
   socket.on('disconnect', () => {
+    streetBot.cleanSocket(socket.id);
     handleUserDisconnectOrSkip(socket.id, 'disconnect');
     broadcastOnlineStats();
   });
@@ -980,5 +1078,6 @@ module.exports = {
   statsBroadcastTimer,
   ipJailSweeper,
   getClientIp,
-  networkPolicy
+  networkPolicy,
+  streetBot
 };

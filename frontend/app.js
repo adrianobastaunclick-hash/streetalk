@@ -1811,6 +1811,41 @@ if (typeof io === 'undefined') {
 
     function appendMessageBubble(messageObj, isSelf) {
       const container = document.getElementById('messages-container');
+      if (!container) return;
+
+      // Special StreetBot system message bubble
+      if (messageObj.isBot || messageObj.senderId === 'STREET_BOT') {
+        const botWrap = document.createElement('div');
+        botWrap.className = 'w-full my-3 flex justify-center';
+
+        const botCard = document.createElement('div');
+        botCard.className = 'max-w-[90%] sm:max-w-[80%] bg-zinc-950 border border-street-orange/60 rounded-xl p-3 text-xs font-mono text-zinc-300 shadow-[0_0_15px_rgba(255,101,47,0.12)] flex items-start gap-2.5';
+
+        const botIcon = document.createElement('div');
+        botIcon.className = 'text-xl select-none shrink-0';
+        botIcon.textContent = '🤖';
+
+        const botContent = document.createElement('div');
+        botContent.className = 'flex-1 space-y-1';
+
+        const botHeader = document.createElement('div');
+        botHeader.className = 'font-bold text-[10px] text-street-orange tracking-wider uppercase flex items-center justify-between';
+        botHeader.innerHTML = '<span>STREET BOT // MODERAZIONE FLUSSO</span><span class="text-zinc-500 font-normal">ART. 4</span>';
+
+        const botText = document.createElement('div');
+        botText.className = 'text-zinc-200 leading-relaxed font-sans text-xs';
+        safeSetText(botText, messageObj.message != null ? messageObj.message : (messageObj.text != null ? messageObj.text : ''));
+
+        botContent.appendChild(botHeader);
+        botContent.appendChild(botText);
+        botCard.appendChild(botIcon);
+        botCard.appendChild(botContent);
+        botWrap.appendChild(botCard);
+        container.appendChild(botWrap);
+        container.scrollTop = container.scrollHeight;
+        return;
+      }
+
       const wrap = document.createElement('div');
       wrap.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'} mb-3`;
 
@@ -2135,7 +2170,22 @@ if (typeof io === 'undefined') {
         openEndedModal('TEMPO SCADUTO', 'Il tempo della sessione è terminato. Puoi cercare una nuova conversazione.');
       });
 
+      socket.on('bot_strike_warning', (data) => {
+        if (SoundEngine.playWarning) SoundEngine.playWarning();
+        showToast(`⚠️ [STREET BOT] Sgarro ${data.strike}/${data.maxStrikes}: ${data.reason}`, 'error');
+      });
+
       socket.on('error_event', (err) => {
+        if (err.code === 'STRIKE_2_JAILED') {
+          if (SoundEngine.playSkip) SoundEngine.playSkip();
+          openEndedModal('SOSPESO DAL BOT (2° SGARRO)', err.message || 'Accesso sospeso temporaneamente (15m). Revisione umana: contatto@streetalk.live');
+          return;
+        }
+        if (err.code === 'STRIKE_3_PERMABAN' || err.code === 'IP_PERMABAN') {
+          if (SoundEngine.playSkip) SoundEngine.playSkip();
+          openEndedModal('BAN PERMANENTE (3 SGARRI)', err.message || 'Accesso escluso definitivamente da STREETALK. Revisione umana: contatto@streetalk.live');
+          return;
+        }
         showToast(err.message, 'error');
       });
     }
