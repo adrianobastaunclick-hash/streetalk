@@ -1126,7 +1126,8 @@ if (typeof io === 'undefined') {
         gender,
         targetGender,
         mood: selectedMood,
-        secret: mySecret
+        secret: mySecret,
+        profile: getUserProfile()
       };
 
       if (socket && socket.connected) {
@@ -1362,8 +1363,227 @@ if (typeof io === 'undefined') {
         closeTermsModal();
         closeReportModal();
         closeSocialCardModal();
+        closeProfileModal();
       }
     });
+
+    // ==========================================
+    // URBAN PROFILE & ONBOARDING SYSTEM
+    // ==========================================
+    const STREET_RANDOM_NICKS = ['Shadow', 'Neon', 'Viper', 'Ghost', 'Drifter', 'Phantom', 'Hacker', 'Rebel', 'Rogue', 'Blade', 'Voltage', 'Echo', 'Specter', 'Apex', 'Asfalto', 'Notturno', 'Freccia', 'Zenit'];
+    const STREET_AVATARS = ['⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'];
+
+    function generateRandomStreetNick() {
+      const name = STREET_RANDOM_NICKS[Math.floor(Math.random() * STREET_RANDOM_NICKS.length)];
+      const num = Math.floor(10 + Math.random() * 89);
+      return `${name}_${num}`;
+    }
+
+    function getUserProfile() {
+      try {
+        const stored = localStorage.getItem('streetalk_profile_v1');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed.moniker === 'string') {
+            return {
+              moniker: parsed.moniker.trim().substring(0, 25) || generateRandomStreetNick(),
+              avatar: STREET_AVATARS.includes(parsed.avatar) ? parsed.avatar : '⚡',
+              bio: typeof parsed.bio === 'string' ? parsed.bio.trim().substring(0, 70) : ''
+            };
+          }
+        }
+      } catch (e) {}
+
+      const defaultProfile = {
+        moniker: generateRandomStreetNick(),
+        avatar: '⚡',
+        bio: 'Qui per parlare con rispetto ed educazione'
+      };
+      saveUserProfile(defaultProfile);
+      return defaultProfile;
+    }
+
+    function saveUserProfile(prof) {
+      try {
+        localStorage.setItem('streetalk_profile_v1', JSON.stringify(prof));
+      } catch (e) {}
+      updateHeaderProfileDisplay(prof);
+    }
+
+    function updateHeaderProfileDisplay(prof) {
+      const p = prof || getUserProfile();
+      const nickEl = document.getElementById('header-profile-nick');
+      const avatarEl = document.getElementById('header-profile-avatar');
+      if (nickEl) safeSetText(nickEl, p.moniker);
+      if (avatarEl) safeSetText(avatarEl, p.avatar);
+    }
+
+    let tempSelectedAvatar = '⚡';
+
+    function renderAvatarGrid(containerId, activeAvatar, onSelect) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+      STREET_AVATARS.forEach((av) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `p-1.5 rounded-lg text-lg border transition cursor-pointer flex items-center justify-center ${
+          av === activeAvatar
+            ? 'bg-street-orange/25 border-street-orange text-white scale-110 shadow-sm'
+            : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'
+        }`;
+        safeSetText(btn, av);
+        btn.onclick = () => {
+          onSelect(av);
+          renderAvatarGrid(containerId, av, onSelect);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function openProfileModal() {
+      const modal = document.getElementById('modal-profile');
+      if (!modal) return;
+      const prof = getUserProfile();
+      tempSelectedAvatar = prof.avatar;
+
+      const nickInput = document.getElementById('profile-nick-input');
+      const bioInput = document.getElementById('profile-bio-input');
+      const previewAvatar = document.getElementById('profile-preview-avatar');
+      const previewNick = document.getElementById('profile-preview-nick');
+
+      if (nickInput) nickInput.value = prof.moniker;
+      if (bioInput) bioInput.value = prof.bio;
+      if (previewAvatar) safeSetText(previewAvatar, prof.avatar);
+      if (previewNick) safeSetText(previewNick, prof.moniker);
+
+      renderAvatarGrid('profile-avatar-grid', tempSelectedAvatar, (av) => {
+        tempSelectedAvatar = av;
+        if (previewAvatar) safeSetText(previewAvatar, av);
+      });
+
+      if (nickInput) {
+        nickInput.oninput = () => {
+          if (previewNick) safeSetText(previewNick, nickInput.value || 'Anonimo');
+        };
+      }
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeProfileModal() {
+      const modal = document.getElementById('modal-profile');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function randomizeProfileNick() {
+      const newNick = generateRandomStreetNick();
+      const nickInput = document.getElementById('profile-nick-input');
+      const previewNick = document.getElementById('profile-preview-nick');
+      if (nickInput) nickInput.value = newNick;
+      if (previewNick) safeSetText(previewNick, newNick);
+    }
+
+    function saveProfileFromModal() {
+      const nickInput = document.getElementById('profile-nick-input');
+      const bioInput = document.getElementById('profile-bio-input');
+      const moniker = (nickInput && nickInput.value.trim().length >= 2)
+        ? nickInput.value.trim().substring(0, 20)
+        : generateRandomStreetNick();
+      const bio = bioInput ? bioInput.value.trim().substring(0, 70) : '';
+
+      const updated = {
+        moniker,
+        avatar: tempSelectedAvatar,
+        bio
+      };
+      saveUserProfile(updated);
+      closeProfileModal();
+      showToast('Profilo salvato con successo!', 'success');
+    }
+
+    // Onboarding Gate (First Access)
+    let tempOnboardingAvatar = '⚡';
+
+    function initProfileAndOnboarding() {
+      const prof = getUserProfile();
+      updateHeaderProfileDisplay(prof);
+
+      const hasAccepted = localStorage.getItem('streetalk_privacy_accepted_2026');
+      if (!hasAccepted) {
+        openOnboardingModal();
+      }
+    }
+
+    function openOnboardingModal() {
+      const modal = document.getElementById('modal-onboarding');
+      if (!modal) return;
+      const prof = getUserProfile();
+      tempOnboardingAvatar = prof.avatar;
+
+      const nickInput = document.getElementById('onboarding-nick-input');
+      const bioInput = document.getElementById('onboarding-bio-input');
+      if (nickInput) nickInput.value = prof.moniker;
+      if (bioInput) bioInput.value = prof.bio;
+
+      renderAvatarGrid('onboarding-avatar-grid', tempOnboardingAvatar, (av) => {
+        tempOnboardingAvatar = av;
+      });
+
+      modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function randomizeOnboardingNick() {
+      const nickInput = document.getElementById('onboarding-nick-input');
+      if (nickInput) nickInput.value = generateRandomStreetNick();
+    }
+
+    function submitOnboarding() {
+      const check = document.getElementById('onboarding-consent-check');
+      const err = document.getElementById('onboarding-error');
+      if (!check || !check.checked) {
+        if (err) err.classList.remove('hidden');
+        return;
+      }
+      if (err) err.classList.add('hidden');
+
+      const nickInput = document.getElementById('onboarding-nick-input');
+      const bioInput = document.getElementById('onboarding-bio-input');
+      const moniker = (nickInput && nickInput.value.trim().length >= 2)
+        ? nickInput.value.trim().substring(0, 20)
+        : generateRandomStreetNick();
+      const bio = bioInput ? bioInput.value.trim().substring(0, 70) : '';
+
+      const prof = {
+        moniker,
+        avatar: tempOnboardingAvatar,
+        bio
+      };
+      saveUserProfile(prof);
+
+      try {
+        localStorage.setItem('streetalk_privacy_accepted_2026', 'true');
+      } catch (e) {}
+
+      const modal = document.getElementById('modal-onboarding');
+      if (modal) modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+
+      showToast(`Benvenuto, ${moniker}! Patto di rispetto accettato.`, 'success');
+    }
+
+    window.openProfileModal = openProfileModal;
+    window.closeProfileModal = closeProfileModal;
+    window.randomizeProfileNick = randomizeProfileNick;
+    window.saveProfileFromModal = saveProfileFromModal;
+    window.openOnboardingModal = openOnboardingModal;
+    window.randomizeOnboardingNick = randomizeOnboardingNick;
+    window.submitOnboarding = submitOnboarding;
 
     function drawStoryCard() {
       const canvas = document.getElementById('story-card-canvas');
@@ -1619,6 +1839,11 @@ if (typeof io === 'undefined') {
     // INITIALIZATION & DOM LISTENERS
     // ==========================================
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize Streetalk Profile & Onboarding Gate
+      try {
+        initProfileAndOnboarding();
+      } catch (e) {}
+
       // Direct URL Navigation for Chatroom Preview (?view=chat, ?preview=chat, #chat)
       try {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1776,7 +2001,24 @@ if (typeof io === 'undefined') {
         partnerNick = data.partnerMoniker || data.partnerNick || 'SHADOW_' + Math.floor(10 + Math.random() * 89);
         myNick = data.myMoniker || data.myNick || 'NEON_' + Math.floor(10 + Math.random() * 89);
 
+        const partnerAvatar = data.partnerAvatar || '⚡';
+        const partnerBio = data.partnerBio || '';
+
         safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
+        const partnerAvatarEl = document.getElementById('chat-partner-avatar');
+        if (partnerAvatarEl) safeSetText(partnerAvatarEl, partnerAvatar);
+
+        const partnerBioContainer = document.getElementById('chat-partner-bio-container');
+        const partnerBioText = document.getElementById('chat-partner-bio-text');
+        if (partnerBioContainer && partnerBioText) {
+          if (partnerBio && partnerBio.trim().length > 0) {
+            safeSetText(partnerBioText, partnerBio);
+            partnerBioContainer.classList.remove('hidden');
+          } else {
+            partnerBioContainer.classList.add('hidden');
+          }
+        }
+
         safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
         safeSetText(document.getElementById('chat-partner-gender'), data.partnerGender);
         safeSetText(document.getElementById('chat-partner-mood'), data.partnerMood);

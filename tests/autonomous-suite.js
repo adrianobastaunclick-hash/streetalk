@@ -269,6 +269,19 @@ async function runAutonomousSuite() {
       fail('Failed to reject message > 500 chars');
     }
 
+    const valProfile = validateJoinPayload({
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'Cazzeggio',
+      secret: 'Valid secret',
+      profile: { moniker: 'Drifter_99', avatar: '🐺', bio: 'Chiacchiere educate <script>alert(1)</script>' }
+    });
+    if (valProfile.valid && valProfile.data.profile.moniker === 'Drifter_99' && valProfile.data.profile.avatar === '🐺' && !valProfile.data.profile.bio.includes('<script>')) {
+      pass('Payload validation correctly parsed and sanitized urban profile (moniker, avatar, bio)');
+    } else {
+      fail('Failed to validate or sanitize urban profile in join payload');
+    }
+
     // ----------------------------------------------------
     // TEST 3: Skill DOMSafetyFilter & XSS Neutralization
     // ----------------------------------------------------
@@ -943,6 +956,16 @@ async function runAutonomousSuite() {
       pass('Legal Compliance (12/09/2026): Terms & Conditions documentation, modal, 14+ age check and DSA contact verified');
     } else {
       fail('Legal Compliance: Incomplete terms documentation, modal or age gate notice');
+    }
+
+    // Urban Profile & Onboarding Privacy Gate Check
+    const hasOnboardingModal = indexHtml.includes('id="modal-onboarding"') && indexHtml.includes('submitOnboarding');
+    const hasProfileModal = indexHtml.includes('id="modal-profile"') && indexHtml.includes('btn-header-profile');
+    const hasPartnerProfileDisplay = indexHtml.includes('chat-partner-avatar') && indexHtml.includes('chat-partner-bio-container');
+    if (hasOnboardingModal && hasProfileModal && hasPartnerProfileDisplay) {
+      pass('Onboarding & Urban Profile: First-access privacy gate, profile customization and partner respect display verified');
+    } else {
+      fail('Onboarding & Urban Profile: Missing modal-onboarding, modal-profile or partner profile card');
     }
 
     // ----------------------------------------------------

@@ -195,13 +195,43 @@ function validateJoinPayload(payload) {
     return { valid: false, error: 'Il segreto non può contenere numeri di telefono' };
   }
 
+  // Optional profile validation (moniker, avatar, bio)
+  const ALLOWED_AVATARS = ['⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'];
+  let sanitizedMoniker = null;
+  let sanitizedAvatar = '⚡';
+  let sanitizedBio = '';
+
+  if (payload.profile && typeof payload.profile === 'object') {
+    const { moniker, avatar, bio } = payload.profile;
+    if (typeof moniker === 'string') {
+      const trimmedMoniker = moniker.trim().substring(0, 25);
+      if (trimmedMoniker.length >= 2 && !/<\s*\/?\s*script/i.test(trimmedMoniker) && !/https?:/i.test(trimmedMoniker)) {
+        sanitizedMoniker = DOMSafetyFilter.sanitize(trimmedMoniker);
+      }
+    }
+    if (typeof avatar === 'string' && ALLOWED_AVATARS.includes(avatar)) {
+      sanitizedAvatar = avatar;
+    }
+    if (typeof bio === 'string') {
+      const trimmedBio = bio.trim().substring(0, 100);
+      if (!/<\s*\/?\s*script/i.test(trimmedBio) && !/https?:/i.test(trimmedBio)) {
+        sanitizedBio = DOMSafetyFilter.sanitize(trimmedBio);
+      }
+    }
+  }
+
   return {
     valid: true,
     data: {
       gender,
       targetGender,
       mood: normalizedMood,
-      secret: DOMSafetyFilter.sanitize(trimmedSecret)
+      secret: DOMSafetyFilter.sanitize(trimmedSecret),
+      profile: {
+        moniker: sanitizedMoniker,
+        avatar: sanitizedAvatar,
+        bio: sanitizedBio
+      }
     }
   };
 }
@@ -451,15 +481,20 @@ function createRoom(userA, userB) {
     }
   }, 1000);
 
-  // Assign distinct urban street pseudonyms
-  const nickA = generateMoniker();
-  let nickB = generateMoniker();
+  // Assign distinct urban street pseudonyms (custom moniker or generated fallback)
+  const nickA = (userA.profile && userA.profile.moniker) ? userA.profile.moniker : generateMoniker();
+  let nickB = (userB.profile && userB.profile.moniker) ? userB.profile.moniker : generateMoniker();
   while (nickB === nickA) {
     nickB = generateMoniker();
   }
 
+  const avatarA = (userA.profile && userA.profile.avatar) || '⚡';
+  const avatarB = (userB.profile && userB.profile.avatar) || '⚡';
+  const bioA = (userA.profile && userA.profile.bio) || '';
+  const bioB = (userB.profile && userB.profile.bio) || '';
+
   // Swap secrets securely!
-  // User A receives User B's secret
+  // User A receives User B's secret & profile
   if (sockA) {
     sockA.emit('match_found', {
       roomId,
@@ -467,7 +502,11 @@ function createRoom(userA, userB) {
       partnerGender: userB.gender,
       partnerSecret: userB.secret,
       partnerMoniker: nickB,
+      partnerAvatar: avatarB,
+      partnerBio: bioB,
       myMoniker: nickA,
+      myAvatar: avatarA,
+      myBio: bioA,
       partnerNick: nickB,
       myNick: nickA,
       timeRemaining: room.timeRemaining,
@@ -475,7 +514,7 @@ function createRoom(userA, userB) {
     });
   }
 
-  // User B receives User A's secret
+  // User B receives User A's secret & profile
   if (sockB) {
     sockB.emit('match_found', {
       roomId,
@@ -483,7 +522,11 @@ function createRoom(userA, userB) {
       partnerGender: userA.gender,
       partnerSecret: userA.secret,
       partnerMoniker: nickA,
+      partnerAvatar: avatarA,
+      partnerBio: bioA,
       myMoniker: nickB,
+      myAvatar: avatarB,
+      myBio: bioB,
       partnerNick: nickA,
       myNick: nickB,
       timeRemaining: room.timeRemaining,
@@ -632,11 +675,12 @@ io.on('connection', (socket) => {
 
     removeFromQueue(socket.id);
 
-    const { gender, targetGender, mood, secret } = validation.data;
+    const { gender, targetGender, mood, secret, profile } = validation.data;
     user.gender = gender;
     user.targetGender = targetGender;
     user.mood = mood;
     user.secret = secret;
+    user.profile = profile || null;
     user.joinedQueueAt = Date.now();
 
     const candidate = {
@@ -646,6 +690,7 @@ io.on('connection', (socket) => {
       targetGender,
       mood,
       secret,
+      profile: user.profile,
       joinedAt: Date.now()
     };
 
