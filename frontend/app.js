@@ -1017,36 +1017,85 @@ if (typeof io === 'undefined') {
         const totalSec = Math.max(1, Math.round(Number(durationSec) || 12));
         playBtn.innerHTML = '⏸';
 
-        let osc = null;
-        let gain = null;
-        let filter = null;
+        const activeNodes = [];
         if (this.ctx) {
           try {
             const now = this.ctx.currentTime;
-            osc = this.ctx.createOscillator();
-            gain = this.ctx.createGain();
-            filter = this.ctx.createBiquadFilter();
+            
+            // Master Voice Sim Gain
+            const masterGain = this.ctx.createGain();
+            masterGain.gain.setValueAtTime(0.12, now);
+            masterGain.connect(this.ctx.destination);
+            activeNodes.push(masterGain);
 
-            osc.type = 'triangle';
-            osc.frequency.setValueAtTime(220, now);
+            // Filter for warm lo-fi tape quality
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(950, now);
+            filter.Q.setValueAtTime(1.5, now);
+            filter.connect(masterGain);
+            activeNodes.push(filter);
 
-            for (let t = 0; t < totalSec; t += 0.2) {
-              const freq = 180 + Math.sin(t * 8) * 50 + Math.cos(t * 14) * 35;
-              osc.frequency.setValueAtTime(freq, now + t);
-            }
+            // Musical melodic chord progression (Cmaj7 -> Am7 -> Fmaj7 -> G7)
+            const chords = [
+              [261.63, 329.63, 392.00, 493.88], // Cmaj7
+              [220.00, 261.63, 329.63, 392.00], // Am7
+              [174.61, 220.00, 261.63, 329.63], // Fmaj7
+              [196.00, 246.94, 293.66, 349.23]  // G7
+            ];
 
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(500, now);
-            filter.Q.setValueAtTime(3, now);
+            const stepDuration = totalSec / chords.length;
+            chords.forEach((chordNotes, chordIdx) => {
+              const chordStart = now + (chordIdx * stepDuration);
+              chordNotes.forEach((freq, noteIdx) => {
+                const osc = this.ctx.createOscillator();
+                const noteGain = this.ctx.createGain();
+                
+                // Warm mellow Rhodes-like sine + triangle blend
+                osc.type = noteIdx % 2 === 0 ? 'sine' : 'triangle';
+                osc.frequency.setValueAtTime(freq, chordStart);
+                
+                // Subtle gentle vibrato
+                osc.frequency.setValueAtTime(freq, chordStart);
+                osc.frequency.linearRampToValueAtTime(freq * 1.003, chordStart + (stepDuration * 0.5));
+                osc.frequency.linearRampToValueAtTime(freq, chordStart + stepDuration);
 
-            gain.gain.setValueAtTime(0.04, now);
+                // Smooth bell envelope per chord
+                noteGain.gain.setValueAtTime(0.0001, chordStart);
+                noteGain.gain.linearRampToValueAtTime(0.045 / (noteIdx + 1), chordStart + 0.12);
+                noteGain.gain.exponentialRampToValueAtTime(0.0001, chordStart + stepDuration - 0.05);
 
-            osc.connect(filter);
-            filter.connect(gain);
-            gain.connect(this.ctx.destination);
-            osc.start(now);
-            osc.stop(now + totalSec);
-          } catch (e) {}
+                osc.connect(noteGain);
+                noteGain.connect(filter);
+                osc.start(chordStart);
+                osc.stop(chordStart + stepDuration);
+                activeNodes.push(osc);
+                activeNodes.push(noteGain);
+              });
+            });
+
+            // Sub-bass warm walk
+            const bassNotes = [130.81, 110.00, 87.31, 98.00];
+            bassNotes.forEach((bFreq, bIdx) => {
+              const bStart = now + (bIdx * stepDuration);
+              const bOsc = this.ctx.createOscillator();
+              const bGain = this.ctx.createGain();
+              bOsc.type = 'sine';
+              bOsc.frequency.setValueAtTime(bFreq, bStart);
+              bGain.gain.setValueAtTime(0.001, bStart);
+              bGain.gain.linearRampToValueAtTime(0.08, bStart + 0.1);
+              bGain.gain.exponentialRampToValueAtTime(0.001, bStart + stepDuration - 0.05);
+              bOsc.connect(bGain);
+              bGain.connect(masterGain);
+              bOsc.start(bStart);
+              bOsc.stop(bStart + stepDuration);
+              activeNodes.push(bOsc);
+              activeNodes.push(bGain);
+            });
+
+          } catch (e) {
+            console.warn('[SoundEngine] voice note simulation note setup error:', e);
+          }
         }
 
         const startTime = Date.now();
@@ -1073,9 +1122,12 @@ if (typeof io === 'undefined') {
 
         const cleanup = () => {
           clearInterval(interval);
-          if (osc) {
-            try { osc.stop(); } catch (e) {}
-          }
+          activeNodes.forEach(node => {
+            try {
+              if (node.stop) node.stop();
+              if (node.disconnect) node.disconnect();
+            } catch (e) {}
+          });
           playBtn.innerHTML = '▶';
           if (barEls) barEls.forEach(bar => bar.classList.remove('played'));
           if (durLabel) safeSetText(durLabel, `0:${String(totalSec).padStart(2, '0')}`);
@@ -1198,6 +1250,20 @@ if (typeof io === 'undefined') {
         if (!this.enabled) return;
         this.init();
         if (!this.ctx) return;
+
+        // Auto-adapt ambient soundscape based on reaction vibe
+        if (this.ambient && this.ambient.active) {
+          if (['💖', '💋', '🌹', '😈'].includes(emoji)) {
+            this.ambient.setMood('spicy');
+          } else if (['⚡', '💀', '🤯'].includes(emoji)) {
+            this.ambient.setMood('tension');
+          } else if (['🖤', '🌙', '👀'].includes(emoji)) {
+            this.ambient.setMood('deep');
+          } else {
+            this.ambient.setMood('chill');
+          }
+        }
+
         try {
           const now = this.ctx.currentTime;
           if (emoji === '🔥') {
@@ -1365,6 +1431,167 @@ if (typeof io === 'undefined') {
           osc.start(now);
           osc.stop(now + 0.18);
         } catch (e) {}
+      },
+
+      // ========================================================
+      // REAL-TIME DYNAMIC AMBIENT SOUNDSCAPE ENGINE (ZERO KB)
+      // Genera tappeti armonici adattivi in tempo reale
+      // Moods: 'chill' (default), 'spicy', 'tension', 'deep'
+      // ========================================================
+      ambient: {
+        active: false,
+        currentMood: 'chill',
+        masterGain: null,
+        filterNode: null,
+        oscillators: [],
+        moodInterval: null,
+        targetVolume: 0.05,
+
+        start(mood = 'chill') {
+          if (!SoundEngine.enabled) return;
+          SoundEngine.init();
+          if (!SoundEngine.ctx) return;
+          if (this.active) {
+            this.setMood(mood);
+            return;
+          }
+
+          try {
+            const ctx = SoundEngine.ctx;
+            const now = ctx.currentTime;
+
+            this.masterGain = ctx.createGain();
+            this.masterGain.gain.setValueAtTime(0.0001, now);
+            this.masterGain.gain.linearRampToValueAtTime(this.targetVolume, now + 2.5);
+            this.masterGain.connect(ctx.destination);
+
+            this.filterNode = ctx.createBiquadFilter();
+            this.filterNode.type = 'lowpass';
+            this.filterNode.frequency.setValueAtTime(650, now);
+            this.filterNode.Q.setValueAtTime(2.0, now);
+            this.filterNode.connect(this.masterGain);
+
+            this.active = true;
+            this.currentMood = mood;
+            this._spawnVoicesForMood(mood);
+          } catch (e) {
+            console.warn('[Soundscape] start error:', e);
+          }
+        },
+
+        stop() {
+          if (!this.active || !SoundEngine.ctx) return;
+          try {
+            const now = SoundEngine.ctx.currentTime;
+            if (this.masterGain) {
+              this.masterGain.gain.linearRampToValueAtTime(0.0001, now + 1.2);
+            }
+            setTimeout(() => {
+              this._clearVoices();
+              if (this.masterGain) {
+                try { this.masterGain.disconnect(); } catch (e) {}
+              }
+              this.active = false;
+            }, 1300);
+          } catch (e) {
+            this._clearVoices();
+            this.active = false;
+          }
+        },
+
+        setMood(newMood) {
+          if (!this.active || this.currentMood === newMood) return;
+          this.currentMood = newMood;
+          if (!SoundEngine.ctx) return;
+          try {
+            const ctx = SoundEngine.ctx;
+            const now = ctx.currentTime;
+            // Crossfade voices
+            if (this.filterNode) {
+              const freq = newMood === 'spicy' ? 850 : newMood === 'tension' ? 500 : newMood === 'deep' ? 400 : 650;
+              this.filterNode.frequency.linearRampToValueAtTime(freq, now + 2.0);
+            }
+            this._clearVoices();
+            this._spawnVoicesForMood(newMood);
+          } catch (e) {}
+        },
+
+        _clearVoices() {
+          this.oscillators.forEach(osc => {
+            try {
+              osc.stop();
+              osc.disconnect();
+            } catch (e) {}
+          });
+          this.oscillators = [];
+        },
+
+        _spawnVoicesForMood(mood) {
+          if (!SoundEngine.ctx || !this.filterNode) return;
+          const ctx = SoundEngine.ctx;
+          const now = ctx.currentTime;
+
+          // Mood chord frequencies (Hz)
+          let freqs = [130.81, 196.00, 246.94, 329.63]; // C3, G3, B3, E4 (Chill)
+          if (mood === 'spicy') {
+            freqs = [110.00, 164.81, 220.00, 277.18]; // A2, E3, A3, C#4 (Warm seductive sensual)
+          } else if (mood === 'tension') {
+            freqs = [98.00, 146.83, 207.65, 293.66];  // G2, D3, G#3, D4 (Dark gritty tension)
+          } else if (mood === 'deep') {
+            freqs = [87.31, 130.81, 174.61, 261.63];  // F2, C3, F3, C4 (Deep introspective)
+          }
+
+          freqs.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = idx % 2 === 0 ? 'sine' : 'triangle';
+            osc.frequency.setValueAtTime(freq, now);
+
+            // Subtle gentle lfo detune for organic analog drift
+            const drift = (idx + 1) * 0.4;
+            osc.frequency.linearRampToValueAtTime(freq + drift, now + 4.0);
+            osc.frequency.linearRampToValueAtTime(freq - drift, now + 8.0);
+
+            const voiceGain = 0.025 / (idx + 1);
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.linearRampToValueAtTime(voiceGain, now + 2.0);
+
+            osc.connect(gain);
+            gain.connect(this.filterNode);
+            osc.start(now);
+            this.oscillators.push(osc);
+          });
+        }
+      },
+
+      // Analizzatore di tono del messaggio per adattamento soundscape
+      adaptMoodFromText(text) {
+        if (!text || typeof text !== 'string') return;
+        const lower = text.toLowerCase();
+
+        // 1. Piccante / Flirt
+        const spicyWords = ['bacio', 'labbra', 'sguardo', 'letto', 'desiderio', 'voglia', 'brivid', 'attrazion', 'sei bell', 'sexy', 'corpo', 'pelle', 'nuda', 'nudo', 'flirt', 'scopri', 'segret'];
+        if (spicyWords.some(w => lower.includes(w))) {
+          this.ambient.setMood('spicy');
+          return;
+        }
+
+        // 2. Intenso / Provocatorio / Tensione
+        const tensionWords = ['scommett', 'non ci cred', 'davvero', 'sfida', 'coraggio', 'paura', 'follia', 'rischio', 'fotti', 'odio', 'rabbia', 'brucia', 'litig', 'sbagli', 'provoc'];
+        if (tensionWords.some(w => lower.includes(w))) {
+          this.ambient.setMood('tension');
+          return;
+        }
+
+        // 3. Riflessivo / Confessionale / Deep
+        const deepWords = ['solitudine', 'triste', 'sola', 'solo', 'notte', 'pensare', 'piang', 'mancanza', 'ricordo', 'passato', 'futuro', 'dolore', 'vuoto', 'senso', 'vita', 'sogno'];
+        if (deepWords.some(w => lower.includes(w))) {
+          this.ambient.setMood('deep');
+          return;
+        }
+
+        // Ritorno morbido al chill
+        this.ambient.setMood('chill');
       }
     };
 
@@ -1450,6 +1677,9 @@ if (typeof io === 'undefined') {
       safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
       safeSetText(document.getElementById('chat-partner-gender'), partnerGender);
       safeSetText(document.getElementById('chat-partner-mood'), partnerMood);
+
+      const partnerAvatarEl = document.getElementById('chat-partner-avatar');
+      if (partnerAvatarEl) setAvatarDisplay(partnerAvatarEl, '🐺', 'w-6 h-6');
 
       safeSetText(document.getElementById('chat-partner-secret-box'), partnerSecret);
       safeSetText(document.getElementById('chat-my-secret-text'), mySecret);
@@ -1603,10 +1833,18 @@ if (typeof io === 'undefined') {
       if (viewName === 'chat') {
         if (mainHeader) mainHeader.classList.add('hidden');
         document.body.classList.add('chat-mode-active');
+        // Activate real-time dynamic ambient soundscape
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.ambient) {
+          SoundEngine.ambient.start('chill');
+        }
       } else {
         if (mainHeader) mainHeader.classList.remove('hidden');
         document.body.classList.remove('chat-mode-active');
         toggleMobileChatSidebar(false);
+        // Stop ambient soundscape when exiting chat
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.ambient) {
+          SoundEngine.ambient.stop();
+        }
       }
 
       const allViews = [vLanding, vApp, vRadar, vChat, vBacheca, vProfilo].filter(Boolean);
@@ -2653,26 +2891,26 @@ if (typeof io === 'undefined') {
       { id: 'street-seal', label: 'Sigillo 180s', path: '/assets/icons/street-seal.svg', fallback: '⏱️' }
     ];
 
+    // 48 Street-Aesthetic Emojis
+    const STREET_EMOJI_AVATARS = [
+      '⚡', '🔥', '🌙', '🦊', '🐺', '🎭', '🕶️', '🎯', '🏴', '☠️',
+      '🌆', '🛹', '🎧', '🖤', '🎙️', '🥋', '🎲', '👾', '🚬', '👀',
+      '💣', '🗡️', '⛓️', '🗝️', '📻', '🕷️', '🦇', '👁️‍🗨️', '🦅', '🐍',
+      '🦂', '🕯️', '🌪️', '🌌', '🏎️', '🥊', '🧭', '⚓', '🔮', '💎',
+      '🪙', '🛡️', '☕', '🥷', '🐅', '🐉', '🎪', '✨'
+    ];
+
+    // Complete Catalog: 10 Glyphs + 48 Emojis = 58 Avatars
     const STREET_AVATARS = [
-      // SVG custom glyphs
       'street-bolt', 'street-spray', 'street-mask', 'street-radar', 'street-chain',
       'street-asphalt', 'street-flame', 'street-tape', 'street-cassette', 'street-seal',
-      // Street & Urban
-      '⚡', '🔥', '🌆', '🌃', '🏙️', '🛹', '🛵', '🚇', '🏴‍☠️', '🗝️',
-      // Natura & Notturno
-      '🌙', '🌕', '⭐', '🌌', '🌊', '🍃', '🌹', '🖤', '🔮', '🦋',
-      // Animali street
-      '🐺', '🦊', '🐱', '🦁', '🐍', '🦅', '🐉', '🦝', '🐸', '🦈',
-      // Cultura & Musica
-      '🎧', '🎙️', '🎲', '🎯', '🕶️', '👾', '🥋', '🎭', '🎮', '☕',
-      // Flirt & Personalità
-      '💥', '💫', '🌸', '🍀', '✨', '💎', '🎪', '🃏', '🌀', '⚔️',
+      ...STREET_EMOJI_AVATARS
     ];
 
     function setAvatarDisplay(element, avatarValue, sizeClass) {
       if (!element) return;
       element.innerHTML = '';
-      const glyph = STREET_GLYPHS.find(g => g.id === avatarValue || g.fallback === avatarValue);
+      const glyph = STREET_GLYPHS.find(g => g.id === avatarValue);
       if (glyph) {
         const img = document.createElement('img');
         img.src = glyph.path;
@@ -2832,7 +3070,7 @@ if (typeof io === 'undefined') {
     function saveCurrentPartnerConnection() {
       const partner = currentPartnerProfile || {
         moniker: partnerNick || 'SHADOW',
-        avatar: 'street-bolt',
+        avatar: '⚡',
         bio: '',
         motto: ''
       };
@@ -2848,7 +3086,7 @@ if (typeof io === 'undefined') {
         const item = {
           id: existingIdx >= 0 ? list[existingIdx].id : 'conn_' + Date.now(),
           moniker,
-          avatar: partner.avatar || 'street-bolt',
+          avatar: partner.avatar || '⚡',
           bio: partner.bio || '',
           motto: partner.motto || '',
           handle: (partnerSocialContact && partnerSocialContact.handle) || (existingIdx >= 0 ? list[existingIdx].handle : ''),
@@ -2920,7 +3158,7 @@ if (typeof io === 'undefined') {
 
         const avEl = document.createElement('div');
         avEl.className = 'w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0';
-        setAvatarDisplay(avEl, conn.avatar || 'street-bolt', 'w-5 h-5');
+        setAvatarDisplay(avEl, conn.avatar || '⚡', 'w-5 h-5');
 
         const details = document.createElement('div');
         details.className = 'min-w-0';
@@ -3403,12 +3641,14 @@ if (typeof io === 'undefined') {
     function getUserProfile() {
       try {
         const stored = localStorage.getItem('streetalk_profile_v1');
+        const directAvatar = localStorage.getItem('streetalk_avatar');
         if (stored) {
           const parsed = JSON.parse(stored);
           if (parsed && typeof parsed.moniker === 'string') {
+            const rawAv = parsed.avatar || directAvatar;
             return {
               moniker: parsed.moniker.trim().substring(0, 25) || generateRandomStreetNick(),
-              avatar: (STREET_AVATARS.includes(parsed.avatar) || STREET_GLYPHS.some(g => g.id === parsed.avatar)) ? parsed.avatar : 'street-bolt',
+              avatar: (STREET_AVATARS.includes(rawAv) || STREET_GLYPHS.some(g => g.id === rawAv)) ? rawAv : '⚡',
               bio: typeof parsed.bio === 'string' && parsed.bio.trim() ? parsed.bio.trim().substring(0, 70) : STREET_PROFILE_DEFAULTS.bio,
               motto: typeof parsed.motto === 'string' && parsed.motto.trim() ? parsed.motto.trim().substring(0, 100) : STREET_PROFILE_DEFAULTS.motto,
               vision: typeof parsed.vision === 'string' && parsed.vision.trim() ? parsed.vision.trim().substring(0, 200) : STREET_PROFILE_DEFAULTS.vision,
@@ -3418,11 +3658,25 @@ if (typeof io === 'undefined') {
             };
           }
         }
+        if (directAvatar && (STREET_AVATARS.includes(directAvatar) || STREET_GLYPHS.some(g => g.id === directAvatar))) {
+          const fallbackWithDirect = {
+            moniker: generateRandomStreetNick(),
+            avatar: directAvatar,
+            bio: STREET_PROFILE_DEFAULTS.bio,
+            motto: STREET_PROFILE_DEFAULTS.motto,
+            vision: STREET_PROFILE_DEFAULTS.vision,
+            topics: STREET_PROFILE_DEFAULTS.topics,
+            avoids: STREET_PROFILE_DEFAULTS.avoids,
+            isFounder: isFounderUser()
+          };
+          saveUserProfile(fallbackWithDirect);
+          return fallbackWithDirect;
+        }
       } catch (e) {}
 
       const defaultProfile = {
         moniker: generateRandomStreetNick(),
-        avatar: 'street-bolt',
+        avatar: '⚡',
         bio: STREET_PROFILE_DEFAULTS.bio,
         motto: STREET_PROFILE_DEFAULTS.motto,
         vision: STREET_PROFILE_DEFAULTS.vision,
@@ -3437,6 +3691,7 @@ if (typeof io === 'undefined') {
     function saveUserProfile(prof) {
       try {
         localStorage.setItem('streetalk_profile_v1', JSON.stringify(prof));
+        localStorage.setItem('streetalk_avatar', prof.avatar || '⚡');
       } catch (e) {}
       updateHeaderProfileDisplay(prof);
     }
@@ -3446,39 +3701,51 @@ if (typeof io === 'undefined') {
       const nickEl = document.getElementById('header-profile-nick');
       const avatarEl = document.getElementById('header-profile-avatar');
       if (nickEl) safeSetText(nickEl, p.moniker);
-      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar, 'w-4 h-4');
+      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar || '⚡', 'w-4 h-4');
     }
 
-    let tempSelectedAvatar = 'street-bolt';
-    let fullProfileAvatar = 'street-bolt';
+    let tempSelectedAvatar = '⚡';
+    let fullProfileAvatar = '⚡';
 
     function renderAvatarGrid(containerId, activeAvatar, onSelect) {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
-      STREET_AVATARS.forEach((av) => {
+
+      const allAvatars = [
+        // 10 Vector Glyphs
+        ...STREET_GLYPHS.map(g => ({ id: g.id, label: g.label, isSvg: true, path: g.path })),
+        // 48 Street Emojis
+        ...STREET_EMOJI_AVATARS.map(emoji => ({ id: emoji, label: emoji, isSvg: false }))
+      ];
+
+      allAvatars.forEach((av) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        const glyph = STREET_GLYPHS.find(g => g.id === av);
-        btn.title = glyph ? glyph.label : av;
-        const isActive = activeAvatar === av || (glyph && activeAvatar === glyph.fallback);
-        btn.className = `p-1.5 rounded-xl border transition cursor-pointer flex items-center justify-center text-xl ${
+        btn.title = av.label;
+        const isActive = activeAvatar === av.id || (!activeAvatar && av.id === '⚡');
+        btn.className = `p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
           isActive
             ? 'bg-street-orange/25 border-street-orange text-white scale-110 shadow-[0_0_12px_rgba(255,101,47,0.4)]'
             : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'
         }`;
-        if (glyph) {
+
+        if (av.isSvg) {
           const img = document.createElement('img');
-          img.src = glyph.path;
-          img.alt = glyph.label;
+          img.src = av.path;
+          img.alt = av.label;
           img.className = 'w-6 h-6 object-contain pointer-events-none';
           btn.appendChild(img);
         } else {
-          btn.textContent = av;
+          const span = document.createElement('span');
+          span.className = 'text-xl select-none leading-none pointer-events-none';
+          span.textContent = av.id;
+          btn.appendChild(span);
         }
+
         btn.onclick = () => {
-          onSelect(av);
-          renderAvatarGrid(containerId, av, onSelect);
+          onSelect(av.id);
+          renderAvatarGrid(containerId, av.id, onSelect);
         };
         container.appendChild(btn);
       });
@@ -3691,7 +3958,7 @@ if (typeof io === 'undefined') {
     }
 
     // Onboarding Gate (First Access)
-    let tempOnboardingAvatar = 'street-bolt';
+    let tempOnboardingAvatar = '⚡';
 
     function initProfileAndOnboarding() {
       const prof = getUserProfile();
@@ -3788,7 +4055,7 @@ if (typeof io === 'undefined') {
       const avoidsEl = document.getElementById('partner-modal-avoids');
       const bioEl = document.getElementById('partner-modal-bio');
 
-      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar || 'street-bolt', 'w-8 h-8');
+      if (avatarEl) setAvatarDisplay(avatarEl, p.avatar || '⚡', 'w-8 h-8');
       if (nickEl) safeSetText(nickEl, p.moniker || 'SHADOW');
       if (mottoEl) safeSetText(mottoEl, p.motto ? `"${p.motto}"` : 'Nessun motto impostato');
       if (visionEl) safeSetText(visionEl, p.vision || 'Nessuna visione inserita.');
@@ -3824,6 +4091,28 @@ if (typeof io === 'undefined') {
     window.openPartnerProfileModal = openPartnerProfileModal;
     window.closePartnerProfileModal = closePartnerProfileModal;
 
+    // ==========================================
+    // R2: REDESIGNED VIRAL 9:16 STORY CARD ENGINE
+    // ==========================================
+    const STREET_STORY_TAGLINES = [
+      'Un segreto a testa.\nTre minuti per conoscersi.',
+      'Due sconosciuti nell\'asfalto.\nNessuna maschera, solo verità.',
+      '180 secondi di verità nuda\nprima che la stanza bruci nel nulla.',
+      'Quello che non diresti a nessuno,\ndillo a chi non sa chi sei.',
+      'Niente follower, niente profili.\nSolo due voci nella notte.',
+      'Parla finché c\'è tempo.\nQuando il timer scade, svanisce tutto.',
+      'La notte appartiene a chi\nha il coraggio di essere sincero.'
+    ];
+
+    let storyLogoImage = null;
+    function getStoryLogoImage() {
+      if (!storyLogoImage) {
+        storyLogoImage = new Image();
+        storyLogoImage.src = '/assets/logo-streetalk.png';
+      }
+      return storyLogoImage;
+    }
+
     function drawStoryCard() {
       const canvas = document.getElementById('story-card-canvas');
       if (!canvas) return;
@@ -3833,216 +4122,280 @@ if (typeof io === 'undefined') {
       const w = canvas.width;  // 720
       const h = canvas.height; // 1280
 
-      // ── BACKGROUND: deep dark gradient
+      // 1. Dark Gradient Background (Deep Obsidian -> Charcoal -> Night Purple)
       const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-      bgGrad.addColorStop(0, '#080a0f');
-      bgGrad.addColorStop(0.35, '#0d1020');
-      bgGrad.addColorStop(0.7, '#110a18');
-      bgGrad.addColorStop(1, '#050508');
+      bgGrad.addColorStop(0, '#050608');
+      bgGrad.addColorStop(0.35, '#0e1118');
+      bgGrad.addColorStop(0.70, '#131122');
+      bgGrad.addColorStop(1, '#1b1226');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // ── URBAN GRID WATERMARK
+      // Subtle atmospheric radial glow (bottom-right warm amber & purple)
+      const radialGlow = ctx.createRadialGradient(w * 0.75, h * 0.85, 30, w * 0.75, h * 0.85, 520);
+      radialGlow.addColorStop(0, 'rgba(255, 101, 47, 0.12)');
+      radialGlow.addColorStop(0.45, 'rgba(120, 40, 180, 0.08)');
+      radialGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = radialGlow;
+      ctx.fillRect(0, 0, w, h);
+
+      // 2. Subtle Urban Grid Watermark & Crosshairs
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 101, 47, 0.06)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.035)';
       ctx.lineWidth = 1;
-      for (let x = 0; x <= w; x += 60) {
+      const gridSize = 40;
+      for (let x = 0; x < w; x += gridSize) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
       }
-      for (let y = 0; y <= h; y += 60) {
+      for (let y = 0; y < h; y += gridSize) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
       }
-      ctx.restore();
 
-      // ── DIAGONAL ACCENT LINES (top-right corner)
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,101,47,0.12)';
+      // Intersecting tactical crosshairs
+      ctx.strokeStyle = 'rgba(255, 101, 47, 0.25)';
       ctx.lineWidth = 1;
-      for (let i = 0; i < 8; i++) {
-        ctx.beginPath();
-        ctx.moveTo(w - 20 - i * 28, 0);
-        ctx.lineTo(w, i * 28 + 20);
-        ctx.stroke();
-      }
-      ctx.restore();
-
-      // ── OUTER NEON BORDER
-      ctx.save();
-      ctx.shadowColor = '#ff652f';
-      ctx.shadowBlur = 18;
-      ctx.strokeStyle = '#ff652f';
-      ctx.lineWidth = 5;
-      ctx.strokeRect(24, 24, w - 48, h - 48);
-      ctx.restore();
-
-      // ── INNER BORDER
-      ctx.save();
-      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(38, 38, w - 76, h - 76);
-      ctx.restore();
-
-      // ── TOP ORANGE BAR
-      ctx.fillStyle = '#ff652f';
-      ctx.fillRect(24, 24, w - 48, 7);
-
-      // ── LOGO: orange square ST + STREETALK text
-      const logoX = 60;
-      const logoY = 72;
-
-      // Orange square badge
-      ctx.save();
-      ctx.shadowColor = 'rgba(255,101,47,0.7)';
-      ctx.shadowBlur = 20;
-      ctx.fillStyle = '#ff652f';
-      roundRect(ctx, logoX, logoY, 52, 52, 10);
-      ctx.fill();
-      ctx.restore();
-
-      ctx.fillStyle = '#000000';
-      ctx.font = '900 26px "Syne", sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('ST', logoX + 8, logoY + 36);
-
-      // STREET text
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 38px "Syne", sans-serif';
-      ctx.fillText('STREET', logoX + 66, logoY + 37);
-
-      // ALK text in orange
-      ctx.fillStyle = '#ff652f';
-      ctx.fillText('ALK', logoX + 66 + ctx.measureText('STREET').width + 2, logoY + 37);
-
-      // Dot pulse indicator
-      ctx.save();
-      ctx.shadowColor = '#ff652f';
-      ctx.shadowBlur = 14;
-      ctx.fillStyle = '#ff652f';
-      ctx.beginPath();
-      ctx.arc(logoX + 66 + ctx.measureText('STREETALK').width + 16, logoY + 30, 7, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.restore();
-
-      // Tagline under logo
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.font = '400 15px "JetBrains Mono", monospace';
-      ctx.fillText('CHAT ANONIMA. REALE. ORA.', logoX + 66, logoY + 58);
-
-      // ── DIVIDER LINE
-      ctx.fillStyle = 'rgba(255,101,47,0.3)';
-      ctx.fillRect(60, logoY + 76, w - 120, 1);
-
-      // ── RANDOM TAGLINES (5 varianti)
-      const TAGLINES = [
-        { main: 'Un segreto a testa.', sub: 'Tre minuti per capire tutto.' },
-        { main: 'La notte amplifica', sub: 'le parole che il giorno non osa.' },
-        { main: 'Nessun profilo.', sub: 'Solo la voce che hai dentro.' },
-        { main: 'Anonimi per scelta.', sub: 'Reali per natura.' },
-        { main: 'Entra nell\'oscuro.', sub: 'Scambia un segreto. Esci diverso.' },
+      const markers = [
+        { x: 120, y: 240 }, { x: 600, y: 240 },
+        { x: 120, y: 640 }, { x: 600, y: 640 },
+        { x: 120, y: 980 }, { x: 600, y: 980 }
       ];
-      const tagline = TAGLINES[Math.floor(Date.now() / 1000) % TAGLINES.length];
-
-      // Big quote mark
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,101,47,0.18)';
-      ctx.font = '900 200px Georgia, serif';
-      ctx.fillText('\u201C', 45, 620);
+      markers.forEach(pt => {
+        ctx.beginPath();
+        ctx.moveTo(pt.x - 8, pt.y); ctx.lineTo(pt.x + 8, pt.y);
+        ctx.moveTo(pt.x, pt.y - 8); ctx.lineTo(pt.x + 8, pt.y);
+        ctx.stroke();
+      });
       ctx.restore();
 
-      // Main tagline line 1
+      // 3. Neon Orange Border Frame with Tactical Corners
       ctx.save();
-      ctx.shadowColor = 'rgba(255,101,47,0.3)';
-      ctx.shadowBlur = 10;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '800 56px "Syne", sans-serif';
-      const mainWords = tagline.main.split(' ');
-      let lineA = '', lineB = '';
-      let switchedA = false;
-      for (const word of mainWords) {
-        const test = lineA + (lineA ? ' ' : '') + word;
-        if (!switchedA && ctx.measureText(test).width > w - 140) {
-          switchedA = true;
-        }
-        if (switchedA) lineB += (lineB ? ' ' : '') + word;
-        else lineA += (lineA ? ' ' : '') + word;
-      }
-      ctx.fillText(lineA, 70, 560);
-      if (lineB) ctx.fillText(lineB, 70, 625);
-      ctx.restore();
+      ctx.strokeStyle = '#ff652f';
+      ctx.lineWidth = 3;
+      ctx.shadowColor = 'rgba(255, 101, 47, 0.6)';
+      ctx.shadowBlur = 14;
+      ctx.strokeRect(32, 32, w - 64, h - 64);
+      ctx.shadowBlur = 0;
 
-      // Sub tagline
-      const subY = lineB ? 695 : 635;
-      ctx.fillStyle = 'rgba(255,255,255,0.6)';
-      ctx.font = '500 30px "Plus Jakarta Sans", sans-serif';
-      const subWords = tagline.sub.split(' ');
-      let subLine = '';
-      let subY2 = subY;
-      for (const word of subWords) {
-        const test = subLine + (subLine ? ' ' : '') + word;
-        if (ctx.measureText(test).width > w - 140 && subLine) {
-          ctx.fillText(subLine, 70, subY2);
-          subLine = word;
-          subY2 += 44;
-        } else {
-          subLine = test;
-        }
-      }
-      ctx.fillText(subLine, 70, subY2);
-
-      // Closing quote
-      ctx.save();
-      ctx.fillStyle = 'rgba(255,101,47,0.18)';
-      ctx.font = '900 200px Georgia, serif';
-      ctx.fillText('\u201D', w - 140, subY2 + 110);
-      ctx.restore();
-
-      // ── STATS BAR
-      const statsY = h - 290;
-      ctx.fillStyle = '#111520';
-      roundRect(ctx, 60, statsY, w - 120, 90, 14);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255,101,47,0.25)';
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
       ctx.lineWidth = 1;
+      ctx.strokeRect(44, 44, w - 88, h - 88);
+
+      // Tactical corner brackets
+      const cornerLen = 24;
+      ctx.strokeStyle = '#ff652f';
+      ctx.lineWidth = 4;
+      // TL
+      ctx.beginPath(); ctx.moveTo(28, 28 + cornerLen); ctx.lineTo(28, 28); ctx.lineTo(28 + cornerLen, 28); ctx.stroke();
+      // TR
+      ctx.beginPath(); ctx.moveTo(w - 28 - cornerLen, 28); ctx.lineTo(w - 28, 28); ctx.lineTo(w - 28, 28 + cornerLen); ctx.stroke();
+      // BL
+      ctx.beginPath(); ctx.moveTo(28, h - 28 - cornerLen); ctx.lineTo(28, h - 28); ctx.lineTo(28 + cornerLen, h - 28); ctx.stroke();
+      // BR
+      ctx.beginPath(); ctx.moveTo(w - 28 - cornerLen, h - 28); ctx.lineTo(w - 28, h - 28); ctx.lineTo(w - 28, h - 28 - cornerLen); ctx.stroke();
+      ctx.restore();
+
+      // 4. Header Status Bar: Dynamic Time & Session Badge
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const timeFormatted = `${hours}:${minutes} CET`;
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 101, 47, 0.12)';
+      ctx.strokeStyle = 'rgba(255, 101, 47, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(64, 70, 240, 32, 8);
+      } else if (typeof roundRect === 'function') {
+        roundRect(ctx, 64, 70, 240, 32, 8);
+      } else {
+        ctx.rect(64, 70, 240, 32);
+      }
+      ctx.fill();
       ctx.stroke();
 
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+      // Neon dot
       ctx.fillStyle = '#ff652f';
-      ctx.font = '700 13px "JetBrains Mono", monospace';
-      ctx.fillText('⏱ 180 SEC', 85, statsY + 34);
-      ctx.fillText('🔒 E2E RAM', 85 + 190, statsY + 34);
-      ctx.fillText('📍 ' + timeStr, 85 + 380, statsY + 34);
+      ctx.beginPath();
+      ctx.arc(82, 86, 4.5, 0, Math.PI * 2);
+      ctx.fill();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.35)';
-      ctx.font = '500 11px "JetBrains Mono", monospace';
-      ctx.fillText('durata sessione', 85, statsY + 58);
-      ctx.fillText('nessun log', 85 + 190, statsY + 58);
-      ctx.fillText('ora locale', 85 + 380, statsY + 58);
+      ctx.fillStyle = '#ffaa44';
+      ctx.font = '700 12px "JetBrains Mono", monospace';
+      ctx.fillText('NIGHT SESSION // 180s', 96, 91);
 
-      // ── FOOTER
-      ctx.fillStyle = 'rgba(255,101,47,0.15)';
-      ctx.fillRect(24, h - 180, w - 48, 1);
-
-      ctx.fillStyle = 'rgba(255,255,255,0.4)';
-      ctx.font = '400 18px "JetBrains Mono", monospace';
-      ctx.fillText('Entra nella notte. Scambia un segreto reale in 180s.', 60, h - 140);
-
-      ctx.save();
-      ctx.shadowColor = '#ff652f';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#ff652f';
-      ctx.font = '900 32px "Syne", sans-serif';
-      ctx.fillText('@STREETALK.LIVE', 60, h - 96);
+      // Local dynamic time
+      ctx.fillStyle = 'rgba(200, 210, 225, 0.75)';
+      ctx.font = '600 13px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(`ORA LOCALE: ${timeFormatted}`, w - 64, 91);
+      ctx.textAlign = 'left';
       ctx.restore();
 
-      ctx.fillStyle = 'rgba(255,255,255,0.25)';
-      ctx.font = '600 14px "JetBrains Mono", monospace';
-      ctx.fillText('// ZERO REGISTRAZIONE · ZERO TRACCE · 100% REALE', 60, h - 60);
+      // 5. Official Logo / Bold "ST STREETALK" Branding
+      const logo = getStoryLogoImage();
+      if (logo && logo.complete && logo.naturalWidth > 0) {
+        const logoW = 270;
+        const logoH = Math.round(logoW * (logo.naturalHeight / logo.naturalWidth));
+        ctx.drawImage(logo, 64, 130, logoW, logoH);
+      } else {
+        // High-contrast vector branding fallback
+        ctx.fillStyle = '#ff652f';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(64, 135, 50, 50, 10);
+        } else if (typeof roundRect === 'function') {
+          roundRect(ctx, 64, 135, 50, 50, 10);
+        } else {
+          ctx.rect(64, 135, 50, 50);
+        }
+        ctx.fill();
 
-      // ── BOTTOM ORANGE BAR
+        ctx.fillStyle = '#000000';
+        ctx.font = '900 28px Syne, sans-serif';
+        ctx.fillText('ST', 74, 171);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 38px Syne, sans-serif';
+        ctx.fillText('STREET', 128, 172);
+        ctx.fillStyle = '#ff652f';
+        ctx.fillText('ALK', 290, 172);
+
+        if (!logo.onload) {
+          logo.onload = () => {
+            drawStoryCard();
+          };
+        }
+      }
+
+      ctx.fillStyle = '#a1a1aa';
+      ctx.font = '700 12px "JetBrains Mono", monospace';
+      ctx.fillText('CHAT ANONIMA // REALE // EFFIMERA', 64, 215);
+
+      // 6. Impactful Typography & Randomized Tagline
+      const chosenTagline = STREET_STORY_TAGLINES[Math.floor(Math.random() * STREET_STORY_TAGLINES.length)];
+
+      ctx.fillStyle = 'rgba(255, 101, 47, 0.22)';
+      ctx.font = '900 130px Syne, serif';
+      ctx.fillText('“', 56, 350);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '800 38px "Plus Jakarta Sans", Syne, sans-serif';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+      ctx.shadowBlur = 12;
+
+      let currentY = 410;
+      const taglineLines = chosenTagline.split('\n');
+      taglineLines.forEach(l => {
+        ctx.fillText(l, 64, currentY);
+        currentY += 56;
+      });
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = 'rgba(255, 101, 47, 0.22)';
+      ctx.font = '900 130px Syne, serif';
+      ctx.fillText('”', w - 120, currentY + 35);
+
+      // 7. Tactical Feature Cards (3 Pillars)
+      const features = [
+        { icon: '🔒', title: 'DOPPIO SEGRETO RECIPROCO', desc: 'Si entra solo scambiando un pensiero intimo' },
+        { icon: '⏳', title: '180 SECONDI E NIENTE TRACCE', desc: 'Nessun log, messaggi volatili solo in RAM' },
+        { icon: '🤝', title: 'DOPPIO CONSENSO BILATERALE', desc: 'Proroga o contatto solo se entrambi d\'accordo' }
+      ];
+
+      let cardY = Math.max(currentY + 50, 680);
+      features.forEach((feat, idx) => {
+        ctx.fillStyle = 'rgba(18, 21, 30, 0.85)';
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(64, cardY, w - 128, 64, 12);
+        } else if (typeof roundRect === 'function') {
+          roundRect(ctx, 64, cardY, w - 128, 64, 12);
+        } else {
+          ctx.rect(64, cardY, w - 128, 64);
+        }
+        ctx.fill();
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.fillStyle = idx === 0 ? '#ff652f' : (idx === 1 ? '#ffaa44' : '#a855f7');
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(64, cardY, 4, 64, [12, 0, 0, 12]);
+        } else if (typeof roundRect === 'function') {
+          roundRect(ctx, 64, cardY, 4, 64, 12);
+        } else {
+          ctx.rect(64, cardY, 4, 64);
+        }
+        ctx.fill();
+
+        ctx.font = '22px sans-serif';
+        ctx.fillText(feat.icon, 84, cardY + 41);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 13px "JetBrains Mono", monospace';
+        ctx.fillText(feat.title, 124, cardY + 27);
+
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '500 12px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(feat.desc, 124, cardY + 48);
+
+        cardY += 76;
+      });
+
+      // 8. Monospace "streetalk.live" CTA Block
+      ctx.strokeStyle = 'rgba(255, 101, 47, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(64, h - 180);
+      ctx.lineTo(w - 64, h - 180);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(255, 101, 47, 0.08)';
+      ctx.beginPath();
+      if (typeof ctx.roundRect === 'function') {
+        ctx.roundRect(64, h - 160, w - 128, 76, 14);
+      } else if (typeof roundRect === 'function') {
+        roundRect(ctx, 64, h - 160, w - 128, 76, 14);
+      } else {
+        ctx.rect(64, h - 160, w - 128, 76);
+      }
+      ctx.fill();
+      ctx.strokeStyle = '#ff652f';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.fillStyle = '#ffaa44';
+      ctx.font = '700 12px "JetBrains Mono", monospace';
+      ctx.fillText('PARLA CON UNO SCONOSCIUTO ORA ➔', 88, h - 128);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 28px "JetBrains Mono", monospace';
+      ctx.fillText('streetalk.live', 88, h - 98);
+
       ctx.fillStyle = '#ff652f';
-      ctx.fillRect(24, h - 31, w - 48, 7);
+      ctx.font = '700 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText('FREE // NO REGISTRATION', w - 86, h - 122);
+      ctx.fillText('100% EPHEMERAL', w - 86, h - 104);
+      ctx.textAlign = 'left';
+
+      // 9. Privacy Seal & Zero-Secret Guarantee
+      ctx.fillStyle = '#6b7280';
+      ctx.font = '500 11px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('Nessun dato personale o contenuto chat è presente in questa card.', w / 2, h - 52);
+      ctx.textAlign = 'left';
     }
+
+    window.openSocialCardModal = openSocialCardModal;
+    window.closeSocialCardModal = closeSocialCardModal;
+    window.drawStoryCard = drawStoryCard;
+    window.downloadStoryCard = downloadStoryCard;
+    window.shareStoryCard = shareStoryCard;
 
     // Helper: rounded rect path
     function roundRect(ctx, x, y, w, h, r) {
@@ -4165,6 +4518,11 @@ if (typeof io === 'undefined') {
     function appendMessageBubble(messageObj, isSelf) {
       const container = document.getElementById('messages-container');
       if (!container) return;
+
+      // Adapt ambient soundscape mood based on emotional tone of conversation
+      if (typeof SoundEngine !== 'undefined' && SoundEngine.adaptMoodFromText && messageObj.message) {
+        SoundEngine.adaptMoodFromText(messageObj.message);
+      }
 
       // Special StreetBot system message bubble
       if (messageObj.isBot || messageObj.senderId === 'STREET_BOT') {

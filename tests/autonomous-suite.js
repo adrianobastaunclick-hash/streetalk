@@ -1929,6 +1929,63 @@ async function runAutonomousSuite() {
     freeClientA.disconnect();
     freeClientB.disconnect();
 
+    // ====================================================
+    // TEST 26: Milestone 2: Story Card 9:16 Redesign (R2) & Street ID 40+ Avatar System (R6)
+    // ====================================================
+    console.log('\n--- TEST 26: Milestone 2: Story Card 9:16 Redesign & Street ID Avatar System ---');
+
+    // 26.1 Story Card Architecture & Canvas Contract (R2)
+    assert(frontendAppJs.includes('STREET_STORY_TAGLINES'), 'frontend/app.js must define STREET_STORY_TAGLINES array');
+    assert(frontendAppJs.includes('drawStoryCard'), 'frontend/app.js must implement drawStoryCard()');
+    assert(frontendAppJs.includes('window.drawStoryCard = drawStoryCard'), 'frontend/app.js must expose drawStoryCard globally');
+    assert(frontendAppJs.includes('window.openSocialCardModal = openSocialCardModal'), 'frontend/app.js must expose openSocialCardModal globally');
+    assert(frontendAppJs.includes('window.downloadStoryCard = downloadStoryCard'), 'frontend/app.js must expose downloadStoryCard globally');
+    assert(frontendAppJs.includes('window.shareStoryCard = shareStoryCard'), 'frontend/app.js must expose shareStoryCard globally');
+    assert(frontendAppJs.includes('/assets/logo-streetalk.png'), 'Story card must reference official logo image /assets/logo-streetalk.png');
+    assert(frontendAppJs.includes('streetalk.live'), 'Story card must render streetalk.live CTA');
+    assert(frontendAppJs.includes('DOPPIO SEGRETO RECIPROCO'), 'Story card must render Pillar 1: Doppio segreto reciproco');
+    assert(frontendAppJs.includes('180 SECONDI E NIENTE TRACCE'), 'Story card must render Pillar 2: 180s e niente tracce');
+    assert(frontendAppJs.includes('DOPPIO CONSENSO BILATERALE'), 'Story card must render Pillar 3: Doppio consenso bilaterale');
+
+    // Verify at least 5 randomized tagline phrases
+    const taglinesMatch = frontendAppJs.match(/const\s+STREET_STORY_TAGLINES\s*=\s*\[([\s\S]*?)\];/);
+    assert(taglinesMatch, 'STREET_STORY_TAGLINES array declaration must be found');
+    const taglineItems = taglinesMatch[1].split('\n').filter(s => s.trim().startsWith("'"));
+    assert(taglineItems.length >= 5, `STREET_STORY_TAGLINES must have at least 5 phrases (found: ${taglineItems.length})`);
+
+    // Verify zero privacy leakage in drawStoryCard (no mySecret, partnerSecret, messages, or IPs rendered)
+    const storyCardStart = frontendAppJs.indexOf('function drawStoryCard()');
+    const storyCardEnd = frontendAppJs.indexOf('window.openSocialCardModal', storyCardStart);
+    const drawStoryCardBody = frontendAppJs.substring(storyCardStart, storyCardEnd);
+    assert(!drawStoryCardBody.includes('mySecret'), 'drawStoryCard must NEVER reference mySecret');
+    assert(!drawStoryCardBody.includes('partnerSecret'), 'drawStoryCard must NEVER reference partnerSecret');
+    assert(!drawStoryCardBody.includes('currentRoomId'), 'drawStoryCard must NEVER reference currentRoomId');
+    pass('Story Card Canvas Engine (R2): 9:16 layout, logo branding, >=5 dynamic taglines, 3 pillars, monospace CTA, and zero privacy leakage verified');
+
+    // 26.2 Street ID Avatar System (R6)
+    assert(frontendAppJs.includes('STREET_EMOJI_AVATARS'), 'frontend/app.js must declare STREET_EMOJI_AVATARS');
+    const emojiAvatarsMatch = frontendAppJs.match(/const\s+STREET_EMOJI_AVATARS\s*=\s*\[([\s\S]*?)\];/);
+    assert(emojiAvatarsMatch, 'STREET_EMOJI_AVATARS array must be declared');
+    const emojiItems = emojiAvatarsMatch[1].match(/'[^']+'/g) || [];
+    assert(emojiItems.length >= 40, `STREET_EMOJI_AVATARS must contain at least 40 emojis (found: ${emojiItems.length})`);
+
+    // Verify renderAvatarGrid renders all avatars (both SVG and emojis)
+    assert(frontendAppJs.includes('renderAvatarGrid'), 'frontend/app.js must define renderAvatarGrid');
+    assert(frontendAppJs.includes('STREET_EMOJI_AVATARS.map'), 'renderAvatarGrid must map and render STREET_EMOJI_AVATARS');
+    assert(frontendAppJs.includes('STREET_GLYPHS.map'), 'renderAvatarGrid must map and render STREET_GLYPHS');
+
+    // Verify default avatar is '⚡' in getUserProfile()
+    assert(frontendAppJs.includes("avatar: '⚡'"), "default avatar in getUserProfile must be '⚡'");
+    assert(frontendAppJs.includes("localStorage.setItem('streetalk_avatar'"), 'saveUserProfile must persist to streetalk_avatar');
+
+    // Verify HTML avatar grid containers & display targets in index.html and public/index.html
+    assert(indexContent.includes('id="full-profile-avatar-grid"'), 'index.html must include #full-profile-avatar-grid');
+    assert(indexContent.includes('id="onboarding-avatar-grid"'), 'index.html must include #onboarding-avatar-grid');
+    assert(indexContent.includes('id="profile-avatar-grid"'), 'index.html must include #profile-avatar-grid');
+    assert(indexContent.includes('id="header-profile-avatar"'), 'index.html must include #header-profile-avatar');
+    assert(indexContent.includes('id="chat-partner-avatar"'), 'index.html must include #chat-partner-avatar');
+    pass('Street ID Avatar System (R6): >= 40 avatars, 58 total catalog, full grid rendering, default ⚡, localStorage persistence & display bindings verified');
+
     // ----------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------

@@ -505,27 +505,24 @@ textarea::placeholder {
   box-sizing: border-box !important;
 }
 
-/* Left Sidebar: Unified Dark Glass Control Panel */
+/* Left Sidebar: Hidden until login system is implemented (R4 - DOM preserved for compatibility) */
 #chat-sidebar {
-  width: 340px !important;
-  min-width: 320px !important;
-  max-width: 380px !important;
-  height: 100% !important;
-  background: #0d0f17 !important;
-  border-right: 1px solid #1c2130 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-  padding: 16px !important;
-  gap: 12px !important;
-  overflow-y: auto !important;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 101, 47, 0.25) transparent;
-  flex-shrink: 0 !important;
-  z-index: 45 !important;
-  box-sizing: border-box !important;
-  transform: none !important;
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: none !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+  overflow: hidden !important;
+}
+
+/* Responsive fix for Scambio Social Facoltativo (R1) */
+#friend-request-unlocked-drawer .flex {
+  flex-wrap: wrap !important;
+}
+#friend-social-handle {
+  min-width: 0 !important;
 }
 
 #chat-sidebar::-webkit-scrollbar {
@@ -808,18 +805,14 @@ body.chat-mode-active {
 /* Responsive Lateral Sidebar (Maintained on Mobile & Desktop - Zero Missing Sidebar) */
 @media (max-width: 768px) {
   #chat-sidebar {
-    width: clamp(140px, 38vw, 190px) !important;
-    min-width: 130px !important;
-    max-width: 200px !important;
-    position: static !important;
-    transform: none !important;
-    box-shadow: none !important;
-    padding: 8px 6px !important;
-    gap: 8px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    flex-shrink: 0 !important;
-    border-right: 1px solid #1c2130 !important;
+    display: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    max-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+    overflow: hidden !important;
   }
 
   #chat-sidebar .chat-sidebar-card {

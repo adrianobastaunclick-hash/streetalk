@@ -1,4 +1,4 @@
-﻿# BRIEFING — 2026-09-14T23:12:00Z
+# BRIEFING — 2026-09-14T23:12:00Z
 
 ## Mission
 Implement Milestone 1 (R1, R3, R4) in streetalk: fix social exchange drawer overflow, integrate official logo in assets and header, hide chat left sidebar while preserving DOM elements, ensure SHA256 parity and 100% test pass.
@@ -33,6 +33,8 @@ Implement Milestone 1 (R1, R3, R4) in streetalk: fix social exchange drawer over
 ## Key Decisions Made
 - Keep all DOM nodes inside `#chat-sidebar` intact and apply CSS hiding + `hidden` attribute to fulfill R4 without breaking test assertions or runtime listeners.
 - Use `flex-wrap gap-1.5` container with `min-w-[90px]` input and full-width wrap button for social drawer.
+- Applied responsive media query override in `incrocio.css` to ensure `#chat-sidebar` stays hidden across all breakpoints (<768px and >768px).
+- Mirrored all edits synchronously to `public/index.html` and `public/incrocio.css`, ensuring 100% SHA256 byte-for-byte parity.
 
 ## Artifact Index
 - `d:\streetalk\.agents\worker_m1_1\DISPATCH.md` — assignment & instructions
@@ -40,11 +42,16 @@ Implement Milestone 1 (R1, R3, R4) in streetalk: fix social exchange drawer over
 - `d:\streetalk\.agents\worker_m1_1\handoff.md` — final handoff report
 
 ## Change Tracker
-- **Files modified**: None yet
-- **Build status**: Pending
+- **Files modified**:
+  - `index.html`: Official logo in header (R3), hidden #chat-sidebar with DOM nodes preserved (R4), #friend-request-unlocked-drawer responsive layout (R1), hidden mobile options button (R4).
+  - `public/index.html`: Byte-for-byte mirror of `index.html`.
+  - `incrocio.css`: #chat-sidebar hidden with display: none !important (desktop & mobile) (R4), #friend-request-unlocked-drawer flex-wrap and min-w-0 rules (R1).
+  - `public/incrocio.css`: Byte-for-byte mirror of `incrocio.css`.
+  - `assets/logo-streetalk.png` & `public/assets/logo-streetalk.png`: Official logo image copied from user uploaded media.
+- **Build status**: PASS
 - **Pending issues**: None
 
 ## Quality Status
-- **Build/test result**: Not yet run
-- **Lint status**: N/A
-- **Tests added/modified**: None
+- **Build/test result**: 124/124 tests PASSED (0 failures) via `node tests/autonomous-suite.js`
+- **Lint status**: Clean
+- **Tests added/modified**: Full suite passing including Test 18.5 parity check
