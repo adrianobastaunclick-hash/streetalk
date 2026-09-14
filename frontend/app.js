@@ -1194,35 +1194,135 @@ if (typeof io === 'undefined') {
         } catch (e) {}
       },
 
-      playReaction() {
+      playReaction(emoji = '🔥') {
         if (!this.enabled) return;
         this.init();
         if (!this.ctx) return;
         try {
           const now = this.ctx.currentTime;
-          const osc1 = this.ctx.createOscillator();
-          const gain1 = this.ctx.createGain();
-          osc1.type = 'sine';
-          osc1.frequency.setValueAtTime(440, now);
-          osc1.frequency.exponentialRampToValueAtTime(660, now + 0.05);
-          gain1.gain.setValueAtTime(0.22, now);
-          gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
-          osc1.connect(gain1);
-          gain1.connect(this.ctx.destination);
-          osc1.start(now);
-          osc1.stop(now + 0.06);
+          if (emoji === '🔥') {
+            // Warm resonant rising chirp
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.exponentialRampToValueAtTime(740, now + 0.12);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.14);
+          } else if (emoji === '💀') {
+            // Dark sub drop
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(140, now);
+            osc.frequency.exponentialRampToValueAtTime(40, now + 0.22);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+          } else if (emoji === '⚡') {
+            // High voltage electric zap
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(880, now);
+            osc.frequency.exponentialRampToValueAtTime(1760, now + 0.08);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.1);
+          } else if (emoji === '💖' || emoji === '🖤') {
+            // Warm romantic dual chime
+            const f1 = emoji === '💖' ? 523.25 : 330;
+            const f2 = emoji === '💖' ? 659.25 : 440;
+            [f1, f2].forEach((freq, i) => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(freq, now + (i * 0.04));
+              gain.gain.setValueAtTime(0.15, now + (i * 0.04));
+              gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18 + (i * 0.04));
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + (i * 0.04));
+              osc.stop(now + 0.18 + (i * 0.04));
+            });
+          } else if (emoji === '💋' || emoji === '🌹') {
+            // Playful sweep pop / shimmering harmonic
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.07);
+            osc.frequency.exponentialRampToValueAtTime(900, now + 0.12);
+            gain.gain.setValueAtTime(0.18, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.14);
+          } else if (emoji === '😈') {
+            // Playful chromatic minor 3rd
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(523.25, now + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(622.25, now + 0.14);
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.16);
+          } else if (emoji === '👏') {
+            // Double click / clap
+            [0, 0.06].forEach(offset => {
+              const osc = this.ctx.createOscillator();
+              const gain = this.ctx.createGain();
+              osc.type = 'square';
+              osc.frequency.setValueAtTime(800, now + offset);
+              gain.gain.setValueAtTime(0.08, now + offset);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + offset + 0.04);
+              osc.connect(gain);
+              gain.connect(this.ctx.destination);
+              osc.start(now + offset);
+              osc.stop(now + offset + 0.04);
+            });
+          } else {
+            // Standard generic dual pop
+            const osc1 = this.ctx.createOscillator();
+            const gain1 = this.ctx.createGain();
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(440, now);
+            osc1.frequency.exponentialRampToValueAtTime(660, now + 0.05);
+            gain1.gain.setValueAtTime(0.18, now);
+            gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+            osc1.connect(gain1);
+            gain1.connect(this.ctx.destination);
+            osc1.start(now);
+            osc1.stop(now + 0.06);
 
-          const osc2 = this.ctx.createOscillator();
-          const gain2 = this.ctx.createGain();
-          osc2.type = 'sine';
-          osc2.frequency.setValueAtTime(660, now + 0.06);
-          osc2.frequency.exponentialRampToValueAtTime(990, now + 0.12);
-          gain2.gain.setValueAtTime(0.24, now + 0.06);
-          gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-          osc2.connect(gain2);
-          gain2.connect(this.ctx.destination);
-          osc2.start(now + 0.06);
-          osc2.stop(now + 0.14);
+            const osc2 = this.ctx.createOscillator();
+            const gain2 = this.ctx.createGain();
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(660, now + 0.06);
+            osc2.frequency.exponentialRampToValueAtTime(990, now + 0.12);
+            gain2.gain.setValueAtTime(0.2, now + 0.06);
+            gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+            osc2.connect(gain2);
+            gain2.connect(this.ctx.destination);
+            osc2.start(now + 0.06);
+            osc2.stop(now + 0.14);
+          }
         } catch (e) {}
       },
 
@@ -1377,12 +1477,31 @@ if (typeof io === 'undefined') {
         timestamp: Date.now() - 20000
       }, false);
 
-      // 3. Incoming reaction GIF card (Direct CDN without referer restrictions)
+      // 3. Incoming reaction GIF card (Direct local SVG asset)
       appendMessageBubble({
         type: 'gif',
-        gifUrl: '/assets/gifs/flame.svg',
+        gifUrl: '/assets/gifs/drive.svg',
         timestamp: Date.now() - 10000
       }, false);
+
+      // Populate preview partner quick details in sidebar
+      if (typeof resetFriendRequestUI === 'function') resetFriendRequestUI();
+      const pMottoEl = document.getElementById('chat-partner-motto-text') || document.getElementById('chat-partner-motto');
+      const pTopicsEl = document.getElementById('chat-partner-topics-text') || document.getElementById('chat-partner-topics');
+      const pAvoidsEl = document.getElementById('chat-partner-avoids-text') || document.getElementById('chat-partner-avoids');
+      const previewMotto = '"Cerco conversazioni che lasciano il segno dopo le due di notte."';
+      const previewTopics = 'Musica notturna, filosofia da marciapiede, sfoghi';
+      const previewAvoids = 'Fenomeni da bar, giudizi sul corpo, monosillabi';
+      if (pMottoEl) safeSetText(pMottoEl, previewMotto);
+      if (pTopicsEl) safeSetText(pTopicsEl, previewTopics);
+      if (pAvoidsEl) safeSetText(pAvoidsEl, previewAvoids);
+
+      const mottoRow = document.getElementById('chat-partner-motto-row');
+      if (mottoRow && previewMotto) mottoRow.classList.remove('hidden');
+      const topicsRow = document.getElementById('chat-partner-topics-row');
+      if (topicsRow && previewTopics) topicsRow.classList.remove('hidden');
+      const avoidsRow = document.getElementById('chat-partner-avoids-row');
+      if (avoidsRow && previewAvoids) avoidsRow.classList.remove('hidden');
 
       // 4. Outgoing text bubble (Telegram Street Orange)
       appendMessageBubble({
@@ -1719,6 +1838,22 @@ if (typeof io === 'undefined') {
       }
     }
 
+    // Category Fallback Mapping for Robust Offline / Error Resilience (R2)
+    const CATEGORY_FALLBACK_MAP = {
+      trend: '/assets/gifs/flame.svg',
+      street: '/assets/gifs/drive.svg',
+      reazioni: '/assets/gifs/shock.svg',
+      memes: '/assets/gifs/smart.svg',
+      lol: '/assets/gifs/lol.svg',
+      notte: '/assets/gifs/moon.svg',
+      cyberpunk: '/assets/gifs/cyber.svg',
+      anime: '/assets/gifs/anime.svg',
+      music: '/assets/gifs/vinyl.svg',
+      flirt: '/assets/gifs/kiss.svg',
+      amore: '/assets/gifs/heart_pulse.svg',
+      spicy: '/assets/gifs/chili.svg'
+    };
+
     // Curated High-Speed Reaction GIFs Catalog (Local Verified Permanent Assets)
     const STREET_GIF_CATALOG = {
       trend: [
@@ -1733,9 +1868,9 @@ if (typeof io === 'undefined') {
         { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
         { label: 'Boombox Beat', url: '/assets/gifs/boombox.svg' },
         { label: 'Urban Skater', url: '/assets/gifs/skate.svg' },
-        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' },
         { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
-        { label: 'Moonlight Alley', url: '/assets/gifs/moon.svg' }
+        { label: 'Moonlight Alley', url: '/assets/gifs/moon.svg' },
+        { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' }
       ],
       reazioni: [
         { label: 'Shocked Face', url: '/assets/gifs/shock.svg' },
@@ -1743,7 +1878,7 @@ if (typeof io === 'undefined') {
         { label: 'Mind Blown', url: '/assets/gifs/mindblown.svg' },
         { label: 'Respect Salute', url: '/assets/gifs/respect.svg' },
         { label: 'Popcorn Time', url: '/assets/gifs/popcorn.svg' },
-        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+        { label: 'Roll Safe Smart', url: '/assets/gifs/smart.svg' }
       ],
       memes: [
         { label: 'Roll Safe Smart', url: '/assets/gifs/smart.svg' },
@@ -1767,7 +1902,7 @@ if (typeof io === 'undefined') {
         { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
         { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
         { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
-        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+        { label: 'Popcorn Time', url: '/assets/gifs/popcorn.svg' }
       ],
       cyberpunk: [
         { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
@@ -1783,15 +1918,34 @@ if (typeof io === 'undefined') {
         { label: 'Midnight Smoke', url: '/assets/gifs/smoke.svg' },
         { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
         { label: 'Shocked Face', url: '/assets/gifs/shock.svg' },
-        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+        { label: 'Respect Salute', url: '/assets/gifs/respect.svg' }
       ],
       music: [
         { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
         { label: 'Boombox Beat', url: '/assets/gifs/boombox.svg' },
         { label: 'Urban Skater', url: '/assets/gifs/skate.svg' },
         { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
-        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' },
-        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' }
+        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
+        { label: 'Respect Salute', url: '/assets/gifs/respect.svg' }
+      ],
+      flirt: [
+        { label: 'Bacio Notturno', url: '/assets/gifs/kiss.svg' },
+        { label: 'Occhiolino', url: '/assets/gifs/wink.svg' },
+        { label: 'Diavoletto', url: '/assets/gifs/devil.svg' },
+        { label: 'Rosa Nera', url: '/assets/gifs/rose.svg' },
+        { label: 'Sparkle Flirt', url: '/assets/gifs/sparkle.svg' }
+      ],
+      amore: [
+        { label: 'Battito Cardiaco', url: '/assets/gifs/heart_pulse.svg' },
+        { label: 'Cuori Fluttuanti', url: '/assets/gifs/hearts.svg' },
+        { label: 'Lettera d\'Amore', url: '/assets/gifs/love_letter.svg' },
+        { label: 'Cupido Cyber', url: '/assets/gifs/cupid.svg' },
+        { label: 'Lucchetto Amore', url: '/assets/gifs/love_lock.svg' }
+      ],
+      spicy: [
+        { label: 'Peperoncino Hot', url: '/assets/gifs/chili.svg' },
+        { label: 'Fiamma Viola', url: '/assets/gifs/purple_flame.svg' },
+        { label: 'Ciliegie Neon', url: '/assets/gifs/cherries.svg' }
       ]
     };
 
@@ -1937,7 +2091,7 @@ if (typeof io === 'undefined') {
 
         img.onerror = () => {
           img.onerror = null;
-          img.src = '/assets/gifs/flame.svg';
+          img.src = CATEGORY_FALLBACK_MAP[activeGifCategory] || '/assets/gifs/flame.svg';
         };
 
         const badge = document.createElement('span');
@@ -2352,8 +2506,40 @@ if (typeof io === 'undefined') {
     }
 
     function sendReaction(emoji) {
-      if (!currentRoomId || !socket || !socket.connected) return;
-      socket.emit('send_reaction', { roomId: currentRoomId, emoji });
+      if (!emoji) return;
+
+      // 1. Spring-pop animation on reaction dock button
+      try {
+        const btn = document.querySelector(`.reaction-btn[data-emoji="${emoji}"]`);
+        if (btn) {
+          btn.classList.add('reaction-btn-pop');
+          setTimeout(() => btn.classList.remove('reaction-btn-pop'), 400);
+        }
+      } catch (_) {}
+
+      // 2. Haptic vibration feedback
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        try { navigator.vibrate(25); } catch (_) {}
+      }
+
+      // 3. Native Web Audio tone synthesis
+      SoundEngine.playReaction(emoji);
+
+      // 4. Immediate local neon floating visual burst
+      triggerReactionVisual(emoji, true);
+
+      // 5. Realtime socket dispatch or preview simulation
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('send_reaction', { roomId: currentRoomId, emoji });
+      } else if (!currentRoomId) {
+        // Preview mode: simulate random partner reaction echo
+        setTimeout(() => {
+          const sampleEmojis = ['🔥', '💀', '⚡', '💖', '💋', '👀', '🤯'];
+          const randomEmoji = sampleEmojis[Math.floor(Math.random() * sampleEmojis.length)];
+          triggerReactionVisual(randomEmoji, false);
+          SoundEngine.playReaction(randomEmoji);
+        }, 1200);
+      }
     }
 
     function triggerReactionVisual(emoji, isSelf = false) {
@@ -2361,7 +2547,7 @@ if (typeof io === 'undefined') {
       if (!layer) return;
 
       const el = document.createElement('div');
-      el.className = 'absolute text-3xl sm:text-4xl pointer-events-none select-none z-40';
+      el.className = 'absolute text-3xl sm:text-4xl pointer-events-none select-none z-40 floating-reaction-neon';
       safeSetText(el, emoji);
 
       const randomX = isSelf ? (60 + Math.random() * 28) : (10 + Math.random() * 28);
@@ -2379,7 +2565,6 @@ if (typeof io === 'undefined') {
       });
 
       setTimeout(() => { el.remove(); }, 1700);
-      SoundEngine.playReaction();
     }
 
     function openReportModal() {
@@ -2443,6 +2628,9 @@ if (typeof io === 'undefined') {
         closeReportModal();
         closeSocialCardModal();
         closeProfileModal();
+        if (typeof closeCreateGroupModal === 'function') closeCreateGroupModal();
+        if (typeof closeUnqualifiedModal === 'function') closeUnqualifiedModal();
+        if (typeof closeFounderBadgeModal === 'function') closeFounderBadgeModal();
       }
     });
 
@@ -2527,6 +2715,681 @@ if (typeof io === 'undefined') {
       }
     ];
 
+    // ==========================================
+    // R4 & R6: STREET KARMA & FOUNDER BADGE ENGINE
+    // ==========================================
+    function isFounderUser() {
+      try {
+        return localStorage.getItem('streetalk_is_founder') === 'true';
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function getBotStrikes() {
+      try {
+        return parseInt(localStorage.getItem('streetalk_bot_strikes') || '0', 10);
+      } catch (_) {
+        return 0;
+      }
+    }
+
+    function getStreetKarma() {
+      try {
+        const base = 50;
+        const flames = parseInt(localStorage.getItem('streetalk_karma_flames') || '8', 10);
+        const chats = parseInt(localStorage.getItem('streetalk_karma_chats') || '4', 10);
+        const strikes = getBotStrikes();
+        return Math.max(0, base + (flames * 10) + (chats * 15) - (strikes * 50));
+      } catch (_) {
+        return 50;
+      }
+    }
+
+    function updateKarmaHUD() {
+      const score = getStreetKarma();
+      const strikes = getBotStrikes();
+      const isFounder = isFounderUser();
+      const flames = parseInt(localStorage.getItem('streetalk_karma_flames') || '8', 10);
+      const connections = getStoredConnections();
+
+      const scoreEl = document.getElementById('profile-karma-score');
+      const levelEl = document.getElementById('profile-karma-level');
+      const meterEl = document.getElementById('profile-karma-meter');
+      const flamesEl = document.getElementById('profile-karma-flames');
+      const strikesEl = document.getElementById('profile-karma-strikes');
+      const founderBadgeStatus = document.getElementById('profile-founder-badge-status');
+      const btnOpenFounder = document.getElementById('btn-profile-open-founder');
+      const connCountBadge = document.getElementById('profile-connections-count-badge');
+      const rubricaCountLabel = document.getElementById('rubrica-count-label');
+
+      if (scoreEl) safeSetText(scoreEl, score);
+      if (levelEl) {
+        if (score >= 80) {
+          safeSetText(levelEl, 'Veterano');
+          levelEl.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold border border-emerald-500/30';
+        } else if (score >= 40) {
+          safeSetText(levelEl, 'Rispettato');
+          levelEl.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full bg-street-orange/20 text-street-orange font-bold border border-street-orange/30';
+        } else {
+          safeSetText(levelEl, 'Novizio');
+          levelEl.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-400 font-bold border border-zinc-700';
+        }
+      }
+      if (meterEl) {
+        const pct = Math.min(100, Math.round((score / 100) * 100));
+        meterEl.style.width = `${pct}%`;
+      }
+      if (flamesEl) safeSetText(flamesEl, `🔥 ${flames} Fiamme`);
+      if (strikesEl) safeSetText(strikesEl, `🛡️ ${strikes} Sanzioni Bot`);
+
+      if (founderBadgeStatus) {
+        if (isFounder) {
+          founderBadgeStatus.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full badge-founder-gold font-bold';
+          safeSetText(founderBadgeStatus, 'ATTIVO (FONDATORE)');
+          if (btnOpenFounder) {
+            btnOpenFounder.className = 'w-full py-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-mono font-bold text-xs rounded-xl cursor-default flex items-center justify-center gap-1.5';
+            btnOpenFounder.innerHTML = '<span>👑</span> <span>STATUS FONDATORE ATTIVO</span>';
+            btnOpenFounder.disabled = true;
+          }
+        } else {
+          founderBadgeStatus.className = 'text-[9px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 font-bold border border-zinc-800';
+          safeSetText(founderBadgeStatus, 'Non attivo');
+          if (btnOpenFounder) {
+            btnOpenFounder.className = 'w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 hover:border-amber-400 text-amber-300 font-mono font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95';
+            btnOpenFounder.innerHTML = '<span>⭐</span> <span>Diventa Fondatore (€2.99)</span>';
+            btnOpenFounder.disabled = false;
+          }
+        }
+      }
+
+      if (connCountBadge) safeSetText(connCountBadge, `${connections.length} Salvati`);
+      if (rubricaCountLabel) safeSetText(rubricaCountLabel, `${connections.length} connession${connections.length === 1 ? 'e' : 'i'}`);
+    }
+
+    // ==========================================
+    // R3 & R4: RUBRICA CONNESSIONI (LOCAL PERSISTENCE)
+    // ==========================================
+    function getStoredConnections() {
+      try {
+        const raw = localStorage.getItem('streetalk_connections_v1');
+        return raw ? JSON.parse(raw) : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function saveCurrentPartnerConnection() {
+      const partner = currentPartnerProfile || {
+        moniker: partnerNick || 'SHADOW',
+        avatar: 'street-bolt',
+        bio: '',
+        motto: ''
+      };
+      saveConnection(partner);
+    }
+
+    function saveConnection(partner) {
+      if (!partner) return;
+      try {
+        const list = getStoredConnections();
+        const moniker = partner.moniker || partnerNick || 'SHADOW';
+        const existingIdx = list.findIndex(c => c.moniker === moniker);
+        const item = {
+          id: existingIdx >= 0 ? list[existingIdx].id : 'conn_' + Date.now(),
+          moniker,
+          avatar: partner.avatar || 'street-bolt',
+          bio: partner.bio || '',
+          motto: partner.motto || '',
+          handle: (partnerSocialContact && partnerSocialContact.handle) || (existingIdx >= 0 ? list[existingIdx].handle : ''),
+          platform: (partnerSocialContact && partnerSocialContact.platform) || (existingIdx >= 0 ? list[existingIdx].platform : ''),
+          timestamp: Date.now()
+        };
+
+        if (existingIdx >= 0) {
+          list[existingIdx] = item;
+        } else {
+          list.unshift(item);
+        }
+        localStorage.setItem('streetalk_connections_v1', JSON.stringify(list));
+        renderRubricaConnessioni();
+      } catch (_) {}
+    }
+
+    function updatePartnerConnectionSocial(handle, platform) {
+      try {
+        const list = getStoredConnections();
+        const moniker = partnerNick || (currentPartnerProfile && currentPartnerProfile.moniker);
+        if (!moniker) return;
+        const entry = list.find(c => c.moniker === moniker);
+        if (entry) {
+          entry.handle = handle;
+          entry.platform = platform;
+          localStorage.setItem('streetalk_connections_v1', JSON.stringify(list));
+          renderRubricaConnessioni();
+        }
+      } catch (_) {}
+    }
+
+    function removeConnection(connId) {
+      try {
+        const list = getStoredConnections().filter(c => c.id !== connId);
+        localStorage.setItem('streetalk_connections_v1', JSON.stringify(list));
+        renderRubricaConnessioni();
+        updateKarmaHUD();
+        showToast('Connessione rimossa dalla Rubrica.', 'info');
+      } catch (_) {}
+    }
+
+    function renderRubricaConnessioni() {
+      const listEl = document.getElementById('rubrica-connessioni-list');
+      const emptyEl = document.getElementById('rubrica-connessioni-empty');
+      const countBadge = document.getElementById('profile-connections-count-badge');
+      const rubricaCountLabel = document.getElementById('rubrica-count-label');
+      if (!listEl) return;
+
+      const connections = getStoredConnections();
+      if (countBadge) safeSetText(countBadge, `${connections.length} Salvati`);
+      if (rubricaCountLabel) safeSetText(rubricaCountLabel, `${connections.length} connession${connections.length === 1 ? 'e' : 'i'}`);
+
+      if (!connections || connections.length === 0) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      if (emptyEl) emptyEl.classList.add('hidden');
+      listEl.innerHTML = '';
+
+      connections.forEach(conn => {
+        const card = document.createElement('div');
+        card.className = 'connection-friend-card p-4 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 hover:border-zinc-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition shadow-sm';
+
+        const leftCol = document.createElement('div');
+        leftCol.className = 'flex items-center gap-3 min-w-0';
+
+        const avEl = document.createElement('div');
+        avEl.className = 'w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-800 flex items-center justify-center shrink-0';
+        setAvatarDisplay(avEl, conn.avatar || 'street-bolt', 'w-5 h-5');
+
+        const details = document.createElement('div');
+        details.className = 'min-w-0';
+
+        const nickRow = document.createElement('div');
+        nickRow.className = 'flex items-center gap-2';
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'font-bold font-mono text-sm text-white truncate';
+        safeSetText(nameSpan, conn.moniker);
+
+        const dateSpan = document.createElement('span');
+        dateSpan.className = 'text-[9px] font-mono text-zinc-500';
+        const d = new Date(conn.timestamp || Date.now());
+        safeSetText(dateSpan, `${d.toLocaleDateString('it-IT')}`);
+
+        nickRow.appendChild(nameSpan);
+        nickRow.appendChild(dateSpan);
+        details.appendChild(nickRow);
+
+        if (conn.motto || conn.bio) {
+          const mottoEl = document.createElement('div');
+          mottoEl.className = 'text-xs text-zinc-400 italic truncate max-w-[280px]';
+          safeSetText(mottoEl, conn.motto ? `"${conn.motto}"` : conn.bio);
+          details.appendChild(mottoEl);
+        }
+
+        leftCol.appendChild(avEl);
+        leftCol.appendChild(details);
+
+        const rightCol = document.createElement('div');
+        rightCol.className = 'flex items-center gap-2 self-end sm:self-center shrink-0';
+
+        if (conn.handle) {
+          const socialBadge = document.createElement('button');
+          socialBadge.type = 'button';
+          socialBadge.className = 'px-2.5 py-1 rounded-lg bg-street-orange/15 border border-street-orange/40 text-street-orange font-mono text-xs font-bold hover:bg-street-orange/25 cursor-pointer flex items-center gap-1';
+          socialBadge.title = 'Clicca per copiare contatto';
+          safeSetText(socialBadge, `${(conn.platform || 'link').toUpperCase()}: ${conn.handle}`);
+          socialBadge.onclick = () => {
+            fallbackCopyText(conn.handle);
+          };
+          rightCol.appendChild(socialBadge);
+        }
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'p-1.5 text-zinc-500 hover:text-red-400 font-mono text-xs transition cursor-pointer';
+        delBtn.title = 'Rimuovi connessione';
+        delBtn.textContent = '✕';
+        delBtn.onclick = () => removeConnection(conn.id);
+        rightCol.appendChild(delBtn);
+
+        card.appendChild(leftCol);
+        card.appendChild(rightCol);
+        listEl.appendChild(card);
+      });
+    }
+
+    // ==========================================
+    // R3: BILATERAL FRIEND REQUEST & SOCIAL DRAWER
+    // ==========================================
+    let friendRequestState = 'idle'; // 'idle' | 'sent' | 'received' | 'unlocked'
+    let partnerSocialContact = null;
+
+    function resetFriendRequestUI() {
+      friendRequestState = 'idle';
+      partnerSocialContact = null;
+      const btn = document.getElementById('btn-friend-request');
+      const badge = document.getElementById('friend-request-status-badge');
+      const drawer = document.getElementById('friend-request-unlocked-drawer') || document.getElementById('friend-unlocked-drawer');
+      const partnerSocialBox = document.getElementById('friend-partner-social-received') || document.getElementById('friend-partner-social-box');
+
+      if (btn) {
+        btn.disabled = false;
+        btn.className = 'w-full py-2 px-3 rounded-xl bg-street-orange/15 hover:bg-street-orange/25 border border-street-orange/40 hover:border-street-orange text-street-orange hover:text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm';
+        btn.innerHTML = '<span>🤝</span> <span>RICHIEDI AMICIZIA</span>';
+      }
+      if (badge) {
+        badge.className = 'text-[9px] font-mono text-zinc-500 uppercase';
+        safeSetText(badge, 'DOPPIA CONFERMA 180s');
+      }
+      if (drawer) drawer.classList.add('hidden');
+      if (partnerSocialBox) partnerSocialBox.classList.add('hidden');
+    }
+
+    function sendFriendRequest() {
+      if (friendRequestState === 'unlocked') {
+        showToast('Siete già connessi nella rubrica!', 'info');
+        return;
+      }
+
+      if (friendRequestState === 'received') {
+        // Double consensus reached via accepting incoming
+        if (socket && socket.connected && currentRoomId) {
+          socket.emit('send_friend_request', { roomId: currentRoomId });
+        }
+        friendRequestState = 'unlocked';
+        updateFriendRequestUI('unlocked');
+        saveCurrentPartnerConnection();
+        showToast('Amicizia accettata! Connessione salvata nella Rubrica.', 'success');
+        SoundEngine.playMatchSound();
+        return;
+      }
+
+      friendRequestState = 'sent';
+      updateFriendRequestUI('sent');
+
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('send_friend_request', { roomId: currentRoomId });
+        showToast('Richiesta inviata! In attesa del partner...', 'info');
+      } else if (!currentRoomId) {
+        // Preview mode simulation
+        showToast('Richiesta inviata (anteprima)!', 'info');
+        setTimeout(() => {
+          friendRequestState = 'unlocked';
+          updateFriendRequestUI('unlocked');
+          saveCurrentPartnerConnection();
+          showToast('Il partner ha accettato! Connessione sbloccata 🎉', 'success');
+          SoundEngine.playMatchSound();
+        }, 1500);
+      }
+    }
+
+    function updateFriendRequestUI(state) {
+      const btn = document.getElementById('btn-friend-request');
+      const badge = document.getElementById('friend-request-status-badge');
+      const drawer = document.getElementById('friend-request-unlocked-drawer') || document.getElementById('friend-unlocked-drawer');
+
+      if (state === 'sent') {
+        if (btn) {
+          btn.disabled = true;
+          btn.className = 'w-full py-2 px-3 rounded-xl bg-zinc-900 border border-amber-500/50 text-amber-400 font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-not-allowed opacity-90';
+          btn.innerHTML = '<span>⏳</span> <span>RICHIESTA INVIATA...</span>';
+        }
+        if (badge) {
+          badge.className = 'text-[9px] font-mono text-amber-400 font-semibold uppercase animate-pulse';
+          safeSetText(badge, 'IN ATTESA DEL PARTNER');
+        }
+      } else if (state === 'received') {
+        if (btn) {
+          btn.disabled = false;
+          btn.className = 'w-full py-2 px-3 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500 text-emerald-300 hover:text-white font-mono text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_12px_rgba(16,185,129,0.3)] animate-pulse';
+          btn.innerHTML = '<span>🤝</span> <span>ACCETTA RICHIESTA PARTNER</span>';
+        }
+        if (badge) {
+          badge.className = 'text-[9px] font-mono text-emerald-400 font-semibold uppercase';
+          safeSetText(badge, 'IL PARTNER VUOLE CONNETTERSI!');
+        }
+      } else if (state === 'unlocked') {
+        if (btn) {
+          btn.disabled = true;
+          btn.className = 'w-full py-2 px-3 rounded-xl bg-emerald-950/60 border border-emerald-500/60 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center gap-2 cursor-default';
+          btn.innerHTML = '<span>✅</span> <span>CONNESSI NELLA RUBRICA</span>';
+        }
+        if (badge) {
+          badge.className = 'text-[9px] font-mono text-emerald-400 uppercase font-semibold';
+          safeSetText(badge, 'AMICIZIA SBLOCCATA');
+        }
+        if (drawer) {
+          drawer.classList.remove('hidden');
+        }
+      }
+    }
+
+    function shareFriendSocial() {
+      const handleInput = document.getElementById('friend-social-handle') || document.getElementById('friend-social-handle-input');
+      const platformSelect = document.getElementById('friend-social-platform');
+      if (!handleInput) return;
+      const handle = handleInput.value.trim();
+      const platform = (platformSelect && platformSelect.value) ? platformSelect.value : 'telegram';
+
+      if (!handle) {
+        showToast('Inserisci il tuo username o link prima di inviare.', 'error');
+        return;
+      }
+
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('share_friend_contact', { roomId: currentRoomId, handle, platform });
+        showToast(`Contatto ${platform} condiviso con il partner!`, 'success');
+      } else if (!currentRoomId) {
+        showToast(`Contatto ${platform} inviato (anteprima)!`, 'success');
+        setTimeout(() => {
+          onFriendContactReceived({ handle: '@shadow_underground', platform: 'telegram' });
+        }, 1200);
+      }
+    }
+
+    function onFriendContactReceived(data) {
+      partnerSocialContact = data;
+      const box = document.getElementById('friend-partner-social-received') || document.getElementById('friend-partner-social-box');
+      const handleEl = document.getElementById('friend-partner-social-text') || document.getElementById('friend-partner-social-handle');
+      if (box && handleEl) {
+        box.classList.remove('hidden');
+        safeSetText(handleEl, `${(data.platform || 'Social').toUpperCase()}: ${data.handle}`);
+      }
+      updatePartnerConnectionSocial(data.handle, data.platform);
+      showToast(`Il partner ha condiviso il suo contatto: ${data.handle}!`, 'success');
+      SoundEngine.playMsgReceived();
+    }
+
+    function copyPartnerSocial() {
+      if (!partnerSocialContact || !partnerSocialContact.handle) {
+        const handleEl = document.getElementById('friend-partner-social-text') || document.getElementById('friend-partner-social-handle');
+        if (handleEl && handleEl.textContent) {
+          fallbackCopyText(handleEl.textContent);
+          return;
+        }
+        showToast('Nessun contatto disponibile da copiare.', 'error');
+        return;
+      }
+      fallbackCopyText(partnerSocialContact.handle);
+    }
+
+    // ==========================================
+    // R5: BACHECA THEMATIC GROUPS (UNDERGROUND TABLES)
+    // ==========================================
+    function switchBachecaTab(tab) {
+      const confBtn = document.getElementById('btn-tab-bacheca-confessioni');
+      const grpBtn = document.getElementById('btn-tab-bacheca-groups');
+      const confContainer = document.getElementById('bacheca-confessioni-container');
+      const grpContainer = document.getElementById('bacheca-groups-container');
+
+      if (tab === 'groups') {
+        if (confBtn) confBtn.className = 'bacheca-tab-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 transition cursor-pointer flex items-center gap-2';
+        if (grpBtn) grpBtn.className = 'bacheca-tab-btn active px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-bold bg-street-orange text-black border border-street-orange transition cursor-pointer shadow-md flex items-center gap-2';
+        if (confContainer) confContainer.classList.add('hidden');
+        if (grpContainer) grpContainer.classList.remove('hidden');
+        loadThematicGroups();
+      } else {
+        if (confBtn) confBtn.className = 'bacheca-tab-btn active px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-bold bg-street-orange text-black border border-street-orange transition cursor-pointer shadow-md flex items-center gap-2';
+        if (grpBtn) grpBtn.className = 'bacheca-tab-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 transition cursor-pointer flex items-center gap-2';
+        if (confContainer) confContainer.classList.remove('hidden');
+        if (grpContainer) grpContainer.classList.add('hidden');
+      }
+    }
+
+    async function loadThematicGroups() {
+      const grid = document.getElementById('bacheca-groups-grid');
+      if (!grid) return;
+
+      try {
+        const res = await fetch('/api/groups');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        const groups = (data && Array.isArray(data.groups) && data.groups.length > 0)
+          ? data.groups
+          : [
+              { id: 'musica-notturna', title: 'Musica Notturna', description: 'Underground rap, techno berlinese, sonorità lo-fi e dischi rari suonati alle 3 di notte.', category: 'Musica Notturna', participantsCount: 14 },
+              { id: 'confessioni-relazioni', title: 'Confessioni Relazioni', description: 'Storie d\'amore chiuse a metà, rimorsi, ghosting e dinamiche di coppia senza filtri.', category: 'Confessioni Relazioni', participantsCount: 22 },
+              { id: 'dibattito-filosofico', title: 'Dibattito Filosofico', description: 'Etica dell\'anonimato, solitudine metropolitana, senso del futuro e visioni notturne.', category: 'Dibattito Filosofico', participantsCount: 9 }
+            ];
+        renderThematicGroups(groups);
+      } catch (err) {
+        const defaultGroups = [
+          { id: 'musica-notturna', title: 'Musica Notturna', description: 'Underground rap, techno berlinese, sonorità lo-fi e dischi rari suonati alle 3 di notte.', category: 'Musica Notturna', participantsCount: 14 },
+          { id: 'confessioni-relazioni', title: 'Confessioni Relazioni', description: 'Storie d\'amore chiuse a metà, rimorsi, ghosting e dinamiche di coppia senza filtri.', category: 'Confessioni Relazioni', participantsCount: 22 },
+          { id: 'dibattito-filosofico', title: 'Dibattito Filosofico', description: 'Etica dell\'anonimato, solitudine metropolitana, senso del futuro e visioni notturne.', category: 'Dibattito Filosofico', participantsCount: 9 }
+        ];
+        renderThematicGroups(defaultGroups);
+      }
+    }
+
+    function renderThematicGroups(groups) {
+      const grid = document.getElementById('bacheca-groups-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      groups.forEach(g => {
+        const card = document.createElement('div');
+        card.className = 'thematic-group-card p-5 rounded-2xl bg-zinc-950/80 border border-zinc-800/80 hover:border-street-orange/60 flex flex-col justify-between transition duration-200 shadow-sm';
+
+        const topRow = document.createElement('div');
+        topRow.className = 'flex items-center justify-between mb-3';
+
+        const badge = document.createElement('span');
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-zinc-900 border border-zinc-800 text-street-orange';
+        safeSetText(badge, g.category || 'Generale');
+
+        const members = document.createElement('span');
+        members.className = 'text-xs font-mono text-zinc-500 flex items-center gap-1';
+        members.innerHTML = `<span>👥</span> <span>${g.participantsCount || 1} online</span>`;
+
+        topRow.appendChild(badge);
+        topRow.appendChild(members);
+
+        const title = document.createElement('h3');
+        title.className = 'font-bold font-sans text-white text-base mb-1.5 leading-snug';
+        safeSetText(title, g.title);
+
+        const desc = document.createElement('p');
+        desc.className = 'text-xs text-zinc-400 font-sans leading-relaxed mb-4 flex-1';
+        safeSetText(desc, g.description);
+
+        const bottomRow = document.createElement('div');
+        bottomRow.className = 'pt-3 border-t border-zinc-900 flex items-center justify-between';
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-xs font-mono font-bold text-zinc-300 hover:text-white transition cursor-pointer flex items-center justify-center gap-1.5';
+        btn.innerHTML = '<span>PARTECIPA AL TAVOLO</span> <span>→</span>';
+        btn.onclick = () => {
+          showToast(`Ingresso nel tavolo "${g.title}" in fase di avvio... 🔥`, 'info');
+        };
+
+        bottomRow.appendChild(btn);
+
+        card.appendChild(topRow);
+        card.appendChild(title);
+        card.appendChild(desc);
+        card.appendChild(bottomRow);
+        grid.appendChild(card);
+      });
+    }
+
+    function openCreateGroupModal() {
+      const isFounder = isFounderUser();
+      const karma = getStreetKarma();
+      const strikes = getBotStrikes();
+      const isQualified = isFounder || (karma >= 50 && strikes === 0);
+
+      if (!isQualified) {
+        const unqualModal = document.getElementById('modal-group-unqualified');
+        if (unqualModal) {
+          unqualModal.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+        }
+        return;
+      }
+
+      const modal = document.getElementById('modal-create-group');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeCreateGroupModal() {
+      const modal = document.getElementById('modal-create-group');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function closeUnqualifiedModal() {
+      const modal = document.getElementById('modal-group-unqualified');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    async function submitCreateGroup() {
+      const titleInput = document.getElementById('group-title-input') || document.getElementById('group-create-title');
+      const descInput = document.getElementById('group-desc-input') || document.getElementById('group-create-desc');
+      const catSelect = document.getElementById('group-category-select') || document.getElementById('group-create-category');
+
+      if (!titleInput || !descInput) return;
+      const title = titleInput.value.trim();
+      const description = descInput.value.trim();
+      const category = catSelect ? catSelect.value : 'Musica Notturna';
+
+      if (title.length < 3 || title.length > 60) {
+        showToast('Il titolo deve avere tra 3 e 60 caratteri.', 'error');
+        return;
+      }
+      if (description.length < 5 || description.length > 250) {
+        showToast('La descrizione deve avere tra 5 e 250 caratteri.', 'error');
+        return;
+      }
+
+      try {
+        const payload = {
+          title,
+          description,
+          category,
+          isFounder: isFounderUser(),
+          hasFounderBadge: isFounderUser(),
+          qualification: {
+            isFounder: isFounderUser(),
+            karmaScore: getStreetKarma(),
+            strikeCount: getBotStrikes()
+          }
+        };
+
+        const res = await fetch('/api/groups', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.status === 201 && data.ok) {
+          closeCreateGroupModal();
+          titleInput.value = '';
+          descInput.value = '';
+          showToast('Gruppo a tema creato con successo! 🔥', 'success');
+          loadThematicGroups();
+        } else if (res.status === 403 || (data && data.code === 'NOT_QUALIFIED')) {
+          closeCreateGroupModal();
+          const unqualModal = document.getElementById('modal-group-unqualified');
+          if (unqualModal) {
+            unqualModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+          }
+        } else {
+          showToast(data.error || 'Errore nella creazione del tavolo.', 'error');
+        }
+      } catch (err) {
+        showToast('Errore di connessione durante la creazione del tavolo.', 'error');
+      }
+    }
+
+    // ==========================================
+    // R6: FOUNDER BADGE CHECKOUT & MODAL
+    // ==========================================
+    function openFounderBadgeModal() {
+      const modal = document.getElementById('modal-founder-badge');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+
+    function closeFounderBadgeModal() {
+      const modal = document.getElementById('modal-founder-badge');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    async function unlockFounderBadge() {
+      const btn = document.getElementById('btn-unlock-founder') || document.getElementById('btn-checkout-founder');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳</span> <span>SIMULAZIONE STRIPE IN CORSO...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/founder/unlock', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: 'simulated_stripe_tok_' + Date.now(),
+            plan: 'founder_299'
+          })
+        });
+
+        const data = await res.json();
+        if (data && data.ok) {
+          try {
+            localStorage.setItem('streetalk_is_founder', 'true');
+          } catch (_) {}
+
+          SoundEngine.playMatchSound();
+          closeFounderBadgeModal();
+          updateKarmaHUD();
+          showToast('🏆 COMPLIMENTI! Sei ora un Fondatore Ufficiale di STREETALK.', 'success');
+        } else {
+          showToast('Errore durante lo sblocco del badge.', 'error');
+        }
+      } catch (err) {
+        try {
+          localStorage.setItem('streetalk_is_founder', 'true');
+        } catch (_) {}
+        SoundEngine.playMatchSound();
+        closeFounderBadgeModal();
+        updateKarmaHUD();
+        showToast('🏆 COMPLIMENTI! Sei ora un Fondatore Ufficiale di STREETALK.', 'success');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>⭐</span> <span>DIVENTA FONDATORE SUBITO (€2,99)</span>';
+        }
+      }
+    }
+
     function getUserProfile() {
       try {
         const stored = localStorage.getItem('streetalk_profile_v1');
@@ -2540,7 +3403,8 @@ if (typeof io === 'undefined') {
               motto: typeof parsed.motto === 'string' && parsed.motto.trim() ? parsed.motto.trim().substring(0, 100) : STREET_PROFILE_DEFAULTS.motto,
               vision: typeof parsed.vision === 'string' && parsed.vision.trim() ? parsed.vision.trim().substring(0, 200) : STREET_PROFILE_DEFAULTS.vision,
               topics: typeof parsed.topics === 'string' && parsed.topics.trim() ? parsed.topics.trim().substring(0, 150) : STREET_PROFILE_DEFAULTS.topics,
-              avoids: typeof parsed.avoids === 'string' && parsed.avoids.trim() ? parsed.avoids.trim().substring(0, 150) : STREET_PROFILE_DEFAULTS.avoids
+              avoids: typeof parsed.avoids === 'string' && parsed.avoids.trim() ? parsed.avoids.trim().substring(0, 150) : STREET_PROFILE_DEFAULTS.avoids,
+              isFounder: isFounderUser()
             };
           }
         }
@@ -2553,7 +3417,8 @@ if (typeof io === 'undefined') {
         motto: STREET_PROFILE_DEFAULTS.motto,
         vision: STREET_PROFILE_DEFAULTS.vision,
         topics: STREET_PROFILE_DEFAULTS.topics,
-        avoids: STREET_PROFILE_DEFAULTS.avoids
+        avoids: STREET_PROFILE_DEFAULTS.avoids,
+        isFounder: isFounderUser()
       };
       saveUserProfile(defaultProfile);
       return defaultProfile;
@@ -2694,6 +3559,8 @@ if (typeof io === 'undefined') {
       });
 
       updateCardLivePreview();
+      updateKarmaHUD();
+      renderRubricaConnessioni();
     }
 
     function updateCardLivePreview() {
@@ -3276,7 +4143,8 @@ if (typeof io === 'undefined') {
           'media4.giphy.com',
           'i.giphy.com'
         ];
-        let safeGifUrl = '/assets/gifs/flame.svg';
+        const initialFallbackCat = messageObj.category || activeGifCategory || 'trend';
+        let safeGifUrl = CATEGORY_FALLBACK_MAP[initialFallbackCat] || '/assets/gifs/flame.svg';
         const rawUrl = String(messageObj.gifUrl || '').trim();
         if (rawUrl.startsWith('/assets/gifs/')) {
           safeGifUrl = rawUrl;
@@ -3299,7 +4167,8 @@ if (typeof io === 'undefined') {
         img.crossOrigin = 'anonymous';
         img.onerror = () => {
           img.onerror = null;
-          img.src = '/assets/gifs/flame.svg';
+          const fallbackCat = messageObj.category || activeGifCategory || 'trend';
+          img.src = CATEGORY_FALLBACK_MAP[fallbackCat] || '/assets/gifs/flame.svg';
         };
 
         const timeBadge = document.createElement('div');
@@ -3347,6 +4216,34 @@ if (typeof io === 'undefined') {
     window.updateChatInputState = updateChatInputState;
     window.toggleMobileChatSidebar = toggleMobileChatSidebar;
     window.leaveChatToHome = leaveChatToHome;
+
+    // R1: Quick Reactions
+    window.sendReaction = sendReaction;
+    window.triggerReactionVisual = triggerReactionVisual;
+
+    // R3: Bilateral Double-Consensus Friend Request
+    window.sendFriendRequest = sendFriendRequest;
+    window.shareFriendSocial = shareFriendSocial;
+    window.copyPartnerSocial = copyPartnerSocial;
+    window.resetFriendRequestUI = resetFriendRequestUI;
+
+    // R4: Street Karma & Rubrica Connessioni
+    window.updateKarmaHUD = updateKarmaHUD;
+    window.renderRubricaConnessioni = renderRubricaConnessioni;
+    window.removeConnection = removeConnection;
+
+    // R5: Bacheca Thematic Groups
+    window.switchBachecaTab = switchBachecaTab;
+    window.loadThematicGroups = loadThematicGroups;
+    window.openCreateGroupModal = openCreateGroupModal;
+    window.closeCreateGroupModal = closeCreateGroupModal;
+    window.closeUnqualifiedModal = closeUnqualifiedModal;
+    window.submitCreateGroup = submitCreateGroup;
+
+    // R6: Founder Badge Checkout & Perks
+    window.openFounderBadgeModal = openFounderBadgeModal;
+    window.closeFounderBadgeModal = closeFounderBadgeModal;
+    window.unlockFounderBadge = unlockFounderBadge;
 
     // ==========================================
     // INITIALIZATION & DOM LISTENERS
@@ -3550,6 +4447,34 @@ if (typeof io === 'undefined') {
           avoids: data.partnerAvoids || ''
         };
 
+        // R3 & R6: Partner Founder Badge & Sidebar Profile Details
+        const partnerIsFounder = Boolean(data.partnerIsFounder || (data.partnerProfile && data.partnerProfile.isFounder));
+        const partnerBadgeEl = document.getElementById('chat-partner-founder-badge');
+        if (partnerBadgeEl) {
+          if (partnerIsFounder) partnerBadgeEl.classList.remove('hidden');
+          else partnerBadgeEl.classList.add('hidden');
+        }
+
+        const pMottoEl = document.getElementById('chat-partner-motto-text') || document.getElementById('chat-partner-motto');
+        const pTopicsEl = document.getElementById('chat-partner-topics-text') || document.getElementById('chat-partner-topics');
+        const pAvoidsEl = document.getElementById('chat-partner-avoids-text') || document.getElementById('chat-partner-avoids');
+        const mottoVal = currentPartnerProfile.motto ? `"${currentPartnerProfile.motto}"` : 'Nessun motto impostato';
+        const topicsVal = currentPartnerProfile.topics || 'Aperto a qualsiasi argomento con rispetto';
+        const avoidsVal = currentPartnerProfile.avoids || 'Mancanza di rispetto e superficialità';
+        if (pMottoEl) safeSetText(pMottoEl, mottoVal);
+        if (pTopicsEl) safeSetText(pTopicsEl, topicsVal);
+        if (pAvoidsEl) safeSetText(pAvoidsEl, avoidsVal);
+
+        const mottoRow = document.getElementById('chat-partner-motto-row');
+        if (mottoRow && mottoVal) mottoRow.classList.remove('hidden');
+        const topicsRow = document.getElementById('chat-partner-topics-row');
+        if (topicsRow && topicsVal) topicsRow.classList.remove('hidden');
+        const avoidsRow = document.getElementById('chat-partner-avoids-row');
+        if (avoidsRow && avoidsVal) avoidsRow.classList.remove('hidden');
+
+        // Reset friend request state machine
+        if (typeof resetFriendRequestUI === 'function') resetFriendRequestUI();
+
         safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
         safeSetText(document.getElementById('chat-pinned-partner-nick'), partnerNick);
         const secretSnippet = data.partnerSecret ? `"${data.partnerSecret.substring(0, 48)}..."` : 'Tocca per leggere il segreto completo';
@@ -3642,7 +4567,40 @@ if (typeof io === 'undefined') {
 
       socket.on('receive_reaction', (data) => {
         const isSelf = data.senderId === (socket ? socket.id : null);
-        triggerReactionVisual(data.emoji, isSelf);
+        if (!isSelf) {
+          triggerReactionVisual(data.emoji, false);
+          SoundEngine.playReaction(data.emoji);
+        }
+      });
+
+      // R3: Bilateral Double-Consensus Friend Request Listeners
+      socket.on('friend_request_received', (data) => {
+        friendRequestState = 'received';
+        updateFriendRequestUI('received');
+        showToast(`🤝 ${data.partnerNick || partnerNick || 'Il partner'} ti ha inviato una richiesta di amicizia!`, 'info');
+        SoundEngine.playMsgReceived();
+      });
+
+      socket.on('friend_request_matched', (data) => {
+        friendRequestState = 'unlocked';
+        updateFriendRequestUI('unlocked');
+        saveConnection(data.partnerProfile || currentPartnerProfile || { moniker: partnerNick });
+        showToast('🎉 Doppia conferma raggiunta! Amicizia sbloccata e salvata nella Rubrica.', 'success');
+        SoundEngine.playMatchSound();
+      });
+
+      socket.on('friendship_unlocked', (data) => {
+        friendRequestState = 'unlocked';
+        updateFriendRequestUI('unlocked');
+        saveConnection(data.partnerProfile || currentPartnerProfile || { moniker: partnerNick });
+      });
+
+      socket.on('friend_contact_received', (data) => {
+        onFriendContactReceived(data);
+      });
+
+      socket.on('social_contact_received', (data) => {
+        onFriendContactReceived(data);
       });
 
       socket.on('partner_typing', (data) => {

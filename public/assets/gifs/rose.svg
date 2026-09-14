@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 240" width="320" height="240">
+  <defs>
+    <linearGradient id="bgGrad_rose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d0f17"/>
+      <stop offset="50%" stop-color="#08090e"/>
+      <stop offset="100%" stop-color="#12141f"/>
+    </linearGradient>
+    <radialGradient id="glow_rose" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </radialGradient>
+    <style>
+      @keyframes roseGlow {
+        0%, 100% { transform: scale(1); filter: drop-shadow(0 0 14px #f43f5e); }
+        50% { transform: scale(1.15); filter: drop-shadow(0 0 32px #fb7185); }
+      }
+      @keyframes petalBloom {
+        0% { r: 38; opacity: 0.8; stroke-width: 2; }
+        100% { r: 88; opacity: 0; stroke-width: 0.5; }
+      }
+      @keyframes petalFloat {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.4; }
+        50% { transform: translate(5px, -10px) rotate(18deg); opacity: 0.9; }
+      }
+      .rose-icon { animation: roseGlow 1.5s ease-in-out infinite; transform-origin: center; font-size: 72px; }
+      .bloom-ring { animation: petalBloom 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) infinite; }
+      .leaf-particle { animation: petalFloat 2.2s ease-in-out infinite; transform-origin: 120px 80px; }
+      .title-text { font-family: 'JetBrains Mono', monospace, sans-serif; font-size: 11px; font-weight: 800; fill: #ffffff; letter-spacing: 1.5px; text-anchor: middle; }
+      .badge-text { font-family: 'JetBrains Mono', monospace, sans-serif; font-size: 8px; font-weight: 700; fill: #f43f5e; letter-spacing: 1px; }
+      .border-glow { stroke: #f43f5e; stroke-opacity: 0.35; stroke-width: 1.5; }
+    </style>
+  </defs>
+
+  <!-- Background Card -->
+  <rect width="320" height="240" rx="16" fill="url(#bgGrad_rose)"/>
+  <rect width="320" height="240" rx="16" fill="url(#glow_rose)"/>
+  <rect x="1" y="1" width="318" height="238" rx="15" fill="none" class="border-glow"/>
+
+  <!-- Top Category Chip -->
+  <rect x="14" y="12" width="70" height="18" rx="6" fill="#141724" stroke="#f43f5e" stroke-opacity="0.4" stroke-width="1"/>
+  <text x="22" y="24" class="badge-text">FLIRT</text>
+
+  <!-- Central Animated Icon & Effects -->
+  <circle class="bloom-ring" cx="160" cy="110" r="38" fill="none" stroke="#f43f5e" stroke-width="2"/>
+  <circle cx="160" cy="110" r="58" fill="none" stroke="#f43f5e" stroke-opacity="0.2" stroke-dasharray="6, 6"/>
+  <path class="leaf-particle" d="M115,85 C120,80 128,82 125,90 C122,94 116,92 115,85 Z" fill="#f43f5e" opacity="0.6"/>
+  <text x="160" y="130" text-anchor="middle" class="rose-icon">🌹</text>
+
+  <!-- Bottom Title Banner -->
+  <rect x="14" y="196" width="292" height="30" rx="8" fill="#000000" fill-opacity="0.6" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
+  <text x="160" y="215" class="title-text">NEON ROSE</text>
+</svg>

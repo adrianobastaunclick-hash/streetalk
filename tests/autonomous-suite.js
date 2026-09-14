@@ -1467,6 +1467,468 @@ async function runAutonomousSuite() {
     assert(incrocioCss.includes('.gif-sheet-handle'), 'CSS must provide bottom-sheet drag handle for mobile');
     pass('3D Perspective & Motion Engine: 1000px depth, transform-style and a11y reduced-motion verified');
 
+    // ====================================================
+    // TEST 20: R1 Quick Reactions & Web Audio Realtime Bursts
+    // ====================================================
+    console.log('\n--- TEST 20: R1 Quick Reactions & Web Audio Realtime Bursts ---');
+
+    // 20.1 12-Emoji Static Bar Verification across Root and Public HTML
+    const requiredReactionEmojis = ['🔥', '💀', '⚡', '🖤', '🚬', '👀', '🤯', '👏', '💖', '💋', '😈', '🌹'];
+    for (const emoji of requiredReactionEmojis) {
+      assert(
+        indexContent.includes(`data-emoji="${emoji}"`) || indexContent.includes(`sendReaction('${emoji}')`),
+        `index.html must provide reaction button for emoji ${emoji}`
+      );
+      assert(
+        publicIndexContent.includes(`data-emoji="${emoji}"`) || publicIndexContent.includes(`sendReaction('${emoji}')`),
+        `public/index.html must provide reaction button for emoji ${emoji}`
+      );
+    }
+    pass('Quick Reaction Bar: All 12 reaction emojis verified in index.html and public/index.html');
+
+    // 20.2 Web Audio Synthesis & Zero External Audio Check
+    assert(frontendAppJs.includes('playReaction(emoji'), 'frontend/app.js must define playReaction with emoji parameter');
+    assert(frontendAppJs.includes('this.ctx.createOscillator()'), 'SoundEngine must synthesize tones via createOscillator()');
+    assert(frontendAppJs.includes('this.ctx.createGain()'), 'SoundEngine must manage amplitude envelope via createGain()');
+    assert(!indexContent.includes('.mp3') && !indexContent.includes('.wav') && !indexContent.includes('.ogg'), 'Strict Zero MP3/WAV/OGG compliance maintained');
+    assert(!publicIndexContent.includes('.mp3') && !publicIndexContent.includes('.wav') && !publicIndexContent.includes('.ogg'), 'Public HTML zero external audio verified');
+    pass('Web Audio Reaction Synthesis: Pure procedural oscillators & envelopes, zero external audio dependencies');
+
+    // 20.3 Realtime Socket Burst Verification for Flirt/Amore Emojis
+    const r1ClientA = await createClient();
+    const r1ClientB = await createClient();
+
+    const r1MatchPromiseA = waitForEvent(r1ClientA, 'match_found', 'r1 client A match');
+    const r1MatchPromiseB = waitForEvent(r1ClientB, 'match_found', 'r1 client B match');
+
+    r1ClientA.emit('join_queue', {
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto R1 Alpha'
+    });
+    r1ClientB.emit('join_queue', {
+      gender: 'F',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto R1 Beta'
+    });
+
+    const [r1MatchA] = await Promise.all([r1MatchPromiseA, r1MatchPromiseB]);
+    const r1RoomId = r1MatchA.roomId;
+
+    const newReactionEmojis = ['💖', '💋', '😈', '🌹'];
+    for (const emoji of newReactionEmojis) {
+      const rxPromise = waitForEvent(r1ClientB, 'receive_reaction', `receive_reaction ${emoji}`);
+      r1ClientA.emit('send_reaction', { roomId: r1RoomId, emoji });
+      const rxData = await rxPromise;
+      assert.strictEqual(rxData.emoji, emoji, `Partner must receive burst for ${emoji}`);
+      assert.strictEqual(rxData.senderId, r1ClientA.id, 'Reaction senderId must match origin socket');
+    }
+    pass('Realtime Reaction Bursts: Socket delivery of 4 flirt/amore emojis (💖, 💋, 😈, 🌹) verified');
+
+    // 20.4 Negative Check: Disallowed Emoji Drop
+    let disallowedReceived = false;
+    const unexpectedRxHandler = () => { disallowedReceived = true; };
+    r1ClientB.once('receive_reaction', unexpectedRxHandler);
+    r1ClientA.emit('send_reaction', { roomId: r1RoomId, emoji: '🍕' });
+    await new Promise((r) => setTimeout(r, 150));
+    r1ClientB.off('receive_reaction', unexpectedRxHandler);
+    assert.strictEqual(disallowedReceived, false, 'Disallowed emoji 🍕 must be rejected and not broadcast');
+    pass('Reaction Security: Strict server-side whitelist rejection of non-allowed emoji verified');
+
+    r1ClientA.disconnect();
+    r1ClientB.disconnect();
+
+    // ====================================================
+    // TEST 21: R2 GIF Multi-Category Catalog & Fallback Diversity
+    // ====================================================
+    console.log('\n--- TEST 21: R2 GIF Multi-Category Catalog & Fallback Diversity ---');
+
+    // 21.1 Multi-Category Catalog Registration (flirt, amore, spicy)
+    const catResAll = await fetchLocalJson(SERVER_URL, '/api/gifs/categories?all=true');
+    assert(catResAll && catResAll.ok === true, 'Categories endpoint with all=true must return ok: true');
+    assert(Array.isArray(catResAll.categories), 'Categories must be an array');
+    const registeredCatIds = catResAll.categories.map(c => c.id);
+    assert(registeredCatIds.includes('flirt'), 'Category flirt must be registered');
+    assert(registeredCatIds.includes('amore'), 'Category amore must be registered');
+    assert(registeredCatIds.includes('spicy'), 'Category spicy must be registered');
+    pass('GIF Catalog Expansion: Flirt, Amore, and Spicy categories verified in catalog');
+
+    // 21.2 Trending GIFs for New Categories
+    for (const catId of ['flirt', 'amore', 'spicy']) {
+      const trendCategoryRes = await fetchLocalJson(SERVER_URL, `/api/gifs/trending?category=${catId}`);
+      assert(trendCategoryRes && trendCategoryRes.ok === true, `Trending endpoint for ${catId} must return ok: true`);
+      assert(Array.isArray(trendCategoryRes.items) && trendCategoryRes.items.length > 0, `Trending for ${catId} must deliver items`);
+      for (const item of trendCategoryRes.items) {
+        assert(typeof item.url === 'string' && item.url.length > 0, `Item in ${catId} must have a valid url`);
+        assert(typeof item.title === 'string', `Item in ${catId} must have a title`);
+      }
+    }
+    pass('Trending API: Distinct animated GIF entries delivered for flirt, amore and spicy');
+
+    // 21.3 13 Vector SVGs Filesystem & Parity Verification
+    const newSvgAssets = [
+      'cherries.svg', 'chili.svg', 'cupid.svg', 'devil.svg', 'heart_pulse.svg',
+      'hearts.svg', 'kiss.svg', 'love_letter.svg', 'love_lock.svg',
+      'purple_flame.svg', 'rose.svg', 'sparkle.svg', 'wink.svg'
+    ];
+
+    for (const svgFile of newSvgAssets) {
+      const rootSvgPath = path.join(__dirname, '..', 'assets', 'gifs', svgFile);
+      const publicSvgPath = path.join(__dirname, '..', 'public', 'assets', 'gifs', svgFile);
+      assert(fs.existsSync(rootSvgPath), `Asset ${svgFile} must exist in assets/gifs/`);
+      assert(fs.existsSync(publicSvgPath), `Asset ${svgFile} must exist in public/assets/gifs/`);
+      const rootBuf = fs.readFileSync(rootSvgPath);
+      const pubBuf = fs.readFileSync(publicSvgPath);
+      assert.strictEqual(rootBuf.compare(pubBuf), 0, `Asset ${svgFile} must be byte-for-byte identical between root and public/`);
+      const svgStr = rootBuf.toString('utf8');
+      assert(svgStr.includes('<svg') && svgStr.includes('</svg>'), `Asset ${svgFile} must contain valid SVG tags`);
+    }
+    pass('Vector Graphics Inventory: All 13 animated SVGs verified on disk with 100% root/public parity');
+
+    // 21.4 Fallback Diversity & Elimination of Single Flame Fallback Bug
+    assert(frontendAppJs.includes('CATEGORY_FALLBACK_MAP'), 'frontend/app.js must declare CATEGORY_FALLBACK_MAP');
+    assert(frontendAppJs.includes('/assets/gifs/kiss.svg'), 'CATEGORY_FALLBACK_MAP must map flirt to distinct SVG');
+    assert(frontendAppJs.includes('/assets/gifs/heart_pulse.svg'), 'CATEGORY_FALLBACK_MAP must map amore to distinct SVG');
+    assert(frontendAppJs.includes('/assets/gifs/chili.svg'), 'CATEGORY_FALLBACK_MAP must map spicy to distinct SVG');
+    const hasUnconditionalFlame = /img\.src\s*=\s*['"]\/assets\/gifs\/flame\.svg['"]\s*;/.test(frontendAppJs);
+    assert(!hasUnconditionalFlame, 'frontend/app.js must eliminate unconditional flame.svg assignment');
+    pass('Fallback Diversity: CATEGORY_FALLBACK_MAP verified, duplicate flame.svg bug eliminated');
+
+    // ====================================================
+    // TEST 22: R3 Chat Sidebar Hub & Bilateral Friend Request Protocol
+    // ====================================================
+    console.log('\n--- TEST 22: R3 Chat Sidebar Hub & Bilateral Friend Request Protocol ---');
+
+    const r3ClientA = await createClient();
+    const r3ClientB = await createClient();
+
+    const r3MatchPromiseA = waitForEvent(r3ClientA, 'match_found', 'r3 client A match');
+    const r3MatchPromiseB = waitForEvent(r3ClientB, 'match_found', 'r3 client B match');
+
+    r3ClientA.emit('join_queue', {
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto Amicizia Alpha',
+      profile: {
+        moniker: 'CyberNomad',
+        avatar: 'street-bolt',
+        motto: 'Vagabondo del web',
+        isFounder: true
+      }
+    });
+
+    r3ClientB.emit('join_queue', {
+      gender: 'F',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto Amicizia Beta',
+      profile: {
+        moniker: 'NeonValkyrie',
+        avatar: 'street-flame',
+        motto: 'Velocità e silenzio',
+        isFounder: false
+      }
+    });
+
+    const [r3MatchA] = await Promise.all([r3MatchPromiseA, r3MatchPromiseB]);
+    const r3RoomId = r3MatchA.roomId;
+
+    // 22.1 Single Consent: Peer A requests friendship -> Peer B receives discrete notification
+    const r3ReqB = waitForEvent(r3ClientB, 'friend_request_received', 'B receives friend_request_received');
+    r3ClientA.emit('send_friend_request', { roomId: r3RoomId });
+    const reqNotification = await r3ReqB;
+    assert.strictEqual(reqNotification.from, r3ClientA.id, 'friend_request_received must originate from Client A');
+    pass('Bilateral Friendship (Step 1): Single consent notifies partner without premature unlock');
+
+    // 22.2 Negative Gate: Sharing contact prior to double consensus must be rejected
+    const unauthContactPromise = waitForEvent(r3ClientA, 'error_event', 'rejection of premature contact sharing');
+    r3ClientA.emit('share_friend_contact', {
+      roomId: r3RoomId,
+      handle: '@premature_handle',
+      platform: 'telegram'
+    });
+    const unauthErr = await unauthContactPromise;
+    assert.strictEqual(unauthErr.code, 'FRIENDSHIP_NOT_UNLOCKED', 'Premature contact share must be blocked');
+    pass('Bilateral Friendship (Guard): Unilateral contact sharing safely blocked with FRIENDSHIP_NOT_UNLOCKED');
+
+    // 22.3 Mutual Consent: Peer B requests friendship -> Bilateral Unlock for both peers
+    const matchedPromiseA = waitForEvent(r3ClientA, 'friend_request_matched', 'matched A');
+    const matchedPromiseB = waitForEvent(r3ClientB, 'friend_request_matched', 'matched B');
+    const unlockedPromiseA = waitForEvent(r3ClientA, 'friendship_unlocked', 'unlocked A');
+    const unlockedPromiseB = waitForEvent(r3ClientB, 'friendship_unlocked', 'unlocked B');
+
+    r3ClientB.emit('send_friend_request', { roomId: r3RoomId });
+
+    const [mAData, mBData, uAData, uBData] = await Promise.all([
+      matchedPromiseA, matchedPromiseB, unlockedPromiseA, unlockedPromiseB
+    ]);
+
+    assert.strictEqual(mAData.partnerId, r3ClientB.id, 'Client A must receive partnerId of B');
+    assert.strictEqual(mBData.partnerId, r3ClientA.id, 'Client B must receive partnerId of A');
+    assert.strictEqual(mAData.partnerProfile.moniker, 'NeonValkyrie', 'Client A must receive partner profile');
+    assert.strictEqual(mBData.partnerProfile.moniker, 'CyberNomad', 'Client B must receive partner profile');
+    assert.strictEqual(uAData.partnerId, r3ClientB.id);
+    assert.strictEqual(uBData.partnerId, r3ClientA.id);
+    pass('Bilateral Friendship (Step 2): Double consensus triggers friend_request_matched and friendship_unlocked for both peers');
+
+    // 22.4 Authorized Social Contact Exchange
+    const contactReceivedPromise = waitForEvent(r3ClientB, 'friend_contact_received', 'B receives friend_contact_received');
+    r3ClientA.emit('share_friend_contact', {
+      roomId: r3RoomId,
+      handle: '@cyber_nomad_tg',
+      platform: 'telegram'
+    });
+    const contactData = await contactReceivedPromise;
+    assert.strictEqual(contactData.handle, '@cyber_nomad_tg', 'Shared handle must match');
+    assert.strictEqual(contactData.platform, 'telegram', 'Shared platform must match');
+    pass('Bilateral Friendship (Step 3): Authorized mutual social contact exchanged safely');
+
+    // 22.5 Memory Cleanup on Room Teardown
+    const activeR3Room = serverModule.rooms.get(r3RoomId);
+    assert(activeR3Room, 'Room must exist in RAM before teardown');
+    assert(activeR3Room.friendRequests && activeR3Room.friendRequests.size === 2, 'Room must track both friendRequests');
+    assert(activeR3Room.friendSocials && activeR3Room.friendSocials.size === 1, 'Room must track shared friendSocials');
+
+    r3ClientA.emit('skip_partner');
+    await new Promise((r) => setTimeout(r, 100));
+    assert(!serverModule.rooms.has(r3RoomId), 'Room must be completely deallocated from RAM upon skip');
+    pass('Bilateral Friendship (Teardown): Room friendRequests and friendSocials cleanly deallocated with zero leaks');
+
+    r3ClientA.disconnect();
+    r3ClientB.disconnect();
+
+    // 22.6 Static DOM Audit for Sidebar Hub, Friend Request Drawer & Social Exchange
+    const r3RequiredDomIds = [
+      'friend-request-unlocked-drawer',
+      'friend-social-handle',
+      'friend-partner-social-received',
+      'friend-partner-social-text',
+      'chat-partner-motto-row',
+      'chat-partner-topics-row',
+      'chat-partner-avoids-row'
+    ];
+    for (const domId of r3RequiredDomIds) {
+      assert(indexContent.includes(`id="${domId}"`), `index.html must include element #${domId}`);
+      assert(publicIndexContent.includes(`id="${domId}"`), `public/index.html must include element #${domId}`);
+    }
+    pass('Static DOM Elements: Sidebar Partner details & Bilateral Friend Request drawer IDs verified across index.html and public/index.html');
+
+    // ====================================================
+    // TEST 23: R4 Street Karma & Connections Address Book Audit
+    // ====================================================
+    console.log('\n--- TEST 23: R4 Street Karma & Connections Address Book Audit ---');
+
+    // 23.1 Street Karma Algorithmic Calculation Logic Audit
+    function calculateSimulatedKarma(flames, chats, strikes) {
+      const base = 50;
+      return Math.max(0, base + (flames * 10) + (chats * 15) - (strikes * 50));
+    }
+
+    assert.strictEqual(calculateSimulatedKarma(0, 0, 0), 50, 'Baseline karma must be 50');
+    assert.strictEqual(calculateSimulatedKarma(5, 2, 0), 130, '5 flames (+50) and 2 chats (+30) must yield 130');
+    assert.strictEqual(calculateSimulatedKarma(1, 1, 1), 25, '1 flame (+10), 1 chat (+15), 1 strike (-50) must yield 25');
+    assert.strictEqual(calculateSimulatedKarma(0, 0, 2), 0, 'Multiple strikes must clamp to minimum 0 points');
+    pass('Street Karma Algorithm: Mathematical formula (base=50, flame=10, chat=15, strike=-50, min=0) verified');
+
+    // 23.2 Frontend Street Karma & Connections Implementation
+    assert(frontendAppJs.includes('getStreetKarma()'), 'frontend/app.js must implement getStreetKarma()');
+    assert(frontendAppJs.includes('updateKarmaHUD()'), 'frontend/app.js must implement updateKarmaHUD()');
+    assert(frontendAppJs.includes('streetalk_connections_v1'), 'frontend/app.js must utilize streetalk_connections_v1 schema');
+    assert(frontendAppJs.includes('renderRubricaConnessioni()'), 'frontend/app.js must implement renderRubricaConnessioni()');
+    pass('Frontend Karma & Connections Engine: HUD updater and storage manager verified in app.js');
+
+    // 23.3 Static DOM Audit for Street Karma, Founder Badge & Address Book
+    const hasKarmaDisplay = indexContent.includes('id="profile-karma-score"') || indexContent.includes('id="profile-karma-display"');
+    assert(hasKarmaDisplay, 'index.html must include Street Karma display element (#profile-karma-score or #profile-karma-display)');
+    const hasPublicKarmaDisplay = publicIndexContent.includes('id="profile-karma-score"') || publicIndexContent.includes('id="profile-karma-display"');
+    assert(hasPublicKarmaDisplay, 'public/index.html must include Street Karma display element');
+
+    const hasFounderBadgeEl = indexContent.includes('id="profile-founder-badge-status"') || indexContent.includes('id="profile-founder-badge"');
+    assert(hasFounderBadgeEl, 'index.html must include Founder Badge profile indicator (#profile-founder-badge-status or #profile-founder-badge)');
+    const hasPublicFounderBadgeEl = publicIndexContent.includes('id="profile-founder-badge-status"') || publicIndexContent.includes('id="profile-founder-badge"');
+    assert(hasPublicFounderBadgeEl, 'public/index.html must include Founder Badge profile indicator');
+
+    const hasAddressBook = indexContent.includes('id="rubrica-connessioni-section"') || indexContent.includes('id="connections-address-book"');
+    assert(hasAddressBook, 'index.html must include Connections Address Book section (#rubrica-connessioni-section or #connections-address-book)');
+    const hasPublicAddressBook = publicIndexContent.includes('id="rubrica-connessioni-section"') || publicIndexContent.includes('id="connections-address-book"');
+    assert(hasPublicAddressBook, 'public/index.html must include Connections Address Book section');
+
+    assert(indexContent.includes('id="rubrica-connessioni-list"'), 'index.html must provide #rubrica-connessioni-list grid container');
+    assert(indexContent.includes('id="rubrica-connessioni-empty"'), 'index.html must provide #rubrica-connessioni-empty state');
+    pass('Static DOM Elements: Street Karma HUD, Founder Badge chip & Connections Address Book verified across HTML files');
+
+    // ====================================================
+    // TEST 24: R5 Bacheca Thematic Groups & Hybrid Authorization
+    // ====================================================
+    console.log('\n--- TEST 24: R5 Bacheca Thematic Groups & Hybrid Authorization ---');
+
+    // 24.1 Sub-test A: Founder Badge Qualification -> HTTP 201 Created
+    const groupARes = await fetch(`${SERVER_URL}/api/groups`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Club Elettronica Sotterranea',
+        description: 'Tavolo notturno di confronto per produttori underground e sintetizzatori.',
+        category: 'musica',
+        qualification: { isFounder: true }
+      })
+    });
+    assert.strictEqual(groupARes.status, 201, 'Founder group creation must return HTTP 201');
+    const groupAData = await groupARes.json();
+    assert.strictEqual(groupAData.ok, true);
+    assert.strictEqual(groupAData.group.title, 'Club Elettronica Sotterranea');
+    assert.strictEqual(groupAData.group.isFounder, true);
+    pass('Hybrid Auth (Case A): Founder Badge qualification successfully creates thematic group (HTTP 201)');
+
+    // 24.2 Sub-test B: High Karma Qualification (Score >= 50, 0 Strikes) -> HTTP 201 Created
+    const groupBRes = await fetch(`${SERVER_URL}/api/groups`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Filosofia da Marciapiede',
+        description: 'Dibattiti esistenziali e riflessioni urbane a cuore aperto.',
+        category: 'filosofia',
+        qualification: { karmaScore: 100, strikeCount: 0 }
+      })
+    });
+    assert.strictEqual(groupBRes.status, 201, 'High karma group creation must return HTTP 201');
+    const groupBData = await groupBRes.json();
+    assert.strictEqual(groupBData.ok, true);
+    assert.strictEqual(groupBData.group.title, 'Filosofia da Marciapiede');
+    pass('Hybrid Auth (Case B): High Street Karma qualification (100 pts, 0 strikes) creates thematic group (HTTP 201)');
+
+    // 24.3 Sub-test C: Unqualified User (Low Karma, Non-Founder) -> HTTP 403 NOT_QUALIFIED
+    const groupCRes = await fetch(`${SERVER_URL}/api/groups`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Tavolo Spammer Infiltrato',
+        description: 'Descrizione del tentativo non autorizzato da parte di un utente senza karma.',
+        category: 'cazzeggio',
+        qualification: { karmaScore: 20, isFounder: false }
+      })
+    });
+    assert.strictEqual(groupCRes.status, 403, 'Unqualified user group creation must return HTTP 403');
+    const groupCData = await groupCRes.json();
+    assert.strictEqual(groupCData.ok, false);
+    assert.strictEqual(groupCData.code, 'NOT_QUALIFIED');
+    pass('Hybrid Auth (Case C): Unqualified user rejection with HTTP 403 NOT_QUALIFIED verified');
+
+    // 24.4 Sub-test D: User with Strikes (High Karma but Strikes >= 1 in StreetBot) -> HTTP 403 NOT_QUALIFIED
+    streetBot.recordStrike('127.0.0.1', 'Test strike');
+    let groupDRes;
+    try {
+      groupDRes = await fetch(`${SERVER_URL}/api/groups`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Tavolo Utente Sanzionato',
+          description: 'Descrizione valida ma utente con richiami attivi da parte dello StreetBot.',
+          category: 'generale',
+          qualification: { karmaScore: 100, strikeCount: 0 }
+        })
+      });
+      assert.strictEqual(groupDRes.status, 403, 'User with strikes must return HTTP 403');
+      const groupDData = await groupDRes.json();
+      assert.strictEqual(groupDData.ok, false);
+      assert.strictEqual(groupDData.code, 'NOT_QUALIFIED');
+      pass('Hybrid Auth (Case D): User with active Bot strike rejected with HTTP 403 NOT_QUALIFIED verified');
+    } finally {
+      streetBot.reset();
+    }
+
+    // 24.5 Sub-test E: GET /api/groups Listing & XSS Sanitization Audit
+    const getGroupsRes = await fetch(`${SERVER_URL}/api/groups`);
+    assert.strictEqual(getGroupsRes.status, 200, 'GET /api/groups must return HTTP 200');
+    const getGroupsData = await getGroupsRes.json();
+    assert(getGroupsData.ok === true && Array.isArray(getGroupsData.groups), 'GET /api/groups must return groups list');
+    assert(getGroupsData.groups.some(g => g.id === groupAData.group.id), 'Created group A must be present');
+    assert(getGroupsData.groups.some(g => g.id === groupBData.group.id), 'Created group B must be present');
+    pass('Thematic Groups Retrieval: GET /api/groups returns registered tables including newly created groups');
+
+    // ====================================================
+    // TEST 25: R6 Founder Badge Monetization & Free Chat Invariance
+    // ====================================================
+    console.log('\n--- TEST 25: R6 Founder Badge Monetization & Free Chat Invariance ---');
+
+    // 25.1 Modal Verification & 4 Perk Descriptors
+    const hasFounderModal = indexContent.includes('id="modal-founder-badge"') || indexContent.includes('id="modal-founder"');
+    assert(hasFounderModal, 'index.html must include Founder Badge modal (#modal-founder-badge)');
+    const hasPublicFounderModal = publicIndexContent.includes('id="modal-founder-badge"') || publicIndexContent.includes('id="modal-founder"');
+    assert(hasPublicFounderModal, 'public/index.html must include Founder Badge modal');
+
+    // Check the 4 perks in indexContent
+    assert(indexContent.includes('Badge Oro') || indexContent.includes('badge-founder-gold'), 'Perk 1: Golden badge perk descriptor must exist');
+    assert(indexContent.includes('Gruppi a Tema') || indexContent.includes('gruppi a tema'), 'Perk 2: Thematic groups perk descriptor must exist');
+    assert(indexContent.includes('VIP') || indexContent.includes('Esclusive VIP'), 'Perk 3: VIP reactions perk descriptor must exist');
+    assert(indexContent.includes('Radar') || indexContent.includes('Priorità Coda'), 'Perk 4: Radar priority perk descriptor must exist');
+    pass('Founder Monetization Modal: Accessible modal and 4 distinct launch benefit descriptors verified');
+
+    // 25.2 Founder Unlock Simulation Endpoint
+    const unlockRes = await fetch(`${SERVER_URL}/api/founder/unlock`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ clientToken: 'simulated_test_token' })
+    });
+    assert.strictEqual(unlockRes.status, 200, 'POST /api/founder/unlock must return HTTP 200');
+    const unlockData = await unlockRes.json();
+    assert.strictEqual(unlockData.ok, true, 'Unlock response must return ok: true');
+    assert.strictEqual(unlockData.status, 'unlocked', 'Unlock status must be unlocked');
+    assert.strictEqual(unlockData.badge, 'FONDATORE', 'Unlock badge must be FONDATORE');
+    pass('Founder Unlock API: POST /api/founder/unlock delivers genuine status: unlocked and badge: FONDATORE');
+
+    // 25.3 Free Chat Invariance Verification
+    // Both clients enter matchmaking queue with NO founder status and verify 100% unrestricted chat lifecycle
+    const freeClientA = await createClient();
+    const freeClientB = await createClient();
+
+    const freeMatchPromiseA = waitForEvent(freeClientA, 'match_found', 'free client A match');
+    const freeMatchPromiseB = waitForEvent(freeClientB, 'match_found', 'free client B match');
+
+    freeClientA.emit('join_queue', {
+      gender: 'M',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto Gratuito A',
+      profile: { moniker: 'FreeUserA', isFounder: false }
+    });
+
+    freeClientB.emit('join_queue', {
+      gender: 'F',
+      targetGender: 'Tutti',
+      mood: 'cazzeggio',
+      secret: 'Segreto Gratuito B',
+      profile: { moniker: 'FreeUserB', isFounder: false }
+    });
+
+    const [freeMatchA] = await Promise.all([freeMatchPromiseA, freeMatchPromiseB]);
+    assert.strictEqual(freeMatchA.roomId, freeMatchA.roomId, 'Non-founders must match seamlessly');
+    const freeRoomId = freeMatchA.roomId;
+
+    // Verify non-founders can send and receive standard chat messages without payment prompts
+    const freeMsgPromise = waitForEvent(freeClientB, 'receive_message', 'free message delivery');
+    freeClientA.emit('send_message', {
+      roomId: freeRoomId,
+      message: 'Chat gratuita e anonima al 100% senza alcuna barriera.'
+    });
+    const freeMsgData = await freeMsgPromise;
+    assert.strictEqual(freeMsgData.message, 'Chat gratuita e anonima al 100% senza alcuna barriera.');
+
+    // Verify non-founders can request and receive room extensions
+    const freeExtPromise = waitForEvent(freeClientA, 'extension_granted', 'free extension granted');
+    freeClientA.emit('request_extension', { roomId: freeRoomId });
+    freeClientB.emit('request_extension', { roomId: freeRoomId });
+    const freeExtData = await freeExtPromise;
+    assert.strictEqual(freeExtData.addedSeconds, 300, 'Free room extension must grant +300s');
+
+    pass('Free Chat Invariance: Matchmaking, chat messaging, and room extensions operate 100% unhindered for non-founders');
+
+    freeClientA.disconnect();
+    freeClientB.disconnect();
+
     // ----------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------

@@ -1395,6 +1395,7 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-1.5 flex-wrap">
                   <span id="chat-partner-nick" class="font-street font-black text-sm text-white tracking-wide truncate">SHADOW_42</span>
+                  <span id="chat-partner-founder-badge" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded font-bold badge-founder-gold shadow-sm">⭐ FONDATORE</span>
                   <span id="chat-partner-gender" class="text-[9px] font-mono px-1.5 py-0.2 bg-zinc-800 text-zinc-300 rounded border border-zinc-700">M</span>
                 </div>
                 <div class="flex items-center gap-1.5 mt-0.5">
@@ -1417,6 +1418,77 @@
           <!-- Partner Bio Container -->
           <div id="chat-partner-bio-container" class="hidden text-[10px] font-mono text-zinc-300 italic bg-black/60 px-3 py-1.5 rounded-xl border border-zinc-800/90 leading-relaxed">
             <span class="text-street-orange">“</span><span id="chat-partner-bio-text"></span><span class="text-street-orange">”</span>
+          </div>
+
+          <!-- Partner Quick Details (Motto, Vision, Topics, Avoids) -->
+          <div id="chat-partner-details-box" class="pt-2 border-t border-zinc-800/70 space-y-1 text-[10px] font-mono">
+            <div id="chat-partner-motto-row" class="hidden text-zinc-300 truncate">
+              <span class="text-street-orange font-bold">Motto:</span> <span id="chat-partner-motto-text" class="italic"></span>
+            </div>
+            <div id="chat-partner-topics-row" class="hidden text-zinc-400 truncate">
+              <span class="text-teal-400 font-bold">Argomenti:</span> <span id="chat-partner-topics-text"></span>
+            </div>
+            <div id="chat-partner-avoids-row" class="hidden text-zinc-400 truncate">
+              <span class="text-red-400 font-bold">Evita:</span> <span id="chat-partner-avoids-text"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Friend Request / Conoscenza Container (R3) -->
+        <div id="chat-friend-request-container" class="chat-sidebar-card bg-[#121520] border border-zinc-800/90 rounded-2xl p-3.5 space-y-2.5 shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-300 font-bold flex items-center gap-1.5">
+              <span>🤝</span> <span>CONNESSIONE STRADA</span>
+            </span>
+            <span id="friend-request-status-badge" class="text-[9px] font-mono px-1.5 py-0.5 bg-zinc-900 text-zinc-400 rounded border border-zinc-700">Non connessi</span>
+          </div>
+          <p id="friend-request-desc" class="text-[10px] text-zinc-400 font-sans leading-tight">
+            Vuoi restare in contatto con questo partner prima della distruzione della stanza?
+          </p>
+          <!-- Request Button -->
+          <button
+            id="btn-friend-request"
+            type="button"
+            onclick="sendFriendRequest()"
+            class="w-full py-2 bg-street-orange/15 hover:bg-street-orange/25 border border-street-orange/40 hover:border-street-orange text-street-orange hover:text-white rounded-xl text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition cursor-pointer active:scale-95"
+          >
+            <span>🤝</span> <span>Richiedi Amicizia / Conoscenza</span>
+          </button>
+          <!-- Mutual Consent Unlocked Drawer -->
+          <div id="friend-request-unlocked-drawer" class="hidden pt-2 border-t border-zinc-800/80 space-y-2">
+            <div class="p-2 bg-emerald-950/50 border border-emerald-800/60 rounded-xl text-[10px] font-mono text-emerald-300 flex items-center gap-2">
+              <span>✓</span>
+              <span>Doppio consenso confermato! Partner salvato in Rubrica Connessioni.</span>
+            </div>
+            <!-- Optional Social Exchange Drawer -->
+            <div class="space-y-1.5 bg-black/60 p-2.5 rounded-xl border border-zinc-800">
+              <span class="text-[9px] font-mono uppercase tracking-wider text-street-orange font-bold block">Scambio Social Facoltativo:</span>
+              <div class="flex gap-1.5">
+                <select id="friend-social-platform" class="bg-zinc-900 border border-zinc-800 text-zinc-200 text-[10px] font-mono rounded-lg px-1.5 py-1 focus:outline-none focus:border-street-orange">
+                  <option value="telegram">Telegram</option>
+                  <option value="instagram">Instagram</option>
+                  <option value="link">Link</option>
+                </select>
+                <input
+                  type="text"
+                  id="friend-social-handle"
+                  placeholder="@handle o link"
+                  maxlength="60"
+                  class="flex-1 bg-zinc-900 border border-zinc-800 text-zinc-200 text-[10px] font-mono rounded-lg px-2 py-1 placeholder-zinc-600 focus:outline-none focus:border-street-orange"
+                />
+                <button
+                  type="button"
+                  onclick="shareFriendSocial()"
+                  class="px-2.5 py-1 bg-street-orange text-black font-mono font-bold text-[10px] rounded-lg hover:bg-street-orangeHover transition cursor-pointer shrink-0 active:scale-95"
+                >
+                  Invia
+                </button>
+              </div>
+              <div id="friend-partner-social-received" class="hidden mt-2 p-2 bg-street-orange/15 border border-street-orange/30 rounded-lg text-[10px] font-mono text-white flex items-center justify-between">
+                <span id="friend-partner-social-text" class="truncate mr-2"></span>
+                <button type="button" onclick="copyPartnerSocial()" class="px-2 py-0.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded text-[9px] text-zinc-300 cursor-pointer active:scale-95">Copia</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1596,17 +1668,21 @@
       </div>
 
       <!-- QUICK REACTION EMOJI DOCK -->
-      <div class="px-3 sm:px-4 py-1.5 bg-[#0a0c13]/95 backdrop-blur-md border-t border-zinc-800/80 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar z-10 shrink-0">
-        <span class="text-[9px] font-mono text-zinc-500 hidden sm:inline uppercase tracking-wider mr-1">Reagisci:</span>
-        <div class="flex items-center gap-1 sm:gap-2">
-          <button type="button" onclick="sendReaction('🔥')" class="reaction-btn text-sm" title="Fuoco">🔥</button>
-          <button type="button" onclick="sendReaction('💀')" class="reaction-btn text-sm" title="Morto">💀</button>
-          <button type="button" onclick="sendReaction('⚡')" class="reaction-btn text-sm" title="Flash">⚡</button>
-          <button type="button" onclick="sendReaction('🖤')" class="reaction-btn text-sm" title="Cuore nero">🖤</button>
-          <button type="button" onclick="sendReaction('🚬')" class="reaction-btn text-sm" title="Fumo">🚬</button>
-          <button type="button" onclick="sendReaction('👀')" class="reaction-btn text-sm" title="Occhi">👀</button>
-          <button type="button" onclick="sendReaction('🤯')" class="reaction-btn text-sm" title="Mind blown">🤯</button>
-          <button type="button" onclick="sendReaction('👏')" class="reaction-btn text-sm" title="Applausi">👏</button>
+      <div class="px-2 sm:px-4 py-1.5 bg-[#0a0c13]/95 backdrop-blur-md border-t border-zinc-800/80 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar z-10 shrink-0">
+        <span class="text-[9px] font-mono text-zinc-500 hidden sm:inline uppercase tracking-wider mr-1 shrink-0">Reagisci:</span>
+        <div class="flex items-center gap-1 sm:gap-1.5 flex-nowrap">
+          <button type="button" onclick="sendReaction('🔥')" data-emoji="🔥" class="reaction-btn text-sm sm:text-base" title="Fuoco">🔥</button>
+          <button type="button" onclick="sendReaction('💀')" data-emoji="💀" class="reaction-btn text-sm sm:text-base" title="Morto">💀</button>
+          <button type="button" onclick="sendReaction('⚡')" data-emoji="⚡" class="reaction-btn text-sm sm:text-base" title="Flash">⚡</button>
+          <button type="button" onclick="sendReaction('🖤')" data-emoji="🖤" class="reaction-btn text-sm sm:text-base" title="Cuore nero">🖤</button>
+          <button type="button" onclick="sendReaction('🚬')" data-emoji="🚬" class="reaction-btn text-sm sm:text-base" title="Fumo">🚬</button>
+          <button type="button" onclick="sendReaction('👀')" data-emoji="👀" class="reaction-btn text-sm sm:text-base" title="Occhi">👀</button>
+          <button type="button" onclick="sendReaction('🤯')" data-emoji="🤯" class="reaction-btn text-sm sm:text-base" title="Mind blown">🤯</button>
+          <button type="button" onclick="sendReaction('👏')" data-emoji="👏" class="reaction-btn text-sm sm:text-base" title="Applausi">👏</button>
+          <button type="button" onclick="sendReaction('💖')" data-emoji="💖" class="reaction-btn text-sm sm:text-base" title="Cuore brillante">💖</button>
+          <button type="button" onclick="sendReaction('💋')" data-emoji="💋" class="reaction-btn text-sm sm:text-base" title="Bacio">💋</button>
+          <button type="button" onclick="sendReaction('😈')" data-emoji="😈" class="reaction-btn text-sm sm:text-base" title="Diavoletto">😈</button>
+          <button type="button" onclick="sendReaction('🌹')" data-emoji="🌹" class="reaction-btn text-sm sm:text-base" title="Rosa">🌹</button>
         </div>
       </div>
 
@@ -1644,11 +1720,14 @@
           >✕</button>
         </div>
 
-        <!-- GIF Category Tabs (9 Street Categories) -->
+        <!-- GIF Category Tabs (Street & Romance Categories) -->
         <div id="gif-category-scroll" class="flex items-center gap-1 mb-2 overflow-x-auto no-scrollbar pb-1 text-[10px] font-mono scroll-smooth">
           <button type="button" onclick="switchGifCategory('trend', this)" class="gif-cat-btn active px-2.5 py-1 rounded-lg bg-street-orange text-black font-bold cursor-pointer whitespace-nowrap">Trend</button>
           <button type="button" onclick="switchGifCategory('street', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Street</button>
           <button type="button" onclick="switchGifCategory('reazioni', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Reazioni</button>
+          <button type="button" onclick="switchGifCategory('flirt', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-pink-400 hover:text-white cursor-pointer whitespace-nowrap">💋 Flirt</button>
+          <button type="button" onclick="switchGifCategory('amore', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-rose-400 hover:text-white cursor-pointer whitespace-nowrap">💖 Amore</button>
+          <button type="button" onclick="switchGifCategory('spicy', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-amber-400 hover:text-white cursor-pointer whitespace-nowrap">🌶️ Spicy</button>
           <button type="button" onclick="switchGifCategory('memes', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Memes</button>
           <button type="button" onclick="switchGifCategory('lol', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">LOL</button>
           <button type="button" onclick="switchGifCategory('notte', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Notte</button>
@@ -1768,31 +1847,76 @@
       </p>
     </div>
 
-    <!-- Filter & Action Bar -->
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d0e14] border border-zinc-800 p-3 rounded-2xl shadow-lg">
-      <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="bacheca-mood-filters">
-        <button type="button" onclick="filterBacheca('tutti', this)" class="bacheca-filter-btn active px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-street-orange text-black cursor-pointer transition">
-          TUTTI
-        </button>
-        <button type="button" onclick="filterBacheca('cazzeggio', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
-          💬 Cazzeggio
-        </button>
-        <button type="button" onclick="filterBacheca('sfogati', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
-          🖤 Sfogati
-        </button>
-        <button type="button" onclick="filterBacheca('flirt', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
-          🔥 Flirt
-        </button>
-      </div>
-
-      <button type="button" onclick="switchView('landing')" class="px-4 py-2 bg-street-orange hover:bg-street-orangeHover text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-1.5 cursor-pointer">
-        <span>+ ENTRA NEL CONFESSIONALE</span>
+    <!-- Bacheca Sub-View Tabs (Confessioni vs Gruppi a Tema - R5) -->
+    <div class="flex items-center justify-center gap-2 border-b border-zinc-800 pb-3">
+      <button
+        id="btn-tab-bacheca-confessioni"
+        type="button"
+        onclick="switchBachecaTab('confessioni')"
+        class="bacheca-tab-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-bold transition cursor-pointer bg-street-orange text-black shadow-md flex items-center gap-2"
+      >
+        <span>📜</span> <span>CONFESSIONI DELLA NOTTE</span>
+      </button>
+      <button
+        id="btn-tab-bacheca-groups"
+        type="button"
+        onclick="switchBachecaTab('groups')"
+        class="bacheca-tab-btn px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl font-mono text-xs font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 transition cursor-pointer flex items-center gap-2"
+      >
+        <span>👥</span> <span>GRUPPI A TEMA (UNDERGROUND)</span>
       </button>
     </div>
 
-    <!-- Wall Grid of Neo-Brutalist Confession Posters -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" id="bacheca-grid">
-      <!-- Generated dynamically and with high-converting initial curated cards -->
+    <!-- Container 1: Confessioni (Default) -->
+    <div id="bacheca-confessioni-container" class="flex flex-col gap-8">
+      <!-- Filter & Action Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d0e14] border border-zinc-800 p-3 rounded-2xl shadow-lg">
+        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar" id="bacheca-mood-filters">
+          <button type="button" onclick="filterBacheca('tutti', this)" class="bacheca-filter-btn active px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold bg-street-orange text-black cursor-pointer transition">
+            TUTTI
+          </button>
+          <button type="button" onclick="filterBacheca('cazzeggio', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
+            💬 Cazzeggio
+          </button>
+          <button type="button" onclick="filterBacheca('sfogati', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
+            🖤 Sfogati
+          </button>
+          <button type="button" onclick="filterBacheca('flirt', this)" class="bacheca-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-medium text-zinc-400 hover:text-white bg-zinc-900 border border-zinc-800 cursor-pointer transition">
+            🔥 Flirt
+          </button>
+        </div>
+
+        <button type="button" onclick="switchView('landing')" class="px-4 py-2 bg-street-orange hover:bg-street-orangeHover text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+          <span>+ ENTRA NEL CONFESSIONALE</span>
+        </button>
+      </div>
+
+      <!-- Wall Grid of Neo-Brutalist Confession Posters -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" id="bacheca-grid">
+        <!-- Generated dynamically and with high-converting initial curated cards -->
+      </div>
+    </div>
+
+    <!-- Container 2: Gruppi a Tema (R5) -->
+    <div id="bacheca-groups-container" class="hidden flex flex-col gap-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-[#0d0e14] border border-zinc-800 p-3.5 rounded-2xl shadow-lg">
+        <div>
+          <h3 class="font-street font-black text-sm uppercase text-white">Tavoli di Discussione Aperti</h3>
+          <p class="text-xs font-mono text-zinc-400">Conversazioni tematiche della notte senza maschere.</p>
+        </div>
+        <button
+          type="button"
+          onclick="openCreateGroupModal()"
+          class="px-4 py-2.5 bg-street-orange hover:bg-street-orangeHover text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-1.5 cursor-pointer shadow-md active:scale-95"
+        >
+          <span>+ CREA GRUPPO A TEMA</span>
+        </button>
+      </div>
+
+      <!-- Thematic Groups Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" id="bacheca-groups-grid">
+        <!-- Populated dynamically via JS from /api/groups -->
+      </div>
     </div>
 
     <!-- Back to Top / CTA -->
@@ -1837,6 +1961,72 @@
       <p class="text-zinc-300 text-sm sm:text-base leading-relaxed">
         Qui l'apparenza conta zero e il fisico non fa la persona. Non siamo una vetrina di carne: niente foto né pose. Costruisci la tua identità con le sole cose che contano: le tue parole, i tuoi sogni e il rispetto.
       </p>
+    </div>
+
+    <!-- STREET KARMA HUD & FOUNDER STATUS (R4 & R6) -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-[#0d0e14] border border-zinc-800 rounded-2xl p-4 sm:p-5 shadow-xl">
+      <!-- Card 1: Street Karma Score -->
+      <div class="flex flex-col justify-between p-3.5 bg-[#121520] border border-zinc-800 rounded-xl space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-bold flex items-center gap-1.5">
+            <span>⚡</span> <span>STREET KARMA</span>
+          </span>
+          <span id="profile-karma-level" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-street-orange/20 text-street-orange font-bold border border-street-orange/30">Rispettato</span>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="profile-karma-score" class="font-street font-black text-3xl sm:text-4xl text-white">50</span>
+          <span class="text-xs font-mono text-zinc-500">/ 100 PUNTI</span>
+        </div>
+        <!-- Meter bar -->
+        <div class="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden border border-zinc-800">
+          <div id="profile-karma-meter" class="karma-meter-bar h-full w-1/2"></div>
+        </div>
+        <div class="flex items-center justify-between text-[9px] font-mono text-zinc-500">
+          <span id="profile-karma-flames">🔥 0 Fiamme</span>
+          <span id="profile-karma-strikes">🛡️ 0 Sanzioni Bot</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Founder Supporter Badge -->
+      <div class="flex flex-col justify-between p-3.5 bg-[#121520] border border-zinc-800 rounded-xl space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+            <span>⭐</span> <span>BADGE FONDATORE</span>
+          </span>
+          <span id="profile-founder-badge-status" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-zinc-400 font-bold border border-zinc-800">Non attivo</span>
+        </div>
+        <p class="text-[11px] text-zinc-300 font-sans leading-snug">
+          Sostieni il lancio underground: badge oro visibile, apertura gruppi a tema e reazioni VIP.
+        </p>
+        <button
+          id="btn-profile-open-founder"
+          type="button"
+          onclick="openFounderBadgeModal()"
+          class="w-full py-2 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 hover:border-amber-400 text-amber-300 font-mono font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+        >
+          <span>⭐</span> <span>Diventa Fondatore (€2.99)</span>
+        </button>
+      </div>
+
+      <!-- Card 3: Rubrica Connessioni Quick Stat -->
+      <div class="flex flex-col justify-between p-3.5 bg-[#121520] border border-zinc-800 rounded-xl space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-teal-400 font-bold flex items-center gap-1.5">
+            <span>📖</span> <span>RUBRICA CONNESSIONI</span>
+          </span>
+          <span id="profile-connections-count-badge" class="text-[9px] font-mono px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-400 font-bold border border-teal-500/30">0 Salvati</span>
+        </div>
+        <p class="text-[11px] text-zinc-300 font-sans leading-snug">
+          I contatti anonimi con cui hai raggiunto il doppio consenso bilaterale in chat.
+        </p>
+        <a
+          href="#rubrica-connessioni-section"
+          onclick="document.getElementById('rubrica-connessioni-section')?.scrollIntoView({behavior: 'smooth'})"
+          class="w-full py-2 bg-teal-500/20 hover:bg-teal-500/30 border border-teal-500/50 text-teal-300 font-mono font-bold text-xs rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 active:scale-95"
+        >
+          <span>Vedi Rubrica</span> <span>↓</span>
+        </a>
+      </div>
     </div>
 
     <!-- Main Two-Column Grid: Preview Card & Editor Form -->
@@ -2065,6 +2255,39 @@
       </div>
 
     </div>
+
+    <!-- RUBRICA CONNESSIONI SECTION (R4) -->
+    <section id="rubrica-connessioni-section" class="bg-[#0b0d12] border border-zinc-800/90 rounded-2xl p-6 sm:p-7 flex flex-col gap-5 shadow-xl">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-4 flex-wrap gap-2">
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-500/10 border border-teal-500/30 text-teal-400 font-mono text-[10px] font-bold uppercase tracking-wider mb-1">
+            <span>🤝 CONNESSIONI SALVATE</span>
+          </div>
+          <h2 class="font-street font-black text-xl text-white uppercase tracking-tight">RUBRICA CONNESSIONI ANONIME</h2>
+          <p class="text-xs text-zinc-400 mt-0.5">Partner con cui è scattato il doppio consenso bilaterale prima della distruzione della stanza.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="rubrica-count-label" class="text-xs font-mono text-zinc-400">0 connessioni</span>
+        </div>
+      </div>
+
+      <!-- Connections List -->
+      <div id="rubrica-connessioni-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Populated dynamically via JS -->
+      </div>
+
+      <!-- Empty state -->
+      <div id="rubrica-connessioni-empty" class="text-center py-10 border border-dashed border-zinc-800 rounded-xl p-6 flex flex-col items-center gap-3">
+        <span class="text-3xl">🤝</span>
+        <h4 class="font-street font-black text-sm text-zinc-300 uppercase">NESSUNA CONNESSIONE SALVATA</h4>
+        <p class="text-xs font-mono text-zinc-500 max-w-sm">
+          Quando trovi un partner speciale in chat 1v1, clicca su "Richiedi Amicizia" nella barra laterale. Se entrambi confermate, il contatto verrà memorizzato qui.
+        </p>
+        <button type="button" onclick="switchView('app')" class="mt-2 px-4 py-2 bg-street-orange/20 hover:bg-street-orange/30 border border-street-orange/40 text-street-orange text-xs font-mono font-bold rounded-xl transition cursor-pointer">
+          AVVIA IL RADAR ORA
+        </button>
+      </div>
+    </section>
   </main>
 
   <!-- ======================================================== -->
@@ -2480,6 +2703,200 @@
 
       <div class="pt-3 border-t border-zinc-800 shrink-0">
         <button type="button" onclick="closePartnerProfileModal()" class="w-full py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-white font-mono text-xs uppercase tracking-wider rounded-xl transition cursor-pointer">TORNA ALLA CHAT</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: CREA GRUPPO A TEMA (R5)                           -->
+  <!-- ======================================================== -->
+  <div id="modal-create-group" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-create-group-title">
+    <div class="w-full max-w-md bg-street-surface border-2 border-street-orange/80 rounded-2xl p-5 sm:p-6 text-left street-glow shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-street-orange font-mono text-xs font-bold uppercase">BACHECA</span>
+          <span class="text-zinc-600">•</span>
+          <h3 id="modal-create-group-title" class="text-white font-street font-black text-base uppercase">APRI UN GRUPPO A TEMA</h3>
+        </div>
+        <button type="button" onclick="closeCreateGroupModal()" class="text-zinc-400 hover:text-white text-xl font-mono leading-none p-1 cursor-pointer transition">&times;</button>
+      </div>
+
+      <form id="create-group-form" onsubmit="event.preventDefault(); submitCreateGroup();" class="overflow-y-auto pr-1 my-4 space-y-4 font-sans text-xs">
+        <div>
+          <label for="group-title-input" class="block text-xs font-mono text-zinc-300 font-bold mb-1">Titolo del Tavolo (3-60 car):</label>
+          <input type="text" id="group-title-input" maxlength="60" placeholder="Es. Musica Notturna &amp; Beat Sconosciuti" required class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange rounded-xl px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none font-mono">
+        </div>
+
+        <div>
+          <label for="group-category-select" class="block text-xs font-mono text-zinc-300 font-bold mb-1">Categoria:</label>
+          <select id="group-category-select" class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange rounded-xl px-3 py-2 text-xs text-white focus:outline-none font-mono">
+            <option value="Musica Notturna">🎵 Musica Notturna</option>
+            <option value="Confessioni Relazioni">💔 Confessioni Relazioni</option>
+            <option value="Dibattito Filosofico">⚡ Dibattito Filosofico</option>
+            <option value="Sfoghi &amp; Verità">🔥 Sfoghi &amp; Verità</option>
+            <option value="Cultura Underground">🌃 Cultura Underground</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="group-desc-input" class="block text-xs font-mono text-zinc-300 font-bold mb-1">Descrizione / Intento (5-250 car):</label>
+          <textarea id="group-desc-input" maxlength="250" rows="3" placeholder="Di cosa si parlerà in questo tavolo? Quali regole di rispetto si applicano?" required class="w-full bg-[#0d0e14] border border-zinc-800 focus:border-street-orange rounded-xl p-3 text-xs text-white placeholder-zinc-600 focus:outline-none resize-none"></textarea>
+        </div>
+
+        <div class="p-3 bg-street-orange/10 border border-street-orange/30 rounded-xl text-[10px] font-mono text-zinc-300 flex items-center gap-2">
+          <span>🛡️</span>
+          <span>Creazione autorizzata con sistema ibrido (Badge Fondatore o Street Karma &gt;= 50 con 0 sanzioni).</span>
+        </div>
+
+        <div class="pt-3 border-t border-zinc-800 flex gap-2">
+          <button type="button" onclick="closeCreateGroupModal()" class="w-1/3 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono text-xs uppercase rounded-xl transition cursor-pointer">Annulla</button>
+          <button type="submit" class="flex-1 py-2.5 bg-street-orange hover:bg-street-orangeHover text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer">PUBBLICA TAVOLO</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: SPIEGAZIONE UTENTE NON QUALIFICATO (R5)           -->
+  <!-- ======================================================== -->
+  <div id="modal-group-unqualified" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-unqualified-title">
+    <div class="w-full max-w-md bg-street-surface border-2 border-zinc-800 rounded-2xl p-5 sm:p-6 text-left street-glow shadow-2xl flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 font-mono text-xs font-bold uppercase">QUALIFICA RICHIESTA</span>
+          <span class="text-zinc-600">•</span>
+          <h3 id="modal-unqualified-title" class="text-white font-street font-black text-base uppercase">COME APRIRE UN TAVOLO</h3>
+        </div>
+        <button type="button" onclick="closeUnqualifiedModal()" class="text-zinc-400 hover:text-white text-xl font-mono leading-none p-1 cursor-pointer transition">&times;</button>
+      </div>
+
+      <div class="my-4 space-y-3 font-sans text-xs text-zinc-300 leading-relaxed">
+        <p>
+          Per evitare spam e mantenere alto il livello delle discussioni nella notte, l'apertura dei <strong class="text-white">Gruppi a Tema</strong> è riservata agli utenti qualificati tramite il nostro <strong class="text-street-orange">sistema ibrido</strong>:
+        </p>
+
+        <div class="p-3.5 bg-[#121520] border border-amber-500/30 rounded-xl space-y-1">
+          <div class="flex items-center gap-2 text-amber-300 font-mono font-bold text-xs">
+            <span>⭐</span> <span>OPZIONE 1: SBLOCCA IL BADGE FONDATORE</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Con una tantum simbolica di lancio (€2.99), diventi sostenitore ufficiale di STREETALK e sblocchi all'istante il diritto di aprire tutti i tavoli che desideri.
+          </p>
+        </div>
+
+        <div class="p-3.5 bg-[#121520] border border-zinc-800 rounded-xl space-y-1">
+          <div class="flex items-center gap-2 text-teal-300 font-mono font-bold text-xs">
+            <span>⚡</span> <span>OPZIONE 2: ACCUMULA STREET KARMA</span>
+          </div>
+          <p class="text-[11px] text-zinc-400">
+            Partecipa alle chat 1v1 con educazione, ricevi reazioni dai tuoi partner e rispetta le regole dello StreetBot (0 sanzioni, Karma &gt;= 50 punti). 100% gratuito.
+          </p>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex flex-col sm:flex-row gap-2">
+        <button type="button" onclick="closeUnqualifiedModal(); openFounderBadgeModal();" class="flex-1 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5">
+          <span>⭐</span> <span>DIVENTA FONDATORE (€2.99)</span>
+        </button>
+        <button type="button" onclick="closeUnqualifiedModal(); switchView('app');" class="py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-mono text-xs uppercase rounded-xl transition cursor-pointer">
+          CHAT PER IL KARMA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: BADGE FONDATORE / SOSTENITORE DEL LANCIO (R6)     -->
+  <!-- ======================================================== -->
+  <div id="modal-founder-badge" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-founder-title">
+    <div class="w-full max-w-lg bg-[#0d0f17] border-2 border-amber-500/80 rounded-2xl p-5 sm:p-7 text-left shadow-[0_0_50px_rgba(245,158,11,0.25)] flex flex-col max-h-[90vh]">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800 shrink-0">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-400 font-mono text-xs font-bold uppercase">SUPPORTER DI LANCIO</span>
+          <span class="text-zinc-600">•</span>
+          <h3 id="modal-founder-title" class="text-white font-street font-black text-base uppercase">BADGE FONDATORE</h3>
+        </div>
+        <button type="button" onclick="closeFounderBadgeModal()" class="text-zinc-400 hover:text-white text-xl font-mono leading-none p-1 cursor-pointer transition">&times;</button>
+      </div>
+
+      <div class="overflow-y-auto pr-1 my-4 space-y-4 font-sans text-xs">
+        <!-- Hero Price & Supporter Pitch -->
+        <div class="text-center p-4 bg-gradient-to-b from-amber-500/15 to-transparent border border-amber-500/30 rounded-2xl">
+          <div class="inline-block px-3 py-1 rounded-full badge-founder-gold text-[10px] uppercase font-mono tracking-wider mb-2">
+            ⭐ OFFERTA ESCLUSIVA DI LANCIO
+          </div>
+          <div class="flex items-baseline justify-center gap-1.5 my-1">
+            <span class="font-street font-black text-4xl text-white">€ 2,99</span>
+            <span class="text-zinc-400 font-mono text-xs">/ UNA TANTUM</span>
+          </div>
+          <p class="text-zinc-300 text-xs mt-1 max-w-xs mx-auto">
+            Zero abbonamenti ricorrenti. Supporta i server indipendenti e sblocca l'identità dorata per sempre.
+          </p>
+        </div>
+
+        <!-- 100% Free Chat Guarantee (Invariant per AGENTS.md) -->
+        <div class="p-3 bg-zinc-900/80 border border-zinc-800 rounded-xl text-[10px] font-mono text-zinc-400 flex items-start gap-2.5">
+          <span class="text-sm shrink-0">🔒</span>
+          <div class="leading-relaxed">
+            <strong class="text-zinc-200 uppercase block">100% Free Chat Invariance:</strong>
+            La chat 1v1 anonima, il matching per mood e lo scambio dei segreti restano e resteranno <strong class="text-white">gratuiti al 100%</strong>. Il Badge Fondatore offre solo benefit cosmetici e di moderazione tavoli.
+          </div>
+        </div>
+
+        <!-- The 4 Perks -->
+        <div class="space-y-2">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-400 font-bold block">I 4 Vantaggi Esclusivi del Fondatore:</span>
+          
+          <div class="p-3 bg-[#131622] border border-zinc-800 rounded-xl flex items-start gap-3">
+            <span class="text-lg shrink-0">👑</span>
+            <div>
+              <h4 class="font-mono font-bold text-white text-xs">Badge Oro &amp; Neon Visibile</h4>
+              <p class="text-zinc-400 text-[11px] mt-0.5">Mostra lo status di Fondatore sulla tua scheda profilo e nella barra laterale durante le conversazioni.</p>
+            </div>
+          </div>
+
+          <div class="p-3 bg-[#131622] border border-zinc-800 rounded-xl flex items-start gap-3">
+            <span class="text-lg shrink-0">👥</span>
+            <div>
+              <h4 class="font-mono font-bold text-white text-xs">Apertura Illimitata Gruppi a Tema</h4>
+              <p class="text-zinc-400 text-[11px] mt-0.5">Diritto immediato di aprire tavoli di discussione in Bacheca senza dover accumulare Street Karma.</p>
+            </div>
+          </div>
+
+          <div class="p-3 bg-[#131622] border border-zinc-800 rounded-xl flex items-start gap-3">
+            <span class="text-lg shrink-0">✨</span>
+            <div>
+              <h4 class="font-mono font-bold text-white text-xs">Reazioni &amp; GIF Esclusive VIP</h4>
+              <p class="text-zinc-400 text-[11px] mt-0.5">Bagliore dorato speciale sui tuoi burst di reazione e priorità di caricamento.</p>
+            </div>
+          </div>
+
+          <div class="p-3 bg-[#131622] border border-zinc-800 rounded-xl flex items-start gap-3">
+            <span class="text-lg shrink-0">⚡</span>
+            <div>
+              <h4 class="font-mono font-bold text-white text-xs">Priorità Coda Radar</h4>
+              <p class="text-zinc-400 text-[11px] mt-0.5">Accesso prioritario al nodo di connessione quando la coda notturna è congestionata.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-zinc-800 flex flex-col gap-2 shrink-0">
+        <button
+          id="btn-unlock-founder"
+          type="button"
+          onclick="unlockFounderBadge()"
+          class="w-full py-3.5 bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-black font-street font-black text-sm uppercase tracking-wider rounded-xl transition shadow-[0_0_25px_rgba(245,158,11,0.5)] cursor-pointer flex items-center justify-center gap-2 active:scale-95"
+        >
+          <span>⭐</span> <span>SBLOCCA ORA BADGE FONDATORE (€2.99)</span>
+        </button>
+        <button
+          type="button"
+          onclick="closeFounderBadgeModal()"
+          class="w-full py-2 text-zinc-500 hover:text-zinc-300 font-mono text-xs uppercase transition cursor-pointer"
+        >
+          Magari più tardi
+        </button>
       </div>
     </div>
   </div>
