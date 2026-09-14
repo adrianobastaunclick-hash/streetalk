@@ -65,3 +65,116 @@ Integrity mode: development
 - [ ] Nessuna funzionalità base di chat 1v1 viene resa a pagamento; l'anonimato e la privacy dei segreti restano inviolati al 100%.
 - [ ] La suite di test automatizzata (`npm test`) si arricchisce delle nuove verifiche e registra 100% pass rate.
 - [ ] Perfetta parità tra i file radice e la cartella `public/`.
+
+## 2026-09-14T22:47:47Z
+
+Streetalk è una chat anonima street-style (Node/Express/Socket.IO, frontend bundle in `frontend/app.js` → `public/app.min.js`). Dopo una sessione di sviluppo con agenti multipli, sono emerse 7 criticità visive e funzionali da risolvere senza rompere la suite di 124 test esistente (`npm test`). Le immagini di riferimento si trovano in `C:/Users/adria/.gemini/antigravity/brain/c8214c33-d235-419c-a827-2256d857d0f3/.user_uploaded/`.
+
+Working directory: d:\streetalk
+Integrity mode: development
+
+---
+
+## Requirements
+
+### R1. Fix overflow "Scambio Social Facoltativo" nella sidebar destra della chat
+Il form composto da `<select>` (Telegram/Instagram/…) + `<input>` (@handle) + `<button>Invia</button>` nella sezione **SCAMBIO SOCIAL FACOLTATIVO** della sidebar partner (`#partner-hub-sidebar` o simile in `index.html`/`public/index.html`) sporge oltre il bordo destro del pannello — il pulsante Invia è tagliato. Il fix deve fare in modo che l'intera riga rimanga dentro il container su qualsiasi larghezza dello schermo usando flex-wrap o layout column su schermi stretti. Nessuna dipendenza nuova; solo CSS/Tailwind classi esistenti.
+
+### R2. Redesign completo della Story Card (canvas 9:16)
+La funzione `drawStoryCard()` in `frontend/app.js` (~riga 3812) produce una card piatta, senza stile, con placeholder sfocati. Va rifatta con:
+- Sfondo gradiente scuro (nero → antracite → viola scuro) o texture street
+- Logo Streetalk reale (testo `ST STREETALK` in font bold arancio/bianco, non placeholder)
+- Tipografia grande, impattante, con tagline variata fra almeno 5 frasi street diverse scelte random
+- Dettagli visivi: bordo neon arancio, griglia urbana sottile come watermark, orario dinamico (ora locale), call-to-action "streetalk.live" con font monospace
+- Mantenere il vincolo privacy: zero segreti/messaggi reali nella card — solo copy promozionale generata client-side
+
+### R3. Integrazione del logo ufficiale in tutta la UI
+Il logo ufficiale Streetalk si trova in `C:/Users/adria/.gemini/antigravity/brain/c8214c33-d235-419c-a827-2256d857d0f3/.user_uploaded/media_1789425043227.png` — è una `S` in forma di bolla chat con segnale WiFi + testo **STREETALK** bold + sottotitolo *CHAT ANONIMA. REALE. ORA.*
+Va integrato:
+- Nell'header principale dell'app (sostituire il placeholder testuale attuale `ST` o simile)
+- Nella Story Card come header (R2)
+- Il file logo va copiato in `public/assets/logo-streetalk.png` e in `assets/logo-streetalk.png` e referenziato tramite percorso relativo `/assets/logo-streetalk.png`
+
+### R4. Nascondere/rimuovere la sidebar sinistra della chat finché non esiste un sistema di login
+La sidebar sinistra della schermata chat contiene dati e info profilo (karma, connessioni, badge fondatore display) ma non esiste ancora un sistema di registrazione/login vero. Va nascosta (`display:none` o rimossa dal DOM della view chat) lasciando la chat a piena larghezza. Le funzionalità di profilo restano accessibili solo dalla sezione **Profilo** nel menu principale — non dalla chat. Verificare parità `index.html` / `public/index.html`.
+
+### R5. Ripristinare e migliorare la sezione Bacheca con tab "Gruppi a Tema" e modal pagamento
+La Bacheca è presente nel nav (`nav-btn-bacheca`) ma il tab **Gruppi a Tema** non ha un chiaro percorso di creazione a pagamento. Implementare:
+- Tab **Gruppi a Tema** visibile in Bacheca con lista dei gruppi esistenti (GET /api/groups)
+- Pulsante **"Crea Gruppo"** che apre un modal; se l'utente non ha il Badge Fondatore né Karma ≥ 100, mostra un modal di upgrade con prezzo **€2.99 (Badge Fondatore)** e i benefit (simulazione Stripe, nessuna transazione reale)
+- Il flusso di unlock simulato (`POST /api/founder/unlock`) già esiste nel backend e va collegato al modal
+- Dopo unlock simulato, il pulsante Crea Gruppo diventa attivo e chiama `POST /api/groups`
+
+### R6. Sistema di avatar liberamente scelto per gli Street ID
+La griglia avatar esiste in HTML (`#full-profile-avatar-grid`, `#onboarding-avatar-grid`, `#profile-avatar-grid`) ma va ampliata e resa completa:
+- Almeno 40 avatar tra emoji simbolici street (⚡🔥🌙🦊🐺🎭🕶️🎯🏴☠️🌆…) e icone tematiche
+- L'avatar scelto persiste in `localStorage` e si mostra nell'header (`#header-profile-avatar`) e nella partner view (`#chat-partner-avatar`)
+- Se non selezionato, default `⚡`
+- Nessun upload di immagini utente (privacy by design)
+
+---
+
+## File modificabili
+
+- `frontend/app.js` — sorgente principale; ogni modifica richiede rebuild con `npm run build`
+- `index.html` e `public/index.html` — **devono rimanere identici** (usare `Copy-Item` dopo ogni modifica)
+- `incrocio.css` e `public/incrocio.css` — **devono rimanere identici**
+- `street-editorial.css` e `public/street-editorial.css` — **devono rimanere identici**
+- `public/assets/` e `assets/` — per copia del logo
+- `server.js` — solo se serve per R5; gli endpoint `/api/founder/unlock` e `POST /api/groups` già esistono
+- `tests/autonomous-suite.js` — aggiungere test di regressione se necessario
+
+## File NON modificabili
+
+- `lib/street-bot.js`, `lib/network-policy.js`, `lib/gif-provider.js` — non toccare
+- Nessun nuovo framework, servizio cloud o dipendenza npm
+- `package.json` — non aggiungere dipendenze
+
+## Regola critica: build e parità
+Dopo OGNI modifica a `frontend/app.js` eseguire `npm run build`.
+Dopo OGNI modifica a `index.html` copiarlo su `public/index.html` con `Copy-Item index.html public/index.html`.
+Stesso per `incrocio.css` → `public/incrocio.css` e `street-editorial.css` → `public/street-editorial.css`.
+
+---
+
+## Acceptance Criteria
+
+### A1. Overflow fix sidebar (R1)
+- [ ] Su viewport 375px larghezza il form "Scambio Social" è completamente visibile senza scroll orizzontale
+- [ ] Il pulsante Invia non è mai tagliato/hidden su nessun viewport da 320px a 1440px
+- [ ] `npm test` → 124/124 PASS dopo la modifica
+
+### A2. Story Card redesign (R2)
+- [ ] `drawStoryCard()` produce canvas con sfondo scuro (nessun bianco dominante)
+- [ ] La tagline cambia ad ogni apertura (almeno 5 varianti diverse verificabili)
+- [ ] Nessun placeholder sfocato o testo "[SEGRETO]" visibile
+- [ ] Il logo è riconoscibile come Streetalk
+
+### A3. Logo (R3)
+- [ ] `public/assets/logo-streetalk.png` esiste su disco
+- [ ] `assets/logo-streetalk.png` esiste su disco (parità)
+- [ ] L'header mostra il logo invece del placeholder testuale precedente
+
+### A4. Sidebar sinistra rimossa/nascosta (R4)
+- [ ] La view chat non mostra una colonna sinistra separata con dati profilo
+- [ ] `index.html` e `public/index.html` sono identici (hash SHA256 uguale)
+
+### A5. Bacheca Gruppi a Tema + modal pagamento (R5)
+- [ ] Il tab "Gruppi a Tema" è visibile in Bacheca e mostra i gruppi esistenti
+- [ ] Clic su "Crea Gruppo" senza Badge Fondatore → mostra modal upgrade con prezzo €2.99
+- [ ] Modal upgrade collegato a `/api/founder/unlock` → dopo unlock il pulsante Crea Gruppo si attiva
+- [ ] `npm test` → almeno 124/124 PASS
+
+### A6. Avatar selector (R6)
+- [ ] La griglia avatar contiene almeno 40 opzioni
+- [ ] Selezione persiste dopo reload (localStorage)
+- [ ] Avatar dell'utente visibile in `#header-profile-avatar`
+- [ ] `npm test` → 124/124 PASS
+
+### A7. Build e parità finale
+- [ ] `npm run build` completa senza errori
+- [ ] `npm test` → ≥ 124/124 PASS
+- [ ] Hash SHA256 di `index.html` == `public/index.html`
+- [ ] Hash SHA256 di `incrocio.css` == `public/incrocio.css`
+- [ ] Commit finale su branch main con messaggio descrittivo
+- [ ] `git push origin main` eseguito

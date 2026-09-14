@@ -8,6 +8,8 @@ Sentinel monitoring and lifecycle governance for STREETALK social platform evolu
 - Working directory: d:\streetalk\.agents\sentinel_1
 - Orchestrator: 0ad77c82-459e-482a-9811-b4fee4d0e671
 - Victory Auditor: to be spawned on victory claim
+- Active Orchestrator: 70556d1b-6586-4ffc-a863-3f5029f8d4ac (d:\streetalk\.agents\orchestrator_2_gen1)
+- Previous Orchestrator: 394714b1-8aba-4e07-a23c-4eb0720ec71d (errored due to network disconnect)
 
 ## 🔒 Key Constraints
 - No technical decisions — relay only
@@ -17,17 +19,17 @@ Sentinel monitoring and lifecycle governance for STREETALK social platform evolu
 - Never take orchestrator victory claim at face value; independent verification via teamwork_preview_victory_auditor required.
 
 ## User Context
-- **Last user request**: Evolvere STREETALK da chat effimera a piattaforma di connessione sociale sostenibile (R1-R6, Acceptance criteria).
+- **Last user request**: Fix 7 visual & functional issues: R1 overflow Scambio Social in sidebar, R2 Story Card canvas redesign, R3 official logo integration (/assets/logo-streetalk.png), R4 hide/remove left sidebar in chat, R5 Bacheca Gruppi a Tema + payment modal (€2.99 Founder unlock simulation), R6 40+ Street ID avatar selection + persistence, A1-A7 test suite and file parity.
 - **Pending clarifications**: none
-- **Delivered results**: None yet.
+- **Delivered results**: none for new request
 
 ## Project Status
-- **Phase**: in progress (Remediations completed; Phase 4 Round 2 Re-Review actively verifying backend & frontend fixes)
+- **Phase**: in progress
 - **Route**: teamwork_preview_orchestrator (General path)
-- **Rationale**: Multi-part full-stack SWE implementation touching backend sockets, frontend UI/styles, data persistence, and test suites.
+- **Rationale**: Multi-part SWE task with 7 distinct visual/functional requirements, cross-file CSS/HTML/JS changes, asset integration, and regression testing.
 - **Crons**:
-  - Cron 1 (Progress Reporting): 41592701-3e83-44df-bb8a-3c056ba0f03a/task-20 (*/8 * * * *)
-  - Cron 2 (Liveness Check): 41592701-3e83-44df-bb8a-3c056ba0f03a/task-22 (*/10 * * * *)
+  - Cron 1 (Progress Reporting): cf587487-0ca0-49d6-b34f-a7c6fa9f23a7/task-123 (*/8 * * * *)
+  - Cron 2 (Liveness Check): cf587487-0ca0-49d6-b34f-a7c6fa9f23a7/task-125 (*/10 * * * *)
 
 ## Victory Audit Status
 - **Triggered**: no
@@ -37,3 +39,4 @@ Sentinel monitoring and lifecycle governance for STREETALK social platform evolu
 ## Artifact Index
 - d:\streetalk\ORIGINAL_REQUEST.md — Verbatim user request
 - d:\streetalk\.agents\ORIGINAL_REQUEST.md — Verbatim user request (.agents copy)
+- d:\streetalk\.agents\sentinel_1\BRIEFING.md — Sentinel memory and state index

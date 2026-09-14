@@ -2654,9 +2654,19 @@ if (typeof io === 'undefined') {
     ];
 
     const STREET_AVATARS = [
+      // SVG custom glyphs
       'street-bolt', 'street-spray', 'street-mask', 'street-radar', 'street-chain',
       'street-asphalt', 'street-flame', 'street-tape', 'street-cassette', 'street-seal',
-      '⚡', '🐺', '🛹', '🎧', '🌆', '☕', '🖤', '🌙', '🎙️', '🔥', '🕶️', '🥋', '🎲', '👾'
+      // Street & Urban
+      '⚡', '🔥', '🌆', '🌃', '🏙️', '🛹', '🛵', '🚇', '🏴‍☠️', '🗝️',
+      // Natura & Notturno
+      '🌙', '🌕', '⭐', '🌌', '🌊', '🍃', '🌹', '🖤', '🔮', '🦋',
+      // Animali street
+      '🐺', '🦊', '🐱', '🦁', '🐍', '🦅', '🐉', '🦝', '🐸', '🦈',
+      // Cultura & Musica
+      '🎧', '🎙️', '🎲', '🎯', '🕶️', '👾', '🥋', '🎭', '🎮', '☕',
+      // Flirt & Personalità
+      '💥', '💫', '🌸', '🍀', '✨', '💎', '🎪', '🃏', '🌀', '⚔️',
     ];
 
     function setAvatarDisplay(element, avatarValue, sizeClass) {
@@ -3446,24 +3456,29 @@ if (typeof io === 'undefined') {
       const container = document.getElementById(containerId);
       if (!container) return;
       container.innerHTML = '';
-      STREET_GLYPHS.forEach((glyph) => {
+      STREET_AVATARS.forEach((av) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.title = glyph.label;
-        const isActive = activeAvatar === glyph.id || activeAvatar === glyph.fallback;
-        btn.className = `p-2 rounded-xl border transition cursor-pointer flex items-center justify-center ${
+        const glyph = STREET_GLYPHS.find(g => g.id === av);
+        btn.title = glyph ? glyph.label : av;
+        const isActive = activeAvatar === av || (glyph && activeAvatar === glyph.fallback);
+        btn.className = `p-1.5 rounded-xl border transition cursor-pointer flex items-center justify-center text-xl ${
           isActive
             ? 'bg-street-orange/25 border-street-orange text-white scale-110 shadow-[0_0_12px_rgba(255,101,47,0.4)]'
             : 'bg-zinc-900 border-zinc-800 hover:border-zinc-700 text-zinc-300'
         }`;
-        const img = document.createElement('img');
-        img.src = glyph.path;
-        img.alt = glyph.label;
-        img.className = 'w-6 h-6 object-contain pointer-events-none';
-        btn.appendChild(img);
+        if (glyph) {
+          const img = document.createElement('img');
+          img.src = glyph.path;
+          img.alt = glyph.label;
+          img.className = 'w-6 h-6 object-contain pointer-events-none';
+          btn.appendChild(img);
+        } else {
+          btn.textContent = av;
+        }
         btn.onclick = () => {
-          onSelect(glyph.id);
-          renderAvatarGrid(containerId, glyph.id, onSelect);
+          onSelect(av);
+          renderAvatarGrid(containerId, av, onSelect);
         };
         container.appendChild(btn);
       });
@@ -3818,118 +3833,230 @@ if (typeof io === 'undefined') {
       const w = canvas.width;  // 720
       const h = canvas.height; // 1280
 
-      // Asphalt Dark Gradient
+      // ── BACKGROUND: deep dark gradient
       const bgGrad = ctx.createLinearGradient(0, 0, 0, h);
-      bgGrad.addColorStop(0, '#0b0d10');
-      bgGrad.addColorStop(0.4, '#12151d');
-      bgGrad.addColorStop(1, '#060709');
+      bgGrad.addColorStop(0, '#080a0f');
+      bgGrad.addColorStop(0.35, '#0d1020');
+      bgGrad.addColorStop(0.7, '#110a18');
+      bgGrad.addColorStop(1, '#050508');
       ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, w, h);
 
-      // Subtle Asphalt Perspective Grid
+      // ── URBAN GRID WATERMARK
       ctx.save();
-      ctx.strokeStyle = 'rgba(255, 101, 47, 0.08)';
+      ctx.strokeStyle = 'rgba(255, 101, 47, 0.06)';
       ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 45) {
+      for (let x = 0; x <= w; x += 60) {
         ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
       }
-      for (let y = 0; y < h; y += 45) {
+      for (let y = 0; y <= h; y += 60) {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
       }
       ctx.restore();
 
-      // Neon Street Border Frame
+      // ── DIAGONAL ACCENT LINES (top-right corner)
       ctx.save();
+      ctx.strokeStyle = 'rgba(255,101,47,0.12)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 8; i++) {
+        ctx.beginPath();
+        ctx.moveTo(w - 20 - i * 28, 0);
+        ctx.lineTo(w, i * 28 + 20);
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // ── OUTER NEON BORDER
+      ctx.save();
+      ctx.shadowColor = '#ff652f';
+      ctx.shadowBlur = 18;
       ctx.strokeStyle = '#ff652f';
-      ctx.lineWidth = 4;
-      ctx.strokeRect(28, 28, w - 56, h - 56);
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 5;
+      ctx.strokeRect(24, 24, w - 48, h - 48);
+      ctx.restore();
+
+      // ── INNER BORDER
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,255,255,0.07)';
       ctx.lineWidth = 1;
       ctx.strokeRect(38, 38, w - 76, h - 76);
       ctx.restore();
 
-      // Header Branding
+      // ── TOP ORANGE BAR
       ctx.fillStyle = '#ff652f';
-      ctx.fillRect(60, 65, 40, 40);
+      ctx.fillRect(24, 24, w - 48, 7);
+
+      // ── LOGO: orange square ST + STREETALK text
+      const logoX = 60;
+      const logoY = 72;
+
+      // Orange square badge
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,101,47,0.7)';
+      ctx.shadowBlur = 20;
+      ctx.fillStyle = '#ff652f';
+      roundRect(ctx, logoX, logoY, 52, 52, 10);
+      ctx.fill();
+      ctx.restore();
+
       ctx.fillStyle = '#000000';
-      ctx.font = '900 24px Syne, sans-serif';
-      ctx.fillText('ST', 66, 94);
+      ctx.font = '900 26px "Syne", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('ST', logoX + 8, logoY + 36);
 
+      // STREET text
       ctx.fillStyle = '#ffffff';
-      ctx.font = '900 30px Syne, sans-serif';
-      ctx.fillText('STREET', 115, 95);
+      ctx.font = '900 38px "Syne", sans-serif';
+      ctx.fillText('STREET', logoX + 66, logoY + 37);
+
+      // ALK text in orange
       ctx.fillStyle = '#ff652f';
-      ctx.fillText('ALK', 245, 95);
+      ctx.fillText('ALK', logoX + 66 + ctx.measureText('STREET').width + 2, logoY + 37);
 
-      // Badge: Segreto svelato
-      ctx.fillStyle = 'rgba(255, 101, 47, 0.14)';
-      ctx.fillRect(60, 135, 260, 36);
-      ctx.strokeStyle = 'rgba(255, 101, 47, 0.45)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(60, 135, 260, 36);
+      // Dot pulse indicator
+      ctx.save();
+      ctx.shadowColor = '#ff652f';
+      ctx.shadowBlur = 14;
       ctx.fillStyle = '#ff652f';
-      ctx.font = '700 13px "JetBrains Mono", monospace';
-      ctx.fillText('INVITO A STREETALK', 76, 158);
+      ctx.beginPath();
+      ctx.arc(logoX + 66 + ctx.measureText('STREETALK').width + 16, logoY + 30, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
 
-      // Quotation Mark
-      ctx.fillStyle = 'rgba(255, 101, 47, 0.22)';
-      ctx.font = '900 140px Syne, serif';
-      ctx.fillText('“', 55, 300);
+      // Tagline under logo
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.font = '400 15px "JetBrains Mono", monospace';
+      ctx.fillText('CHAT ANONIMA. REALE. ORA.', logoX + 66, logoY + 58);
 
-      // Generic promotional text; never read room content
-      const textToDisplay = 'Un segreto a testa. Tre minuti per conoscersi.';
+      // ── DIVIDER LINE
+      ctx.fillStyle = 'rgba(255,101,47,0.3)';
+      ctx.fillRect(60, logoY + 76, w - 120, 1);
+
+      // ── RANDOM TAGLINES (5 varianti)
+      const TAGLINES = [
+        { main: 'Un segreto a testa.', sub: 'Tre minuti per capire tutto.' },
+        { main: 'La notte amplifica', sub: 'le parole che il giorno non osa.' },
+        { main: 'Nessun profilo.', sub: 'Solo la voce che hai dentro.' },
+        { main: 'Anonimi per scelta.', sub: 'Reali per natura.' },
+        { main: 'Entra nell\'oscuro.', sub: 'Scambia un segreto. Esci diverso.' },
+      ];
+      const tagline = TAGLINES[Math.floor(Date.now() / 1000) % TAGLINES.length];
+
+      // Big quote mark
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,101,47,0.18)';
+      ctx.font = '900 200px Georgia, serif';
+      ctx.fillText('\u201C', 45, 620);
+      ctx.restore();
+
+      // Main tagline line 1
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,101,47,0.3)';
+      ctx.shadowBlur = 10;
       ctx.fillStyle = '#ffffff';
-      ctx.font = '700 34px "Plus Jakarta Sans", sans-serif';
+      ctx.font = '800 56px "Syne", sans-serif';
+      const mainWords = tagline.main.split(' ');
+      let lineA = '', lineB = '';
+      let switchedA = false;
+      for (const word of mainWords) {
+        const test = lineA + (lineA ? ' ' : '') + word;
+        if (!switchedA && ctx.measureText(test).width > w - 140) {
+          switchedA = true;
+        }
+        if (switchedA) lineB += (lineB ? ' ' : '') + word;
+        else lineA += (lineA ? ' ' : '') + word;
+      }
+      ctx.fillText(lineA, 70, 560);
+      if (lineB) ctx.fillText(lineB, 70, 625);
+      ctx.restore();
 
-      const maxWidth = w - 140;
-      const words = textToDisplay.split(' ');
-      let line = '';
-      let y = 370;
-      const lineHeight = 50;
-
-      for (let n = 0; n < words.length; n++) {
-        const testLine = line + words[n] + ' ';
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          ctx.fillText(line, 70, y);
-          line = words[n] + ' ';
-          y += lineHeight;
+      // Sub tagline
+      const subY = lineB ? 695 : 635;
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.font = '500 30px "Plus Jakarta Sans", sans-serif';
+      const subWords = tagline.sub.split(' ');
+      let subLine = '';
+      let subY2 = subY;
+      for (const word of subWords) {
+        const test = subLine + (subLine ? ' ' : '') + word;
+        if (ctx.measureText(test).width > w - 140 && subLine) {
+          ctx.fillText(subLine, 70, subY2);
+          subLine = word;
+          subY2 += 44;
         } else {
-          line = testLine;
+          subLine = test;
         }
       }
-      ctx.fillText(line, 70, y);
+      ctx.fillText(subLine, 70, subY2);
 
-      ctx.fillStyle = 'rgba(255, 101, 47, 0.22)';
-      ctx.font = '900 140px Syne, serif';
-      ctx.fillText('”', w - 130, y + 90);
+      // Closing quote
+      ctx.save();
+      ctx.fillStyle = 'rgba(255,101,47,0.18)';
+      ctx.font = '900 200px Georgia, serif';
+      ctx.fillText('\u201D', w - 140, subY2 + 110);
+      ctx.restore();
 
-      // Metadata Pill
-      const metaY = Math.min(h - 260, y + 150);
-      ctx.fillStyle = '#141720';
-      ctx.fillRect(70, metaY, 360, 54);
-      ctx.strokeStyle = '#343d49';
+      // ── STATS BAR
+      const statsY = h - 290;
+      ctx.fillStyle = '#111520';
+      roundRect(ctx, 60, statsY, w - 120, 90, 14);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,101,47,0.25)';
       ctx.lineWidth = 1;
-      ctx.strokeRect(70, metaY, 360, 54);
+      ctx.stroke();
 
-      ctx.fillStyle = '#ff652f';
-      ctx.font = '700 14px "JetBrains Mono", monospace';
-      ctx.fillText('SCAMBIO RECIPROCO', 90, metaY + 33);
-
-      // This card contains no participant or session metadata.
-
-      // Footer
-      ctx.fillStyle = '#aab4c2';
-      ctx.font = '500 16px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText('Entra nella notte. Scambia un segreto reale in 180s.', 70, h - 130);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '800 24px Syne, sans-serif';
-      ctx.fillText('@STREETALK.LIVE', 70, h - 90);
-
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
       ctx.fillStyle = '#ff652f';
       ctx.font = '700 13px "JetBrains Mono", monospace';
-      ctx.fillText('// CHAT REALTIME • MESSAGGI IN RAM', 70, h - 62);
+      ctx.fillText('⏱ 180 SEC', 85, statsY + 34);
+      ctx.fillText('🔒 E2E RAM', 85 + 190, statsY + 34);
+      ctx.fillText('📍 ' + timeStr, 85 + 380, statsY + 34);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.font = '500 11px "JetBrains Mono", monospace';
+      ctx.fillText('durata sessione', 85, statsY + 58);
+      ctx.fillText('nessun log', 85 + 190, statsY + 58);
+      ctx.fillText('ora locale', 85 + 380, statsY + 58);
+
+      // ── FOOTER
+      ctx.fillStyle = 'rgba(255,101,47,0.15)';
+      ctx.fillRect(24, h - 180, w - 48, 1);
+
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.font = '400 18px "JetBrains Mono", monospace';
+      ctx.fillText('Entra nella notte. Scambia un segreto reale in 180s.', 60, h - 140);
+
+      ctx.save();
+      ctx.shadowColor = '#ff652f';
+      ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ff652f';
+      ctx.font = '900 32px "Syne", sans-serif';
+      ctx.fillText('@STREETALK.LIVE', 60, h - 96);
+      ctx.restore();
+
+      ctx.fillStyle = 'rgba(255,255,255,0.25)';
+      ctx.font = '600 14px "JetBrains Mono", monospace';
+      ctx.fillText('// ZERO REGISTRAZIONE · ZERO TRACCE · 100% REALE', 60, h - 60);
+
+      // ── BOTTOM ORANGE BAR
+      ctx.fillStyle = '#ff652f';
+      ctx.fillRect(24, h - 31, w - 48, 7);
+    }
+
+    // Helper: rounded rect path
+    function roundRect(ctx, x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
     }
 
     function downloadStoryCard() {
