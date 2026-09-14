@@ -774,42 +774,60 @@ if (typeof io === 'undefined') {
             <div class="flex items-center justify-between mb-3">
               <span class="text-xs font-mono text-zinc-400 font-bold flex items-center gap-1.5">
                 <span class="w-2 h-2 rounded-full bg-street-orange shadow-[0_0_6px_#ff652f]"></span>
-                ${escapeHTML(c.moniker)}
+                <span class="bacheca-moniker"></span>
               </span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-street-orange font-bold border border-zinc-800">
-                ${escapeHTML(c.moodLabel)}
-              </span>
+              <span class="bacheca-mood text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 text-street-orange font-bold border border-zinc-800"></span>
             </div>
-            <p class="text-sm text-zinc-100 font-sans italic my-3 leading-relaxed">
-              "${escapeHTML(c.text)}"
-            </p>
+            <p class="bacheca-text text-sm text-zinc-100 font-sans italic my-3 leading-relaxed"></p>
           </div>
           <div class="pt-3.5 border-t border-zinc-800/80 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                onclick="toggleBachecaReaction('${c.id}', 'fire', this)"
-                class="px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-street-orange/20 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                class="bacheca-fire-btn px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-street-orange/20 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1 transition cursor-pointer"
               >
-                <span>🔥</span> <span>${c.fires}</span>
+                <span>🔥</span> <span class="bacheca-fires-count"></span>
               </button>
               <button
                 type="button"
-                onclick="toggleBachecaReaction('${c.id}', 'skull', this)"
-                class="px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1 transition cursor-pointer"
+                class="bacheca-skull-btn px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono text-zinc-300 hover:text-white flex items-center gap-1 transition cursor-pointer"
               >
-                <span>💀</span> <span>${c.skulls}</span>
+                <span>💀</span> <span class="bacheca-skulls-count"></span>
               </button>
             </div>
             <button
               type="button"
-              onclick="replyToConfession('${c.mood}', '${c.moniker}')"
-              class="text-xs font-mono font-bold text-street-orange hover:text-white flex items-center gap-1 transition cursor-pointer"
+              class="bacheca-reply-btn text-xs font-mono font-bold text-street-orange hover:text-white flex items-center gap-1 transition cursor-pointer"
             >
               <span>Rispondi</span> <span>→</span>
             </button>
           </div>
         `;
+        safeSetText(card.querySelector('.bacheca-moniker'), c.moniker);
+        safeSetText(card.querySelector('.bacheca-mood'), c.moodLabel);
+        safeSetText(card.querySelector('.bacheca-text'), `"${c.text}"`);
+        safeSetText(card.querySelector('.bacheca-fires-count'), c.fires);
+        safeSetText(card.querySelector('.bacheca-skulls-count'), c.skulls);
+
+        const fireBtn = card.querySelector('.bacheca-fire-btn');
+        if (fireBtn) {
+          fireBtn.addEventListener('click', function() {
+            toggleBachecaReaction(c.id, 'fire', this);
+          });
+        }
+        const skullBtn = card.querySelector('.bacheca-skull-btn');
+        if (skullBtn) {
+          skullBtn.addEventListener('click', function() {
+            toggleBachecaReaction(c.id, 'skull', this);
+          });
+        }
+        const replyBtn = card.querySelector('.bacheca-reply-btn');
+        if (replyBtn) {
+          replyBtn.addEventListener('click', function() {
+            replyToConfession(c.mood, c.moniker);
+          });
+        }
+
         grid.appendChild(card);
       });
     }
@@ -874,7 +892,18 @@ if (typeof io === 'undefined') {
         switchView('profilo');
       } else if (hash === '#app' || hash === '#confessionale') {
         switchView('app');
-      } else if (hash === '#presentazione' || hash === '' || hash === '#') {
+      } else if (hash === '#radar') {
+        switchView('radar');
+      } else if (hash === '#chat') {
+        switchView('chat');
+      } else if (hash === '#presentazione' || hash === '#landing' || hash === '' || hash === '#') {
+        if (currentRoomId) {
+          if (socket && socket.connected) {
+            socket.emit('skip_partner', { roomId: currentRoomId });
+          }
+          currentRoomId = null;
+        }
+        clearInterval(countdownInterval);
         switchView('landing');
       }
     });
@@ -918,7 +947,7 @@ if (typeof io === 'undefined') {
         return;
       }
       try {
-        localStorage.setItem('streetalk_lead_email', email);
+        localStorage.setItem('streetalk_lead_registered', 'true');
         localStorage.setItem('streetalk_lead_timestamp', Date.now().toString());
       } catch (e) {}
 
@@ -972,6 +1001,88 @@ if (typeof io === 'undefined') {
         if (this.ctx && this.ctx.state === 'suspended') {
           this.ctx.resume();
         }
+      },
+
+      activeVoiceSimCleanup: null,
+
+      playVoiceSimulation(durationSec, playBtn, barEls, durLabel) {
+        if (!this.enabled) return;
+        this.init();
+
+        if (this.activeVoiceSimCleanup) {
+          this.activeVoiceSimCleanup();
+          return;
+        }
+
+        const totalSec = Math.max(1, Math.round(Number(durationSec) || 12));
+        playBtn.innerHTML = '⏸';
+
+        let osc = null;
+        let gain = null;
+        let filter = null;
+        if (this.ctx) {
+          try {
+            const now = this.ctx.currentTime;
+            osc = this.ctx.createOscillator();
+            gain = this.ctx.createGain();
+            filter = this.ctx.createBiquadFilter();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(220, now);
+
+            for (let t = 0; t < totalSec; t += 0.2) {
+              const freq = 180 + Math.sin(t * 8) * 50 + Math.cos(t * 14) * 35;
+              osc.frequency.setValueAtTime(freq, now + t);
+            }
+
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(500, now);
+            filter.Q.setValueAtTime(3, now);
+
+            gain.gain.setValueAtTime(0.04, now);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(now);
+            osc.stop(now + totalSec);
+          } catch (e) {}
+        }
+
+        const startTime = Date.now();
+        const interval = setInterval(() => {
+          const elapsed = (Date.now() - startTime) / 1000;
+          const progress = Math.min(1, elapsed / totalSec);
+          const filledBars = Math.floor(progress * (barEls ? barEls.length : 20));
+          if (barEls) {
+            barEls.forEach((bar, idx) => {
+              if (idx <= filledBars) {
+                bar.classList.add('played');
+              } else {
+                bar.classList.remove('played');
+              }
+            });
+          }
+          const rem = Math.max(0, Math.ceil(totalSec - elapsed));
+          if (durLabel) safeSetText(durLabel, `0:${String(rem).padStart(2, '0')}`);
+
+          if (elapsed >= totalSec) {
+            cleanup();
+          }
+        }, 100);
+
+        const cleanup = () => {
+          clearInterval(interval);
+          if (osc) {
+            try { osc.stop(); } catch (e) {}
+          }
+          playBtn.innerHTML = '▶';
+          if (barEls) barEls.forEach(bar => bar.classList.remove('played'));
+          if (durLabel) safeSetText(durLabel, `0:${String(totalSec).padStart(2, '0')}`);
+          this.activeVoiceSimCleanup = null;
+        };
+
+        this.activeVoiceSimCleanup = cleanup;
       },
 
 
@@ -1233,6 +1344,9 @@ if (typeof io === 'undefined') {
       partnerGender = 'F';
 
       safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
+      safeSetText(document.getElementById('chat-top-partner-nick'), partnerNick);
+      safeSetText(document.getElementById('chat-pinned-partner-nick'), partnerNick);
+      safeSetText(document.getElementById('chat-partner-secret-snippet'), `"${partnerSecret.substring(0, 48)}..."`);
       safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
       safeSetText(document.getElementById('chat-partner-gender'), partnerGender);
       safeSetText(document.getElementById('chat-partner-mood'), partnerMood);
@@ -1243,17 +1357,44 @@ if (typeof io === 'undefined') {
       const container = document.getElementById('messages-container');
       container.innerHTML = `
         <div class="text-center my-2">
-          <span class="text-[10px] font-mono bg-street-orange/15 border border-street-orange/30 text-street-orange px-3.5 py-1 rounded-full">
-            ⚡ ANTEPRIMA CHATROOM ATTIVA • 180 secondi • Messaggi non archiviati
+          <span class="text-[10px] font-mono bg-street-orange/15 border border-street-orange/30 text-street-orange px-3.5 py-1 rounded-full shadow-sm">
+            ⚡ ANTEPRIMA CHAT TELEGRAM • 180 secondi • Crittografia RAM effimera
           </span>
         </div>
-        <div class="flex flex-col items-start mb-3">
-          <div class="max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm font-sans bg-[#0d0e14] border border-zinc-800 text-gray-100 rounded-bl-none">
-            Bella! Ho letto il tuo segreto... assurdo 😂 Sei pronto a parlare o scappi prima dei 3 minuti?
-          </div>
-          <span class="text-[9px] font-mono text-zinc-500 mt-1 px-1">Adesso</span>
-        </div>
       `;
+
+      // 1. Incoming text bubble (Telegram Dark Graphite)
+      appendMessageBubble({
+        message: 'Bella! Ho letto il tuo segreto... assurdo 😂 Sei pronto a parlare o scappi prima dei 3 minuti?',
+        timestamp: Date.now() - 32000
+      }, false);
+
+      // 2. Incoming playable demo voice note
+      appendMessageBubble({
+        type: 'audio',
+        audioData: 'demo',
+        duration: 12,
+        timestamp: Date.now() - 20000
+      }, false);
+
+      // 3. Incoming reaction GIF card (Direct CDN without referer restrictions)
+      appendMessageBubble({
+        type: 'gif',
+        gifUrl: '/assets/gifs/flame.svg',
+        timestamp: Date.now() - 10000
+      }, false);
+
+      // 4. Outgoing text bubble (Telegram Street Orange)
+      appendMessageBubble({
+        message: 'Assurdo fra, parliamone subito prima che scada il timer dei 180s ⏳',
+        timestamp: Date.now() - 2000
+      }, true);
+
+      // Ensure secret drawer is open by default
+      const secretDrawer = document.getElementById('pinned-secret-drawer');
+      const secretChevron = document.getElementById('pinned-secret-chevron');
+      if (secretDrawer) secretDrawer.classList.remove('hidden');
+      if (secretChevron) secretChevron.classList.add('rotate-180');
 
       const extBtn = document.getElementById('btn-extension');
       if (extBtn) {
@@ -1338,6 +1479,17 @@ if (typeof io === 'undefined') {
         }
       }
 
+      // Fullscreen Chat Mode: hide main-header and lock body scroll
+      const mainHeader = document.getElementById('main-header');
+      if (viewName === 'chat') {
+        if (mainHeader) mainHeader.classList.add('hidden');
+        document.body.classList.add('chat-mode-active');
+      } else {
+        if (mainHeader) mainHeader.classList.remove('hidden');
+        document.body.classList.remove('chat-mode-active');
+        toggleMobileChatSidebar(false);
+      }
+
       const allViews = [vLanding, vApp, vRadar, vChat, vBacheca, vProfilo].filter(Boolean);
       const currentActive = allViews.find(v => !v.classList.contains('hidden'));
 
@@ -1360,10 +1512,17 @@ if (typeof io === 'undefined') {
               onActive();
             }
 
-            gsap.fromTo(targetView,
-              { opacity: 0, y: 14, scale: 0.99 },
-              { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: 'power3.out' }
-            );
+            if (targetView === vChat) {
+              gsap.fromTo(targetView,
+                { opacity: 0 },
+                { opacity: 1, duration: 0.2, ease: 'power2.out', clearProps: 'transform' }
+              );
+            } else {
+              gsap.fromTo(targetView,
+                { opacity: 0, y: 14, scale: 0.99 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: 'power3.out' }
+              );
+            }
           }
         });
         return;
@@ -1377,6 +1536,21 @@ if (typeof io === 'undefined') {
       }
       if (typeof onActive === 'function') {
         onActive();
+      }
+    }
+
+    // Mobile Chat Sidebar Drawer Toggle
+    function toggleMobileChatSidebar(forceState) {
+      const sidebar = document.getElementById('chat-sidebar');
+      const backdrop = document.getElementById('chat-sidebar-backdrop');
+      if (!sidebar) return;
+      const willOpen = typeof forceState === 'boolean' ? forceState : !sidebar.classList.contains('mobile-open');
+      if (willOpen) {
+        sidebar.classList.add('mobile-open');
+        if (backdrop) backdrop.classList.remove('hidden');
+      } else {
+        sidebar.classList.remove('mobile-open');
+        if (backdrop) backdrop.classList.add('hidden');
       }
     }
 
@@ -1457,11 +1631,616 @@ if (typeof io === 'undefined') {
       switchView('landing');
     }
 
+    function leaveChatToRadar() {
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('skip_partner', { roomId: currentRoomId });
+      }
+      clearInterval(countdownInterval);
+      const modalEnded = document.getElementById('modal-ended');
+      if (modalEnded) modalEnded.classList.add('hidden');
+      closeReportModal();
+      closeSocialCardModal();
+      currentRoomId = null;
+
+      // Strictly return to RADAR screen
+      switchView('radar');
+      loadRadarEngine();
+
+      if (mySecret) {
+        safeSetText(document.getElementById('radar-display-mood'), selectedMood || 'Cazzeggio');
+        safeSetText(document.getElementById('radar-display-pos'), '#1');
+        safeSetText(document.getElementById('radar-timer-counter'), '00:00');
+        safeSetText(document.getElementById('radar-status-text'), `In cerca di un partner sul mood [${selectedMood || 'Cazzeggio'}]...`);
+
+        radarSecondsCounter = 0;
+        clearInterval(radarInterval);
+        radarInterval = setInterval(() => {
+          radarSecondsCounter++;
+          const mins = String(Math.floor(radarSecondsCounter / 60)).padStart(2, '0');
+          const secs = String(radarSecondsCounter % 60).padStart(2, '0');
+          safeSetText(document.getElementById('radar-timer-counter'), `${mins}:${secs}`);
+        }, 1000);
+
+        const gender = document.getElementById('user-gender')?.value || 'M';
+        const targetGender = document.getElementById('target-gender')?.value || 'ALL';
+
+        const joinPayload = {
+          gender,
+          targetGender,
+          mood: selectedMood || 'Cazzeggio',
+          secret: mySecret,
+          profile: getUserProfile()
+        };
+
+        if (socket && socket.connected) {
+          pendingQueueJoin = null;
+          socket.emit('join_queue', joinPayload);
+        } else {
+          pendingQueueJoin = joinPayload;
+        }
+      }
+    }
+
+    function leaveChatToHome() {
+      leaveChatToRadar();
+    }
+
     function restartWithSameSecret() {
       document.getElementById('modal-ended').classList.add('hidden');
       closeReportModal();
       closeSocialCardModal();
       initiateRadarSearch();
+    }
+
+    // Telegram Pinned Secret Drawer Toggle
+    function togglePinnedSecret() {
+      const drawer = document.getElementById('pinned-secret-drawer');
+      const chevron = document.getElementById('pinned-secret-chevron');
+      if (!drawer) return;
+      drawer.classList.toggle('hidden');
+      if (chevron) {
+        chevron.classList.toggle('rotate-180');
+      }
+    }
+
+    // Dynamic Telegram Input State (Mic vs Send Button)
+    function updateChatInputState() {
+      const input = document.getElementById('chat-message-input');
+      const micBtn = document.getElementById('btn-chat-mic');
+      const sendBtn = document.getElementById('btn-chat-send');
+      if (!input || !micBtn || !sendBtn) return;
+      const hasText = input.value.trim().length > 0;
+      if (hasText) {
+        micBtn.classList.add('hidden');
+        sendBtn.classList.remove('hidden');
+      } else {
+        micBtn.classList.remove('hidden');
+        sendBtn.classList.add('hidden');
+      }
+    }
+
+    // Curated High-Speed Reaction GIFs Catalog (Local Verified Permanent Assets)
+    const STREET_GIF_CATALOG = {
+      trend: [
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' },
+        { label: 'Popcorn Time', url: '/assets/gifs/popcorn.svg' },
+        { label: 'Mind Blown', url: '/assets/gifs/mindblown.svg' },
+        { label: 'Respect Salute', url: '/assets/gifs/respect.svg' },
+        { label: 'Cool Doge', url: '/assets/gifs/doge.svg' },
+        { label: 'Night Drive', url: '/assets/gifs/drive.svg' }
+      ],
+      street: [
+        { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
+        { label: 'Boombox Beat', url: '/assets/gifs/boombox.svg' },
+        { label: 'Urban Skater', url: '/assets/gifs/skate.svg' },
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' },
+        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
+        { label: 'Moonlight Alley', url: '/assets/gifs/moon.svg' }
+      ],
+      reazioni: [
+        { label: 'Shocked Face', url: '/assets/gifs/shock.svg' },
+        { label: 'Facepalm', url: '/assets/gifs/facepalm.svg' },
+        { label: 'Mind Blown', url: '/assets/gifs/mindblown.svg' },
+        { label: 'Respect Salute', url: '/assets/gifs/respect.svg' },
+        { label: 'Popcorn Time', url: '/assets/gifs/popcorn.svg' },
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+      ],
+      memes: [
+        { label: 'Roll Safe Smart', url: '/assets/gifs/smart.svg' },
+        { label: 'Cool Doge', url: '/assets/gifs/doge.svg' },
+        { label: 'Facepalm', url: '/assets/gifs/facepalm.svg' },
+        { label: 'Laugh Hard', url: '/assets/gifs/lol.svg' },
+        { label: 'Wheezing Laugh', url: '/assets/gifs/wheeze.svg' },
+        { label: 'Mind Blown', url: '/assets/gifs/mindblown.svg' }
+      ],
+      lol: [
+        { label: 'Laugh Hard', url: '/assets/gifs/lol.svg' },
+        { label: 'Wheezing Laugh', url: '/assets/gifs/wheeze.svg' },
+        { label: 'Cool Doge', url: '/assets/gifs/doge.svg' },
+        { label: 'Shocked Face', url: '/assets/gifs/shock.svg' },
+        { label: 'Facepalm', url: '/assets/gifs/facepalm.svg' },
+        { label: 'Roll Safe', url: '/assets/gifs/smart.svg' }
+      ],
+      notte: [
+        { label: 'Moonlight Alley', url: '/assets/gifs/moon.svg' },
+        { label: 'Midnight Smoke', url: '/assets/gifs/smoke.svg' },
+        { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
+        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
+        { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+      ],
+      cyberpunk: [
+        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' },
+        { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
+        { label: 'Boombox Beat', url: '/assets/gifs/boombox.svg' },
+        { label: 'Midnight Smoke', url: '/assets/gifs/smoke.svg' },
+        { label: 'Mind Blown', url: '/assets/gifs/mindblown.svg' },
+        { label: 'Anime Sparkle', url: '/assets/gifs/anime.svg' }
+      ],
+      anime: [
+        { label: 'Anime Sparkle', url: '/assets/gifs/anime.svg' },
+        { label: 'Moonlight Alley', url: '/assets/gifs/moon.svg' },
+        { label: 'Midnight Smoke', url: '/assets/gifs/smoke.svg' },
+        { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
+        { label: 'Shocked Face', url: '/assets/gifs/shock.svg' },
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' }
+      ],
+      music: [
+        { label: 'Vinyl Beat', url: '/assets/gifs/vinyl.svg' },
+        { label: 'Boombox Beat', url: '/assets/gifs/boombox.svg' },
+        { label: 'Urban Skater', url: '/assets/gifs/skate.svg' },
+        { label: 'Night Drive', url: '/assets/gifs/drive.svg' },
+        { label: 'Lit Fire', url: '/assets/gifs/flame.svg' },
+        { label: 'Cyber Bolt', url: '/assets/gifs/cyber.svg' }
+      ]
+    };
+
+    let activeGifCategory = 'trend';
+    let gifAbortController = null;
+    let searchDebounceTimer = null;
+
+    function toggleGifPicker(forceState) {
+      const popover = document.getElementById('chat-gif-popover');
+      if (!popover) return;
+      const willOpen = typeof forceState === 'boolean' ? forceState : popover.classList.contains('hidden');
+      if (willOpen) {
+        loadGifs({ category: activeGifCategory });
+        popover.classList.remove('hidden');
+        const input = document.getElementById('gif-search-input');
+        if (input && window.innerWidth >= 768) {
+          setTimeout(() => input.focus(), 80);
+        }
+      } else {
+        popover.classList.add('hidden');
+        if (gifAbortController) {
+          gifAbortController.abort();
+          gifAbortController = null;
+        }
+      }
+    }
+
+    function switchGifCategory(cat, btnEl) {
+      activeGifCategory = cat;
+      const input = document.getElementById('gif-search-input');
+      const clearBtn = document.getElementById('gif-search-clear');
+      if (input) input.value = '';
+      if (clearBtn) clearBtn.classList.add('hidden');
+
+      const popover = document.getElementById('chat-gif-popover');
+      if (popover) {
+        popover.querySelectorAll('.gif-cat-btn').forEach(b => {
+          b.className = 'gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap';
+        });
+      }
+      if (btnEl) {
+        btnEl.className = 'gif-cat-btn active px-2.5 py-1 rounded-lg bg-street-orange text-black font-bold cursor-pointer whitespace-nowrap';
+      }
+      loadGifs({ category: cat });
+    }
+
+    function clearGifSearch() {
+      const input = document.getElementById('gif-search-input');
+      const clearBtn = document.getElementById('gif-search-clear');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      if (clearBtn) clearBtn.classList.add('hidden');
+      loadGifs({ category: activeGifCategory });
+    }
+
+    function renderGifSkeletons() {
+      const grid = document.getElementById('chat-gif-grid');
+      if (!grid) return;
+      grid.innerHTML = Array(6).fill(0).map(() => 
+        '<div class="tg-gif-3d-card tg-gif-loading-skeleton" aria-hidden="true"></div>'
+      ).join('');
+    }
+
+    async function loadGifs({ category = activeGifCategory, query = '' } = {}) {
+      const grid = document.getElementById('chat-gif-grid');
+      if (!grid) return;
+
+      if (gifAbortController) {
+        gifAbortController.abort();
+      }
+      gifAbortController = new AbortController();
+
+      renderGifSkeletons();
+
+      const badge = document.getElementById('gif-provider-badge');
+
+      try {
+        const url = query.trim()
+          ? `/api/gifs/search?q=${encodeURIComponent(query.trim())}&limit=18`
+          : `/api/gifs/trending?category=${encodeURIComponent(category)}&limit=18`;
+
+        const res = await fetch(url, { signal: gifAbortController.signal });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const json = await res.json();
+        const items = (json && Array.isArray(json.items) && json.items.length > 0)
+          ? json.items
+          : (STREET_GIF_CATALOG[category] || STREET_GIF_CATALOG.trend).map(i => ({
+              id: 'curated_' + Math.random().toString(36).slice(2, 7),
+              title: i.label,
+              url: i.url,
+              previewUrl: i.url,
+              provider: 'curated'
+            }));
+
+        if (badge) {
+          const pName = json.provider || 'Curated';
+          badge.textContent = pName.charAt(0).toUpperCase() + pName.slice(1);
+        }
+
+        renderGifItems(items);
+      } catch (err) {
+        if (err.name === 'AbortError') return;
+        const fallbackItems = (STREET_GIF_CATALOG[category] || STREET_GIF_CATALOG.trend).map(i => ({
+          id: 'curated_' + Math.random().toString(36).slice(2, 7),
+          title: i.label,
+          url: i.url,
+          previewUrl: i.url,
+          provider: 'curated'
+        }));
+        if (badge) badge.textContent = 'Curated';
+        renderGifItems(fallbackItems);
+      }
+    }
+
+    function renderGifItems(items) {
+      const grid = document.getElementById('chat-gif-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (!items || items.length === 0) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-6 text-xs text-zinc-500 font-mono">Nessuna GIF trovata</div>';
+        return;
+      }
+
+      items.forEach(item => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'tg-gif-3d-card';
+        btn.setAttribute('role', 'button');
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('aria-label', `Invia GIF: ${item.title || 'Reaction'}`);
+        btn.title = item.title || 'GIF';
+
+        const img = document.createElement('img');
+        img.src = item.previewUrl || item.url;
+        img.alt = item.title || 'Reaction GIF';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.setAttribute('referrerpolicy', 'no-referrer');
+        img.crossOrigin = 'anonymous';
+
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = '/assets/gifs/flame.svg';
+        };
+
+        const badge = document.createElement('span');
+        badge.className = 'tg-gif-3d-badge';
+        safeSetText(badge, item.title || item.category || 'Reaction');
+
+        btn.appendChild(img);
+        btn.appendChild(badge);
+
+        btn.onclick = () => {
+          sendGif(item.url || item.previewUrl);
+          toggleGifPicker(false);
+        };
+
+        btn.onkeydown = (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            sendGif(item.url || item.previewUrl);
+            toggleGifPicker(false);
+          }
+        };
+
+        grid.appendChild(btn);
+      });
+    }
+
+    function sendGif(gifUrl) {
+      if (!gifUrl) return;
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('send_message', {
+          roomId: currentRoomId,
+          type: 'gif',
+          gifUrl
+        });
+      } else if (!currentRoomId) {
+        // Preview mode echo
+        appendMessageBubble({ type: 'gif', gifUrl, timestamp: Date.now() }, true);
+        SoundEngine.playMsgSent();
+
+        const typingEl = document.getElementById('chat-partner-typing-indicator');
+        if (typingEl) typingEl.style.opacity = '1';
+
+        setTimeout(() => {
+          if (typingEl) typingEl.style.opacity = '0';
+          const partnerGifs = STREET_GIF_CATALOG.lol;
+          const randomGif = partnerGifs[Math.floor(Math.random() * partnerGifs.length)].url;
+          appendMessageBubble({ type: 'gif', gifUrl: randomGif, timestamp: Date.now() }, false);
+          SoundEngine.playMsgReceived();
+        }, 1200);
+      }
+    }
+
+    // Web Audio Voice Notes Recorder (Ephemeral MediaRecorder)
+    let audioMediaRecorder = null;
+    let audioStream = null;
+    let recordedAudioChunks = [];
+    let audioRecordingInterval = null;
+    let audioRecordingStart = 0;
+
+    async function startAudioRecording() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showToast('Microfono non supportato su questo browser.', 'error');
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStream = stream;
+        recordedAudioChunks = [];
+
+        let options = {};
+        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported) {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+            options = { mimeType: 'audio/webm;codecs=opus' };
+          } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+            options = { mimeType: 'audio/webm' };
+          }
+        }
+
+        audioMediaRecorder = new MediaRecorder(stream, options);
+
+        audioMediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) {
+            recordedAudioChunks.push(e.data);
+          }
+        };
+
+        audioMediaRecorder.start(100);
+        audioRecordingStart = Date.now();
+
+        // Show recording bar, hide input form
+        const recBar = document.getElementById('chat-recording-bar');
+        const inputForm = document.getElementById('chat-input-form');
+        const recTimer = document.getElementById('recording-timer');
+        if (recBar) recBar.classList.remove('hidden');
+        if (inputForm) inputForm.classList.add('hidden');
+        safeSetText(recTimer, '00:00');
+
+        clearInterval(audioRecordingInterval);
+        audioRecordingInterval = setInterval(() => {
+          const elapsedSec = Math.floor((Date.now() - audioRecordingStart) / 1000);
+          const m = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+          const s = String(elapsedSec % 60).padStart(2, '0');
+          safeSetText(recTimer, `${m}:${s}`);
+
+          if (elapsedSec >= 60) {
+            stopAndSendAudioRecording();
+          }
+        }, 1000);
+
+      } catch (err) {
+        if (!currentRoomId) {
+          audioRecordingStart = Date.now();
+          const recBar = document.getElementById('chat-recording-bar');
+          const inputForm = document.getElementById('chat-input-form');
+          const recTimer = document.getElementById('recording-timer');
+          if (recBar) recBar.classList.remove('hidden');
+          if (inputForm) inputForm.classList.add('hidden');
+          safeSetText(recTimer, '00:00');
+
+          clearInterval(audioRecordingInterval);
+          audioRecordingInterval = setInterval(() => {
+            const elapsedSec = Math.floor((Date.now() - audioRecordingStart) / 1000);
+            const m = String(Math.floor(elapsedSec / 60)).padStart(2, '0');
+            const s = String(elapsedSec % 60).padStart(2, '0');
+            safeSetText(recTimer, `${m}:${s}`);
+
+            if (elapsedSec >= 60) {
+              stopAndSendAudioRecording();
+            }
+          }, 1000);
+          showToast('Modalità demo: simulazione registrazione vocale avviata 🎙️', 'info');
+          return;
+        }
+        showToast('Impossibile accedere al microfono. Verifica i permessi.', 'error');
+      }
+    }
+
+    function cleanupRecordingState() {
+      clearInterval(audioRecordingInterval);
+      if (audioStream) {
+        try {
+          audioStream.getTracks().forEach(track => track.stop());
+        } catch (e) {}
+        audioStream = null;
+      }
+      audioMediaRecorder = null;
+      recordedAudioChunks = [];
+
+      const recBar = document.getElementById('chat-recording-bar');
+      const inputForm = document.getElementById('chat-input-form');
+      if (recBar) recBar.classList.add('hidden');
+      if (inputForm) inputForm.classList.remove('hidden');
+    }
+
+    function cancelAudioRecording() {
+      if (audioMediaRecorder && audioMediaRecorder.state !== 'inactive') {
+        try {
+          audioMediaRecorder.stop();
+        } catch (e) {}
+      }
+      cleanupRecordingState();
+      showToast('Registrazione vocale annullata.', 'info');
+    }
+
+    function stopAndSendAudioRecording() {
+      const durationSec = Math.max(1, Math.round((Date.now() - (audioRecordingStart || Date.now())) / 1000));
+
+      if (!audioMediaRecorder || audioMediaRecorder.state === 'inactive') {
+        if (!currentRoomId && audioRecordingStart) {
+          sendAudioMessage('demo', durationSec);
+        }
+        cleanupRecordingState();
+        return;
+      }
+
+      audioMediaRecorder.onstop = () => {
+        if (!recordedAudioChunks.length) {
+          cleanupRecordingState();
+          return;
+        }
+
+        const mime = (audioMediaRecorder && audioMediaRecorder.mimeType) || 'audio/webm';
+        const audioBlob = new Blob(recordedAudioChunks, { type: mime });
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64Audio = reader.result;
+          if (typeof base64Audio === 'string' && base64Audio.startsWith('data:audio/')) {
+            sendAudioMessage(base64Audio, durationSec);
+          }
+          cleanupRecordingState();
+        };
+        reader.readAsDataURL(audioBlob);
+      };
+
+      try {
+        audioMediaRecorder.stop();
+      } catch (e) {
+        cleanupRecordingState();
+      }
+    }
+
+    function sendAudioMessage(audioData, duration) {
+      if (socket && socket.connected && currentRoomId) {
+        socket.emit('send_message', {
+          roomId: currentRoomId,
+          type: 'audio',
+          audioData,
+          duration
+        });
+      } else if (!currentRoomId) {
+        appendMessageBubble({ type: 'audio', audioData, duration, timestamp: Date.now() }, true);
+        SoundEngine.playMsgSent();
+
+        const typingEl = document.getElementById('chat-partner-typing-indicator');
+        if (typingEl) typingEl.style.opacity = '1';
+
+        setTimeout(() => {
+          if (typingEl) typingEl.style.opacity = '0';
+          appendMessageBubble({
+            message: 'Ho ascoltato il tuo vocale... voce interessantissima! Dimmi di più sul segreto 🔥',
+            timestamp: Date.now()
+          }, false);
+          SoundEngine.playMsgReceived();
+        }, 1500);
+      }
+    }
+
+    // Ephemeral Voice Note Web Audio Player
+    let activeAudioInstance = null;
+    let activeAudioCleanup = null;
+
+    function playVoiceNote(audioData, playBtn, barEls, durLabel, totalDuration) {
+      if (!audioData) return;
+
+      if (audioData === 'demo' || audioData === 'synthetic' || !audioData.startsWith('data:audio/')) {
+        SoundEngine.playVoiceSimulation(totalDuration || 12, playBtn, barEls, durLabel);
+        return;
+      }
+
+      if (activeAudioInstance && !activeAudioInstance.paused && playBtn.textContent === '⏸') {
+        activeAudioInstance.pause();
+        playBtn.innerHTML = '▶';
+        return;
+      }
+
+      if (activeAudioCleanup) {
+        activeAudioCleanup();
+      }
+
+      try {
+        const audio = new Audio(audioData);
+        activeAudioInstance = audio;
+        playBtn.innerHTML = '⏸';
+
+        const onTimeUpdate = () => {
+          if (!audio.duration || !isFinite(audio.duration)) return;
+          const progress = audio.currentTime / audio.duration;
+          const filledBars = Math.floor(progress * barEls.length);
+          barEls.forEach((bar, idx) => {
+            if (idx <= filledBars) {
+              bar.classList.add('played');
+            } else {
+              bar.classList.remove('played');
+            }
+          });
+          const rem = Math.max(0, Math.ceil(audio.duration - audio.currentTime));
+          safeSetText(durLabel, `0:${String(rem).padStart(2, '0')}`);
+        };
+
+        const onAudioEnd = () => {
+          playBtn.innerHTML = '▶';
+          barEls.forEach(bar => bar.classList.remove('played'));
+          safeSetText(durLabel, `0:${String(totalDuration).padStart(2, '0')}`);
+          activeAudioInstance = null;
+          activeAudioCleanup = null;
+        };
+
+        audio.addEventListener('timeupdate', onTimeUpdate);
+        audio.addEventListener('ended', onAudioEnd);
+        audio.addEventListener('error', onAudioEnd);
+
+        activeAudioCleanup = () => {
+          try {
+            audio.pause();
+            audio.removeEventListener('timeupdate', onTimeUpdate);
+            audio.removeEventListener('ended', onAudioEnd);
+            audio.removeEventListener('error', onAudioEnd);
+          } catch (e) {}
+          playBtn.innerHTML = '▶';
+          barEls.forEach(bar => bar.classList.remove('played'));
+          safeSetText(durLabel, `0:${String(totalDuration).padStart(2, '0')}`);
+          activeAudioInstance = null;
+          activeAudioCleanup = null;
+        };
+
+        audio.play().catch(() => {
+          onAudioEnd();
+        });
+      } catch (err) {
+        playBtn.innerHTML = '▶';
+      }
     }
 
     // Chat Actions
@@ -1473,6 +2252,7 @@ if (typeof io === 'undefined') {
       if (socket && socket.connected && currentRoomId) {
         socket.emit('send_message', {
           roomId: currentRoomId,
+          type: 'text',
           message: text,
           text: text
         });
@@ -1500,6 +2280,7 @@ if (typeof io === 'undefined') {
 
       input.value = '';
       input.focus();
+      updateChatInputState();
 
       if (isTyping && socket && socket.connected && currentRoomId) {
         isTyping = false;
@@ -2355,6 +3136,7 @@ if (typeof io === 'undefined') {
         const mins = String(Math.floor(remaining / 60)).padStart(2, '0');
         const secs = String(remaining % 60).padStart(2, '0');
         safeSetText(countdownEl, `${mins}:${secs}`);
+        safeSetText(document.getElementById('chat-top-countdown'), `${mins}:${secs}`);
 
         if (ring) {
           const pct = Math.max(0, Math.min(100, (remaining / totalSeconds) * 100));
@@ -2378,6 +3160,7 @@ if (typeof io === 'undefined') {
         if (remaining <= 0) {
           clearInterval(countdownInterval);
           safeSetText(countdownEl, '00:00');
+          safeSetText(document.getElementById('chat-top-countdown'), '00:00');
           if (ring) ring.style.strokeDashoffset = 100;
         } else {
           updateDisplay();
@@ -2423,28 +3206,147 @@ if (typeof io === 'undefined') {
       }
 
       const wrap = document.createElement('div');
-      wrap.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'} mb-3`;
+      wrap.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'} mb-2.5`;
 
-      const bubble = document.createElement('div');
-      bubble.className = `max-w-[85%] sm:max-w-[70%] rounded-2xl px-4 py-2.5 text-sm break-words shadow-sm font-sans ${
-        isSelf
-          ? 'bg-gradient-to-r from-street-orange to-[#e64a00] text-black font-semibold rounded-br-none'
-          : 'bg-[#0d0e14] border border-zinc-800 text-gray-100 rounded-bl-none'
-      }`;
+      const time = new Date(messageObj.timestamp || Date.now());
+      const timeStr = `${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`;
+      const checks = isSelf ? ' ✓✓' : '';
 
-      safeSetText(bubble, messageObj.message != null ? messageObj.message : (messageObj.text != null ? messageObj.text : ''));
+      // 1. Audio Voice Note Bubble
+      if (messageObj.type === 'audio' || messageObj.audioData) {
+        const voiceWrap = document.createElement('div');
+        voiceWrap.className = `tg-voice-card ${isSelf ? 'tg-bubble-out' : 'tg-bubble-in'}`;
 
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'text-[9px] font-mono text-zinc-500 mt-1 px-1';
-      const time = new Date(messageObj.timestamp);
-      safeSetText(timeSpan, `${String(time.getHours()).padStart(2,'0')}:${String(time.getMinutes()).padStart(2,'0')}`);
+        const playBtn = document.createElement('button');
+        playBtn.type = 'button';
+        playBtn.className = 'tg-voice-play-btn';
+        playBtn.innerHTML = '▶';
+        playBtn.setAttribute('aria-label', 'Riproduci nota vocale');
 
-      wrap.appendChild(bubble);
-      wrap.appendChild(timeSpan);
+        const waveWrap = document.createElement('div');
+        waveWrap.className = 'tg-waveform-wrap';
+
+        const barHeights = [8, 14, 10, 18, 12, 22, 16, 10, 20, 14, 18, 8, 16, 22, 12, 10, 16, 14, 8, 12];
+        const barEls = [];
+        for (let i = 0; i < 20; i++) {
+          const bar = document.createElement('div');
+          bar.className = 'tg-waveform-bar';
+          bar.style.height = `${barHeights[i % barHeights.length]}px`;
+          waveWrap.appendChild(bar);
+          barEls.push(bar);
+        }
+
+        const infoCol = document.createElement('div');
+        infoCol.className = 'flex flex-col justify-between items-end gap-1 shrink-0';
+
+        const durLabel = document.createElement('span');
+        durLabel.className = 'text-[10px] font-mono font-bold leading-none';
+        const durSec = Math.round(Number(messageObj.duration) || 3);
+        safeSetText(durLabel, `0:${String(durSec).padStart(2, '0')}`);
+
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'text-[9px] font-mono opacity-70 leading-none';
+        safeSetText(timeSpan, `${timeStr}${checks}`);
+
+        infoCol.appendChild(durLabel);
+        infoCol.appendChild(timeSpan);
+
+        playBtn.onclick = () => {
+          playVoiceNote(messageObj.audioData, playBtn, barEls, durLabel, durSec);
+        };
+
+        voiceWrap.appendChild(playBtn);
+        voiceWrap.appendChild(waveWrap);
+        voiceWrap.appendChild(infoCol);
+        wrap.appendChild(voiceWrap);
+
+      // 2. Animated Reaction GIF Bubble
+      } else if (messageObj.type === 'gif' || messageObj.gifUrl) {
+        const gifCard = document.createElement('div');
+        gifCard.className = `tg-gif-card ${isSelf ? 'border-street-orange/40' : 'border-zinc-700/60'}`;
+
+        const allowedGifHosts = [
+          'media.tenor.com',
+          'c.tenor.com',
+          'media.giphy.com',
+          'media0.giphy.com',
+          'media1.giphy.com',
+          'media2.giphy.com',
+          'media3.giphy.com',
+          'media4.giphy.com',
+          'i.giphy.com'
+        ];
+        let safeGifUrl = '/assets/gifs/flame.svg';
+        const rawUrl = String(messageObj.gifUrl || '').trim();
+        if (rawUrl.startsWith('/assets/gifs/')) {
+          safeGifUrl = rawUrl;
+        } else if (rawUrl.startsWith('https://')) {
+          try {
+            const parsed = new URL(rawUrl);
+            if (allowedGifHosts.includes(parsed.hostname.toLowerCase())) {
+              safeGifUrl = parsed.href;
+            }
+          } catch (_) {}
+        }
+
+        const img = document.createElement('img');
+        img.src = safeGifUrl;
+        img.alt = 'GIF Reaction';
+        img.className = 'tg-gif-img';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.setAttribute('referrerpolicy', 'no-referrer');
+        img.crossOrigin = 'anonymous';
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = '/assets/gifs/flame.svg';
+        };
+
+        const timeBadge = document.createElement('div');
+        timeBadge.className = 'tg-gif-time';
+        safeSetText(timeBadge, `${timeStr}${checks}`);
+
+        gifCard.appendChild(img);
+        gifCard.appendChild(timeBadge);
+        wrap.appendChild(gifCard);
+
+      // 3. Telegram Text Bubble
+      } else {
+        const bubble = document.createElement('div');
+        bubble.className = `max-w-[85%] sm:max-w-[70%] px-3.5 py-2 text-sm break-words shadow-sm font-sans flex flex-col ${
+          isSelf ? 'tg-bubble-out' : 'tg-bubble-in'
+        }`;
+
+        const textContent = document.createElement('div');
+        textContent.className = 'leading-snug';
+        safeSetText(textContent, messageObj.message != null ? messageObj.message : (messageObj.text != null ? messageObj.text : ''));
+
+        const metaRow = document.createElement('div');
+        metaRow.className = 'self-end text-[9px] font-mono mt-0.5 opacity-75 flex items-center gap-1 select-none';
+        safeSetText(metaRow, `${timeStr}${checks}`);
+
+        bubble.appendChild(textContent);
+        bubble.appendChild(metaRow);
+        wrap.appendChild(bubble);
+      }
+
       container.appendChild(wrap);
-
       container.scrollTop = container.scrollHeight;
     }
+
+    // Window global bindings for interactive HTML elements
+    window.togglePinnedSecret = togglePinnedSecret;
+    window.toggleGifPicker = toggleGifPicker;
+    window.switchGifCategory = switchGifCategory;
+    window.clearGifSearch = clearGifSearch;
+    window.sendGif = sendGif;
+    window.loadGifs = loadGifs;
+    window.startAudioRecording = startAudioRecording;
+    window.cancelAudioRecording = cancelAudioRecording;
+    window.stopAndSendAudioRecording = stopAndSendAudioRecording;
+    window.updateChatInputState = updateChatInputState;
+    window.toggleMobileChatSidebar = toggleMobileChatSidebar;
+    window.leaveChatToHome = leaveChatToHome;
 
     // ==========================================
     // INITIALIZATION & DOM LISTENERS
@@ -2453,6 +3355,29 @@ if (typeof io === 'undefined') {
       // Initialize Streetalk Profile & Onboarding Gate
       try {
         initProfileAndOnboarding();
+      } catch (e) {}
+
+      // Initialize GIF Live Search
+      try {
+        const gifInput = document.getElementById('gif-search-input');
+        const clearBtn = document.getElementById('gif-search-clear');
+        if (gifInput) {
+          gifInput.addEventListener('input', (e) => {
+            const q = e.target.value;
+            if (clearBtn) {
+              if (q.length > 0) clearBtn.classList.remove('hidden');
+              else clearBtn.classList.add('hidden');
+            }
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => {
+              if (q.trim()) {
+                loadGifs({ query: q.trim() });
+              } else {
+                loadGifs({ category: activeGifCategory });
+              }
+            }, 250);
+          });
+        }
       } catch (e) {}
 
       // Direct URL Navigation for Chatroom Preview (?view=chat, ?preview=chat, #chat)
@@ -2626,6 +3551,9 @@ if (typeof io === 'undefined') {
         };
 
         safeSetText(document.getElementById('chat-partner-nick'), partnerNick);
+        safeSetText(document.getElementById('chat-pinned-partner-nick'), partnerNick);
+        const secretSnippet = data.partnerSecret ? `"${data.partnerSecret.substring(0, 48)}..."` : 'Tocca per leggere il segreto completo';
+        safeSetText(document.getElementById('chat-partner-secret-snippet'), secretSnippet);
         const partnerAvatarEl = document.getElementById('chat-partner-avatar');
         if (partnerAvatarEl) setAvatarDisplay(partnerAvatarEl, partnerAvatar, 'w-6 h-6');
 
@@ -2640,6 +3568,9 @@ if (typeof io === 'undefined') {
           }
         }
 
+        safeSetText(document.getElementById('chat-partner-nick'), data.partnerNick);
+        safeSetText(document.getElementById('chat-top-partner-nick'), data.partnerNick);
+        safeSetText(document.getElementById('chat-pinned-partner-nick'), data.partnerNick);
         safeSetText(document.getElementById('chat-my-nick-badge'), `Tu: ${myNick}`);
         safeSetText(document.getElementById('chat-partner-gender'), data.partnerGender);
         safeSetText(document.getElementById('chat-partner-mood'), data.partnerMood);
@@ -2716,10 +3647,13 @@ if (typeof io === 'undefined') {
 
       socket.on('partner_typing', (data) => {
         const indicator = document.getElementById('chat-partner-typing-indicator');
+        const topIndicator = document.getElementById('chat-top-typing');
         if (data.isTyping) {
-          indicator.classList.remove('opacity-0');
+          if (indicator) indicator.classList.remove('opacity-0');
+          if (topIndicator) topIndicator.classList.remove('hidden');
         } else {
-          indicator.classList.add('opacity-0');
+          if (indicator) indicator.classList.add('opacity-0');
+          if (topIndicator) topIndicator.classList.add('hidden');
         }
       });
 

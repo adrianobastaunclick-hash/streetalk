@@ -9,9 +9,26 @@ const supabaseClient = require('./lib/supabase');
 const { createNetworkPolicy } = require('./lib/network-policy');
 const networkPolicy = createNetworkPolicy();
 const { streetBot } = require('./lib/street-bot');
+const { defaultGifService } = require('./lib/gif-provider');
 
 const app = express();
 const server = http.createServer(app);
+
+app.disable('x-powered-by');
+
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(self), geolocation=(), payment=()');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  res.setHeader(
+    'Content-Security-Policy',
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https://media.tenor.com https://*.tenor.com https://*.giphy.com; media-src 'self' blob: data:; connect-src 'self' https://streetalk.onrender.com wss://streetalk.onrender.com ws: wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+  );
+  next();
+});
 
 // Use the same deliberate browser-origin boundary for HTTP and Socket.IO.
 app.set('trust proxy', networkPolicy.trustProxy);
@@ -22,7 +39,37 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors({ origin: (origin, done) => done(null, networkPolicy.isOriginAllowed(origin)) }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+
+// Volatile In-Memory REST API Rate Limiter (Anti-DDoS)
+const apiRateLimits = new Map();
+const API_LIMIT_WINDOW_MS = 60 * 1000;
+const API_MAX_REQUESTS_PER_WINDOW = 120;
+
+function apiRateLimiter(req, res, next) {
+  const ip = getClientIp(req);
+  const now = Date.now();
+  const record = apiRateLimits.get(ip) || { count: 0, resetTime: now + API_LIMIT_WINDOW_MS };
+
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + API_LIMIT_WINDOW_MS;
+  } else {
+    record.count++;
+  }
+  apiRateLimits.set(ip, record);
+
+  if (record.count > API_MAX_REQUESTS_PER_WINDOW) {
+    return res.status(429).json({
+      ok: false,
+      code: 'RATE_LIMIT_EXCEEDED',
+      error: 'Troppe richieste. Rallenta.'
+    });
+  }
+  next();
+}
+
+app.use('/api/', apiRateLimiter);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // allowRequest covers both polling and direct WebSocket handshakes.
@@ -32,6 +79,7 @@ const io = new Server(server, {
     methods: ['GET', 'POST']
   },
   allowRequest: (req, done) => done(null, networkPolicy.isOriginAllowed(req.headers.origin)),
+  maxHttpBufferSize: 1.5e6,
   pingInterval: 10000,
   pingTimeout: 5000
 });
@@ -65,6 +113,7 @@ const rooms = new Map();
 
 // Rate limiter: socketId -> { count: number, resetTime: number }
 const rateLimits = new Map();
+const ipRateLimits = new Map();
 const RATE_LIMIT_MAX_PER_SEC = 20;
 
 // Temporary IP Jail: ip -> unjailTimestamp (RAM only, 10 minutes ban on reports)
@@ -274,17 +323,85 @@ function validateMessagePayload(payload) {
     return { valid: false, error: 'Payload must be a valid JSON object' };
   }
   const { roomId } = payload;
+  if (!roomId || typeof roomId !== 'string') {
+    return { valid: false, error: 'Invalid or missing roomId' };
+  }
+
+  // Audio voice note message
+  if (payload.type === 'audio') {
+    const { audioData, duration } = payload;
+    if (typeof audioData !== 'string' || !audioData.startsWith('data:audio/') || audioData.length > 2500000) {
+      return { valid: false, error: 'Audio data non valido o superiore al limite consentito' };
+    }
+    const dur = Number(duration);
+    if (!Number.isFinite(dur) || dur < 0.2 || dur > 120) {
+      return { valid: false, error: 'Durata audio non valida' };
+    }
+    return {
+      valid: true,
+      data: {
+        roomId,
+        type: 'audio',
+        message: '[Nota vocale]',
+        audioData,
+        duration: Math.round(dur * 10) / 10
+      }
+    };
+  }
+
+  // Animated GIF reaction message (Anti-Web Beacon & Domain Whitelisting)
+  if (payload.type === 'gif') {
+    const { gifUrl } = payload;
+    if (typeof gifUrl !== 'string' || gifUrl.length > 500) {
+      return { valid: false, error: 'URL GIF non valido' };
+    }
+
+    const ALLOWED_GIF_DOMAINS = [
+      'media.tenor.com', 'tenor.com', 'c.tenor.com',
+      'media.giphy.com', 'media0.giphy.com', 'media1.giphy.com',
+      'media2.giphy.com', 'media3.giphy.com', 'media4.giphy.com', 'i.giphy.com',
+      'upload.wikimedia.org', 'streetalk.live', 'streetalk-live.vercel.app',
+      'streetalk.onrender.com', 'localhost', '127.0.0.1'
+    ];
+
+    const isLocalAsset = gifUrl.startsWith('/assets/gifs/');
+    let isAllowedDomain = false;
+
+    if (!isLocalAsset) {
+      try {
+        const parsed = new URL(gifUrl);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+          isAllowedDomain = ALLOWED_GIF_DOMAINS.some(d => parsed.hostname === d || parsed.hostname.endsWith('.' + d));
+        }
+      } catch {
+        return { valid: false, error: 'URL GIF non valido' };
+      }
+    }
+
+    if (!isLocalAsset && !isAllowedDomain) {
+      return { valid: false, error: 'Host GIF non autorizzato' };
+    }
+
+    return {
+      valid: true,
+      data: {
+        roomId,
+        type: 'gif',
+        message: '[GIF]',
+        gifUrl: DOMSafetyFilter.sanitize(gifUrl)
+      }
+    };
+  }
+
+  // Standard text message
   const message = (typeof payload.message === 'string')
     ? payload.message
     : (typeof payload.text === 'string' ? payload.text : null);
 
-  if (!roomId || typeof roomId !== 'string') {
-    return { valid: false, error: 'Invalid or missing roomId' };
-  }
   if (!message || message.trim().length === 0 || message.length > 500) {
     return { valid: false, error: 'Message must be a non-empty string of max 500 characters' };
   }
-  return { valid: true, data: { roomId, message: DOMSafetyFilter.sanitize(message) } };
+  return { valid: true, data: { roomId, type: 'text', message: DOMSafetyFilter.sanitize(message) } };
 }
 
 // Resolve the network identity only across explicitly configured trusted proxies.
@@ -316,29 +433,42 @@ if (ipJailSweeper && ipJailSweeper.unref) {
   ipJailSweeper.unref();
 }
 
-// Rate limiter & IP Jail helper
+// Rate limiter helper (Dual Socket + IP Protection)
 function checkRateLimit(socket) {
   const socketId = socket.id;
   const ip = getClientIp(socket);
   const now = Date.now();
 
-  if (isIpJailed(ip)) {
-    return false;
+  const isLocalhost = ['127.0.0.1', '::1', '::ffff:127.0.0.1'].includes(ip);
+  const maxAllowed = isLocalhost ? 200 : RATE_LIMIT_MAX_PER_SEC;
+
+  // 1. Socket-level counter
+  const socketLimit = rateLimits.get(socketId) || { count: 0, resetTime: now + 1000 };
+  if (now > socketLimit.resetTime) {
+    socketLimit.count = 1;
+    socketLimit.resetTime = now + 1000;
+  } else {
+    socketLimit.count++;
+  }
+  rateLimits.set(socketId, socketLimit);
+
+  // 2. IP-level counter (separate volatile Map with LRU/TTL eviction)
+  const ipLimit = ipRateLimits.get(ip) || { count: 0, resetTime: now + 1000 };
+  if (now > ipLimit.resetTime) {
+    ipLimit.count = 1;
+    ipLimit.resetTime = now + 1000;
+  } else {
+    ipLimit.count++;
+  }
+  ipRateLimits.set(ip, ipLimit);
+
+  if (ipRateLimits.size > 2000) {
+    for (const [k, v] of ipRateLimits.entries()) {
+      if (now > v.resetTime) ipRateLimits.delete(k);
+    }
   }
 
-  const limitData = rateLimits.get(socketId) || { count: 0, resetTime: now + 1000 };
-
-  if (now > limitData.resetTime) {
-    limitData.count = 1;
-    limitData.resetTime = now + 1000;
-    rateLimits.set(socketId, limitData);
-    return true;
-  }
-
-  limitData.count++;
-  rateLimits.set(socketId, limitData);
-
-  if (limitData.count > RATE_LIMIT_MAX_PER_SEC) {
+  if (socketLimit.count > maxAllowed || ipLimit.count > maxAllowed) {
     // Jail IP for flooding
     ipJail.set(ip, now + DEFAULT_JAIL_TIME_MS);
     return false;
@@ -384,8 +514,9 @@ function findMatch(newCandidate) {
   for (let i = 0; i < moodQueue.length; i++) {
     const waiter = moodQueue[i];
 
-    // Ensure not self
+    // Ensure not self and not same IP (in production)
     if (waiter.socketId === newCandidate.socketId) continue;
+    if (process.env.NODE_ENV !== 'test' && waiter.ip === newCandidate.ip) continue;
 
     // Prune stale / disconnected socket from memory queue
     if (io && io.sockets && io.sockets.sockets && !io.sockets.sockets.has(waiter.socketId)) {
@@ -794,12 +925,11 @@ io.on('connection', (socket) => {
         onlineCount: users.size
       });
     }
-
-    broadcastOnlineStats();
   });
 
   // 2. LEAVE QUEUE
   socket.on('leave_queue', () => {
+    if (!checkRateLimit(socket)) return;
     const user = users.get(socket.id);
     if (user && user.secret) {
       destroyedSecretsCount++;
@@ -807,7 +937,6 @@ io.on('connection', (socket) => {
     }
     removeFromQueue(socket.id);
     socket.emit('queue_left', { success: true });
-    broadcastOnlineStats();
   });
 
   // 3. SEND MESSAGE
@@ -836,7 +965,7 @@ io.on('connection', (socket) => {
       return socket.emit('error_event', { code: 'INVALID_MESSAGE', message: validation.error });
     }
 
-    const { roomId, message } = validation.data;
+    const { roomId, type = 'text', message, audioData, duration, gifUrl } = validation.data;
     const user = users.get(socket.id);
 
     if (!user || user.roomId !== roomId) {
@@ -849,75 +978,80 @@ io.on('connection', (socket) => {
     }
 
     // --- STREETBOT REAL-TIME FLOW AUDIT (ART. 4) ---
-    const botAnalysis = streetBot.analyze(message, socket.id);
-    if (botAnalysis.violated) {
-      const strikeResult = streetBot.recordStrike(clientIp, botAnalysis.reason);
+    if (type === 'text') {
+      const botAnalysis = streetBot.analyze(message, socket.id);
+      if (botAnalysis.violated) {
+        const strikeResult = streetBot.recordStrike(clientIp, botAnalysis.reason);
 
-      if (strikeResult.action === 'warn') {
-        // Strike 1: Block message, warn sender, notify room from StreetBot
-        socket.emit('bot_strike_warning', {
-          strike: 1,
-          maxStrikes: 3,
-          reason: botAnalysis.reason,
-          message: strikeResult.message
-        });
-
-        // Send system warning bubble into the chatroom from StreetBot
-        io.to(roomId).emit('receive_message', {
-          id: 'bot_' + crypto.randomUUID().substring(0, 8),
-          senderId: 'STREET_BOT',
-          isBot: true,
-          message: `🤖 [STREET BOT]: Messaggio bloccato per violazione dell'Art. 4 (${botAnalysis.reason}). Ricorda: 3 sgarri e sei fuori.`,
-          timestamp: Date.now()
-        });
-        return;
-      } else if (strikeResult.action === 'jail') {
-        // Strike 2: Temporary suspension (15 min IP Jail), terminate room
-        ipJail.set(clientIp, Date.now() + (strikeResult.jailDurationMs || DEFAULT_JAIL_TIME_MS));
-
-        socket.emit('error_event', {
-          code: 'STRIKE_2_JAILED',
-          strike: 2,
-          message: strikeResult.message
-        });
-
-        const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
-        const partnerSocket = io.sockets.sockets.get(partnerId);
-        if (partnerSocket) {
-          partnerSocket.emit('partner_skipped', {
-            reason: 'Il partner è stato sospeso temporaneamente dal Bot per violazione delle regole di rispetto (Art. 4).'
+        if (strikeResult.action === 'warn') {
+          // Strike 1: Block message, warn sender, notify room from StreetBot
+          socket.emit('bot_strike_warning', {
+            strike: 1,
+            maxStrikes: 3,
+            reason: botAnalysis.reason,
+            message: strikeResult.message
           });
-        }
 
-        destroyRoom(roomId, 'bot_strike_jail');
-        socket.disconnect(true);
-        return;
-      } else if (strikeResult.action === 'permaban') {
-        // Strike 3: Permanent ban, terminate room
-        socket.emit('error_event', {
-          code: 'STRIKE_3_PERMABAN',
-          strike: 3,
-          message: strikeResult.message
-        });
-
-        const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
-        const partnerSocket = io.sockets.sockets.get(partnerId);
-        if (partnerSocket) {
-          partnerSocket.emit('partner_skipped', {
-            reason: 'Il partner è stato espulso definitivamente per ripetute violazioni (Art. 4).'
+          // Send system warning bubble into the chatroom from StreetBot
+          io.to(roomId).emit('receive_message', {
+            id: 'bot_' + crypto.randomUUID().substring(0, 8),
+            senderId: 'STREET_BOT',
+            isBot: true,
+            message: `🤖 [STREET BOT]: Messaggio bloccato per violazione dell'Art. 4 (${botAnalysis.reason}). Ricorda: 3 sgarri e sei fuori.`,
+            timestamp: Date.now()
           });
-        }
+          return;
+        } else if (strikeResult.action === 'jail') {
+          // Strike 2: Temporary suspension (15 min IP Jail), terminate room
+          ipJail.set(clientIp, Date.now() + (strikeResult.jailDurationMs || DEFAULT_JAIL_TIME_MS));
 
-        destroyRoom(roomId, 'bot_strike_permaban');
-        socket.disconnect(true);
-        return;
+          socket.emit('error_event', {
+            code: 'STRIKE_2_JAILED',
+            strike: 2,
+            message: strikeResult.message
+          });
+
+          const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
+          const partnerSocket = io.sockets.sockets.get(partnerId);
+          if (partnerSocket) {
+            partnerSocket.emit('partner_skipped', {
+              reason: 'Il partner è stato sospeso temporaneamente dal Bot per violazione delle regole di rispetto (Art. 4).'
+            });
+          }
+
+          destroyRoom(roomId, 'bot_strike_jail');
+          socket.disconnect(true);
+          return;
+        } else if (strikeResult.action === 'permaban') {
+          // Strike 3: Permanent ban, terminate room
+          socket.emit('error_event', {
+            code: 'STRIKE_3_PERMABAN',
+            strike: 3,
+            message: strikeResult.message
+          });
+
+          const partnerId = room.user1 === socket.id ? room.user2 : room.user1;
+          const partnerSocket = io.sockets.sockets.get(partnerId);
+          if (partnerSocket) {
+            partnerSocket.emit('partner_skipped', {
+              reason: 'Il partner è stato espulso definitivamente per ripetute violazioni (Art. 4).'
+            });
+          }
+
+          destroyRoom(roomId, 'bot_strike_permaban');
+          socket.disconnect(true);
+          return;
+        }
       }
     }
 
     const messageEvent = {
       id: 'msg_' + crypto.randomUUID().substring(0, 8),
       senderId: socket.id,
+      type,
       message,
+      ...(audioData ? { audioData, duration } : {}),
+      ...(gifUrl ? { gifUrl } : {}),
       timestamp: Date.now()
     };
 
@@ -926,6 +1060,7 @@ io.on('connection', (socket) => {
 
   // 4. TYPING INDICATOR
   socket.on('typing', (payload) => {
+    if (!checkRateLimit(socket)) return;
     if (!payload || !payload.roomId) return;
     const user = users.get(socket.id);
     if (user && user.roomId === payload.roomId) {
@@ -935,6 +1070,7 @@ io.on('connection', (socket) => {
 
   // 5. EXTENSION REQUEST (Supports both request_extend and request_extension)
   const handleExtensionRequest = (payload) => {
+    if (!checkRateLimit(socket)) return;
     if (!payload || !payload.roomId) return;
     const user = users.get(socket.id);
     if (!user || user.roomId !== payload.roomId) return;
@@ -942,9 +1078,18 @@ io.on('connection', (socket) => {
     const room = rooms.get(payload.roomId);
     if (!room) return;
 
+    if (!room.extensionCount) room.extensionCount = 0;
+    if (room.extensionCount >= 2) {
+      return socket.emit('error_event', {
+        code: 'MAX_EXTENSIONS_REACHED',
+        message: 'Limite massimo proroghe raggiunto per questa stanza.'
+      });
+    }
+
     room.extensions.add(socket.id);
 
     if (room.extensions.size >= 2) {
+      room.extensionCount++;
       funnelMetrics.extensionsGranted++;
       room.timeRemaining += EXTENSION_TIME_SEC;
       room.extensions.clear();
@@ -964,9 +1109,9 @@ io.on('connection', (socket) => {
 
   // 6. SKIP PARTNER
   socket.on('skip_partner', () => {
+    if (!checkRateLimit(socket)) return;
     handleUserDisconnectOrSkip(socket.id, 'skip');
     socket.emit('skipped_confirmed', { success: true });
-    broadcastOnlineStats();
   });
 
   // 7. REALTIME REACTION (EMOJI BURST)
@@ -991,6 +1136,7 @@ io.on('connection', (socket) => {
 
   // 8. REPORT USER & TEMPORARY IP JAIL
   socket.on('report_user', (payload) => {
+    if (!checkRateLimit(socket)) return;
     if (!payload || !payload.roomId) return;
     const user = users.get(socket.id);
     if (!user || user.roomId !== payload.roomId) return;
@@ -1032,12 +1178,11 @@ io.on('connection', (socket) => {
       success: true, 
       message: 'Utente segnalato e bloccato. Stanza chiusa all\'istante.' 
     });
-
-    broadcastOnlineStats();
   });
 
   // 9. LATENCY PING CHECK
   socket.on('ping_check', (clientTimestamp, callback) => {
+    if (!checkRateLimit(socket)) return;
     if (typeof callback === 'function') {
       callback({ clientTimestamp, serverTimestamp: Date.now() });
     }
@@ -1046,8 +1191,8 @@ io.on('connection', (socket) => {
   // 10. DISCONNECT
   socket.on('disconnect', () => {
     streetBot.cleanSocket(socket.id);
+    rateLimits.delete(socket.id);
     handleUserDisconnectOrSkip(socket.id, 'disconnect');
-    broadcastOnlineStats();
   });
 });
 
@@ -1090,11 +1235,13 @@ app.get('/api/stats', (req, res) => {
       dropOffs: funnelMetrics.getDropOffs()
     },
     supabase: supabaseClient ? supabaseClient.getStatus() : { configured: false },
-    memory: {
-      rssMb: +(mem.rss / (1024 * 1024)).toFixed(2),
-      heapTotalMb: +(mem.heapTotal / (1024 * 1024)).toFixed(2),
-      heapUsedMb: +(mem.heapUsed / (1024 * 1024)).toFixed(2)
-    }
+    ...(process.env.NODE_ENV !== 'production' ? {
+      memory: {
+        rssMb: +(mem.rss / (1024 * 1024)).toFixed(2),
+        heapTotalMb: +(mem.heapTotal / (1024 * 1024)).toFixed(2),
+        heapUsedMb: +(mem.heapUsed / (1024 * 1024)).toFixed(2)
+      }
+    } : {})
   });
 });
 
@@ -1107,6 +1254,43 @@ app.get('/api/supabase/status', (req, res) => {
 app.get('/api/secrets', (req, res) => {
   res.set('Cache-Control', 'no-store');
   res.status(410).json({ ok: false, code: 'FEED_DISABLED', secrets: [] });
+});
+
+// ==========================================
+// GIF API ENDPOINTS (Multi-Provider Abstraction)
+// ==========================================
+app.get('/api/gifs/categories', (req, res) => {
+  res.json({ ok: true, categories: defaultGifService.getCategories() });
+});
+
+app.get('/api/gifs/providers', (req, res) => {
+  res.json({ ok: true, providers: defaultGifService.getProvidersStatus() });
+});
+
+app.get('/api/gifs/trending', async (req, res) => {
+  try {
+    const category = (req.query.category || 'trend').toString().slice(0, 50);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 18));
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+
+    const result = await defaultGifService.getTrending({ category, limit, offset });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'GIF_FETCH_FAILED', items: [] });
+  }
+});
+
+app.get('/api/gifs/search', async (req, res) => {
+  try {
+    const query = (req.query.q || req.query.query || '').toString().slice(0, 100);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit, 10) || 18));
+    const offset = Math.max(0, parseInt(req.query.offset, 10) || 0);
+
+    const result = await defaultGifService.search({ query, limit, offset });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ ok: false, error: 'GIF_SEARCH_FAILED', items: [] });
+  }
 });
 
 // Export app and server for testing & running
@@ -1129,6 +1313,7 @@ module.exports = {
   queue, 
   rooms, 
   rateLimits, 
+  ipRateLimits,
   ipJail, 
   reportCounts,
   funnelMetrics,
@@ -1145,5 +1330,6 @@ module.exports = {
   ipJailSweeper,
   getClientIp,
   networkPolicy,
-  streetBot
+  streetBot,
+  defaultGifService
 };

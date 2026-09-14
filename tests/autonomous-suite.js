@@ -508,6 +508,37 @@ async function runAutonomousSuite() {
       fail(`Markup delivery changed unexpectedly: ${JSON.stringify(receivedMarkup.message)}`);
     }
 
+    // Ephemeral RAM Voice Note (MediaRecorder WebM base64) delivery
+    const dummyAudioBase64 = 'data:audio/webm;base64,GkXfo59ChoEBQveBAULygQ8=';
+    const audioDelivery = waitForEvent(pairB, 'receive_message', 'voice note receive_message delivery');
+    pairA.emit('send_message', {
+      roomId: targetRoomId,
+      type: 'audio',
+      audioData: dummyAudioBase64,
+      duration: 3.5
+    });
+    const receivedAudio = await audioDelivery;
+    if (receivedAudio.type === 'audio' && receivedAudio.audioData === dummyAudioBase64 && receivedAudio.duration === 3.5) {
+      pass('Ephemeral RAM Voice Note (type: audio) delivered with audioData and duration intact');
+    } else {
+      fail(`Voice note delivery failed or malformed: ${JSON.stringify(receivedAudio)}`);
+    }
+
+    // Reaction GIF media delivery
+    const dummyGifUrl = 'https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif';
+    const gifDelivery = waitForEvent(pairB, 'receive_message', 'reaction GIF receive_message delivery');
+    pairA.emit('send_message', {
+      roomId: targetRoomId,
+      type: 'gif',
+      gifUrl: dummyGifUrl
+    });
+    const receivedGif = await gifDelivery;
+    if (receivedGif.type === 'gif' && receivedGif.gifUrl === dummyGifUrl) {
+      pass('Reaction GIF message (type: gif) delivered with sanitized URL in ephemeral RAM');
+    } else {
+      fail(`Reaction GIF delivery failed or malformed: ${JSON.stringify(receivedGif)}`);
+    }
+
     // ----------------------------------------------------
     // TEST 7: Room Extension (+5 Min) Mutual Consent
     // ----------------------------------------------------
@@ -1373,6 +1404,68 @@ async function runAutonomousSuite() {
     assert(frontendAppJs.includes('STREET_GLYPHS'), 'frontend/app.js must define STREET_GLYPHS');
     assert(frontendAppJs.includes('setAvatarDisplay'), 'frontend/app.js must provide setAvatarDisplay helper');
     pass('Pure Street Theme & Code Parity: Deep asphalt (#0b0d10) + neon orange (#ff652f), zero beige, 100% HTML/CSS parity');
+
+    // 18.6 Telegram Chatroom UI (Fullscreen, Pinned Secret, GIF Popover, Voice Recording Bar)
+    assert(indexContent.includes('id="pinned-secret-bar"'), 'index.html must include pinned-secret-bar');
+    assert(indexContent.includes('id="chat-gif-popover"'), 'index.html must include chat-gif-popover');
+    assert(indexContent.includes('id="chat-recording-bar"'), 'index.html must include chat-recording-bar');
+    assert(indexContent.includes('id="btn-chat-mic"'), 'index.html must include btn-chat-mic');
+    assert(frontendAppJs.includes('togglePinnedSecret'), 'frontend/app.js must provide togglePinnedSecret');
+    assert(frontendAppJs.includes('startAudioRecording'), 'frontend/app.js must provide startAudioRecording');
+    assert(frontendAppJs.includes('sendGif'), 'frontend/app.js must provide sendGif');
+    pass('Telegram Chatroom Suite: Fullscreen layout, pinned secret bar, GIF popover & voice recording controls verified');
+
+    // ====================================================
+    // TEST 19: Multi-Provider GIF Database & 3D Chat Navigation Engine
+    // ====================================================
+    console.log('\n--- TEST 19: Multi-Provider GIF Database & 3D Chat Navigation Engine ---');
+
+    // 19.1 Chat Navigation & Exit Controls
+    assert(frontendAppJs.includes('leaveChatToHome'), 'frontend/app.js must implement leaveChatToHome()');
+    assert(frontendAppJs.includes('window.leaveChatToHome = leaveChatToHome'), 'frontend/app.js must expose leaveChatToHome globally');
+    assert(indexContent.includes('leaveChatToHome()'), 'index.html must invoke leaveChatToHome() on back/exit buttons');
+    assert(indexContent.includes('id="gif-search-input"'), 'index.html must include GIF search input #gif-search-input');
+    assert(indexContent.includes('id="gif-search-clear"'), 'index.html must include GIF clear button #gif-search-clear');
+    assert(indexContent.includes('role="dialog"'), 'chat-gif-popover must declare accessible role dialog');
+    pass('Chat Navigation & Accessibility: Back/Exit controls and accessible GIF modal verified');
+
+    // 19.2 REST Endpoints (/api/gifs/categories, trending, search)
+    const catRes = await fetchLocalJson(SERVER_URL, '/api/gifs/categories');
+    assert(catRes && catRes.ok === true, 'Categories endpoint must return ok: true');
+    assert(Array.isArray(catRes.categories) && catRes.categories.length === 9, 'Must offer all 9 street categories');
+    const expectedCats = ['trend', 'street', 'reazioni', 'memes', 'lol', 'notte', 'cyberpunk', 'anime', 'music'];
+    for (const exp of expectedCats) {
+      assert(catRes.categories.some(c => c.id === exp), `Category ${exp} must be registered`);
+    }
+    pass('GIF Categories Catalog: Exactly 9 street categories verified');
+
+    // 19.3 Trending GIFs Fetch & Fallback Guarantee
+    const trendRes = await fetchLocalJson(SERVER_URL, '/api/gifs/trending?category=street');
+    assert(trendRes && trendRes.ok === true, 'Trending endpoint must return ok: true');
+    assert(Array.isArray(trendRes.items) && trendRes.items.length > 0, 'Trending must return non-empty items array');
+    const firstItem = trendRes.items[0];
+    assert(typeof firstItem.url === 'string' && firstItem.url.startsWith('http'), 'GifItem must have a valid URL');
+    assert(typeof firstItem.previewUrl === 'string', 'GifItem must have previewUrl');
+    assert(typeof firstItem.provider === 'string', 'GifItem must specify provider');
+    pass('Trending GIFs API: Schema compliance and non-empty items delivered');
+
+    // 19.4 Search GIFs & RAM Caching Engine
+    const searchRes1 = await fetchLocalJson(SERVER_URL, '/api/gifs/search?q=cyberpunk');
+    assert(searchRes1 && searchRes1.ok === true, 'Search endpoint must return ok: true');
+    assert(Array.isArray(searchRes1.items), 'Search must return an items array');
+
+    // In-RAM TTL Cache Hit
+    const searchRes2 = await fetchLocalJson(SERVER_URL, '/api/gifs/search?q=cyberpunk');
+    assert(searchRes2 && searchRes2.ok === true, 'Subsequent search must succeed');
+    assert.strictEqual(searchRes2.cached, true, 'Subsequent identical search must hit in-RAM TTL cache');
+    pass('GIF Search & Volatile TTL Cache: Instant search response and zero-redundancy cache hits verified');
+
+    // 19.5 3D Perspective CSS & Reduced Motion Support
+    assert(incrocioCss.includes('perspective: 1000px'), 'CSS must declare 3D perspective 1000px on popover');
+    assert(incrocioCss.includes('.tg-gif-3d-card'), 'CSS must define .tg-gif-3d-card with 3D transform style');
+    assert(incrocioCss.includes('@media (prefers-reduced-motion: reduce)'), 'CSS must support prefers-reduced-motion: reduce');
+    assert(incrocioCss.includes('.gif-sheet-handle'), 'CSS must provide bottom-sheet drag handle for mobile');
+    pass('3D Perspective & Motion Engine: 1000px depth, transform-style and a11y reduced-motion verified');
 
     // ----------------------------------------------------
     // SUMMARY

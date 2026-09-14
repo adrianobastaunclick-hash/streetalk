@@ -411,7 +411,7 @@
   <!-- ======================================================== -->
   <!-- A. HEADER MINIMAL & LIVE BEACON                          -->
   <!-- ======================================================== -->
-  <header class="w-full border-b border-zinc-800/90 bg-[#0b0d10]/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 flex items-center justify-between z-30 sticky top-0">
+  <header id="main-header" class="w-full border-b border-zinc-800/90 bg-[#0b0d10]/90 backdrop-blur-xl px-4 sm:px-8 py-3.5 flex items-center justify-between z-30 sticky top-0">
 
     <button type="button" class="flex items-center gap-3 cursor-pointer group" onclick="backToLanding()" aria-label="ST STREETALK — torna alla home">
       <!-- Streetalk Logo with high-voltage orange square -->
@@ -1340,190 +1340,412 @@
   </section>
 
   <!-- ======================================================== -->
-  <!-- VIEW 3: ACTIVE CHAT ROOM & SECRET REVEAL (LAYER Z-10)     -->
+  <!-- VIEW 3: ACTIVE CHAT ROOM & SECRET REVEAL (FULLSCREEN)    -->
   <!-- ======================================================== -->
-  <section id="view-chat" class="hidden flex-1 w-full max-w-4xl mx-auto p-2 sm:p-6 flex flex-col h-[calc(100vh-4.5rem)] max-h-[860px] z-10 relative">
-    <div class="w-full h-full bg-street-surface border-2 border-zinc-800 rounded-2xl overflow-hidden street-glow flex flex-col backdrop-blur-2xl shadow-2xl relative">
+  <section id="view-chat" class="hidden">
+
+    <!-- BACKDROP FOR MOBILE SIDEBAR DRAWER -->
+    <div id="chat-sidebar-backdrop" onclick="toggleMobileChatSidebar(false)" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-40 md:hidden transition-opacity duration-200"></div>
+
+    <!-- LEFT COLUMN: SIDEBAR OPZIONI, PARTNER INFO, TIMER & SEGRETI -->
+    <aside id="chat-sidebar">
+
+      <!-- TOP: Room Header, Partner Card & Timer Cockpit -->
+      <div class="flex flex-col gap-3">
+        <!-- Room Status & Back / Mobile Close Bar -->
+        <div class="flex items-center justify-between pb-2.5 border-b border-zinc-800/80">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-street-orange/20 border border-street-orange/40 flex items-center justify-center text-street-orange text-xs font-bold shadow-[0_0_12px_rgba(255,101,47,0.35)] shrink-0">
+              ⚡
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="font-street font-black text-xs uppercase tracking-wider text-white flex items-center gap-1.5 truncate">
+                STANZA ATTIVA <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </span>
+              <span class="text-[9px] font-mono text-zinc-500 truncate">NODO CRITTOGRAFATO</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onclick="leaveChatToRadar(); leaveChatToHome();"
+              class="flex items-center gap-1 text-zinc-400 hover:text-white text-xs px-2 sm:px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 font-mono active:scale-95 transition cursor-pointer shrink-0"
+              title="Torna alla schermata del radar"
+            >
+              <span>←</span> <span>Radar</span>
+            </button>
+            <button
+              type="button"
+              onclick="toggleMobileChatSidebar(false)"
+              class="md:hidden text-zinc-400 hover:text-white text-xs px-2 py-1 rounded-lg bg-zinc-900 border border-zinc-800 font-mono active:scale-95 transition cursor-pointer"
+              title="Chiudi cassetto"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Partner Profile Card in Sidebar -->
+        <div class="chat-sidebar-card bg-[#121520] border border-zinc-800/90 rounded-2xl p-3.5 space-y-2.5 shadow-lg">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0 flex-1">
+              <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center text-lg shrink-0 shadow-inner">
+                <span id="chat-partner-avatar">⚡</span>
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span id="chat-partner-nick" class="font-street font-black text-sm text-white tracking-wide truncate">SHADOW_42</span>
+                  <span id="chat-partner-gender" class="text-[9px] font-mono px-1.5 py-0.2 bg-zinc-800 text-zinc-300 rounded border border-zinc-700">M</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span id="chat-partner-mood" class="text-[9px] font-mono px-1.5 py-0.2 bg-street-orange/20 text-street-orange rounded border border-street-orange/30">Cazzeggio</span>
+                  <span id="chat-my-nick-badge" class="text-[9px] font-mono text-zinc-500">Tu: Neon_18</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Chat Realtime Latency Ping Badge -->
+            <div id="chat-ping-badge" class="flex items-center gap-1.5 bg-black/70 border border-zinc-800 px-2 py-1 rounded-lg font-mono text-[10px] text-zinc-400 shrink-0 shadow-inner" title="Latenza realtime (ping ogni 4s)">
+              <span id="chat-ping-dot" class="w-2 h-2 rounded-full bg-zinc-500"></span>
+              <span id="chat-ping-text">N/D</span>
+            </div>
+          </div>
+
+          <!-- Typing indicator -->
+          <p id="chat-partner-typing-indicator" class="text-[10px] font-mono text-street-orange transition-all opacity-0">sta digitando...</p>
+
+          <!-- Partner Bio Container -->
+          <div id="chat-partner-bio-container" class="hidden text-[10px] font-mono text-zinc-300 italic bg-black/60 px-3 py-1.5 rounded-xl border border-zinc-800/90 leading-relaxed">
+            <span class="text-street-orange">“</span><span id="chat-partner-bio-text"></span><span class="text-street-orange">”</span>
+          </div>
+        </div>
+
+        <!-- Timer & Quick Actions Cockpit -->
+        <div class="chat-sidebar-card bg-[#121520] border border-zinc-800/90 rounded-2xl p-3.5 space-y-3 shadow-lg">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold flex items-center gap-1.5">
+              <span>⏱️</span> <span>TIMER SESSIONE</span>
+            </span>
+            <!-- Circular Countdown Timer -->
+            <div id="countdown-badge" class="flex items-center gap-2 bg-black/80 border border-zinc-800 px-3 py-1 rounded-xl font-mono text-xs font-bold text-white shadow-inner">
+              <svg class="w-4 h-4 transform -rotate-90" viewBox="0 0 36 36">
+                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#2a3040" stroke-width="3"></circle>
+                <circle id="timer-circular-ring" cx="18" cy="18" r="15.915" fill="none" stroke="#ff652f" stroke-width="3" stroke-dasharray="100, 100" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-300"></circle>
+              </svg>
+              <span id="chat-countdown">03:00</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons Grid -->
+          <div class="grid grid-cols-3 gap-2">
+            <!-- +5 Min Button -->
+            <button
+              id="btn-extension"
+              type="button"
+              onclick="requestExtension()"
+              title="Richiedi proroga di 5 minuti (richiede doppio consenso)"
+              class="px-2 py-2 bg-zinc-900/90 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-xs font-mono text-zinc-300 hover:text-street-orange rounded-xl transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+            >
+              <span>+5m</span>
+            </button>
+
+            <!-- Safety Report Shield Button -->
+            <button
+              id="btn-open-report"
+              type="button"
+              onclick="openReportModal()"
+              title="Segnala utente e termina istantaneamente la stanza"
+              class="px-2 py-2 bg-zinc-900/90 hover:bg-red-950/60 border border-zinc-800 hover:border-red-800/80 text-zinc-400 hover:text-red-400 text-xs font-mono rounded-xl transition flex items-center justify-center gap-1 cursor-pointer active:scale-95 shadow-sm"
+            >
+              <span>🛡️</span> <span>Segnala</span>
+            </button>
+
+            <!-- Skip / Next Button -->
+            <button
+              type="button"
+              onclick="confirmSkip()"
+              class="px-2 py-2 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-400 hover:text-red-200 text-xs font-mono font-bold rounded-xl transition cursor-pointer active:scale-95 flex items-center justify-center shadow-sm"
+            >
+              SALTA
+            </button>
+          </div>
+        </div>
+
+        <!-- Pinned Secrets Area in Sidebar -->
+        <div id="pinned-secret-bar" class="chat-sidebar-card bg-[#121520] border border-zinc-800/90 rounded-2xl p-3.5 flex flex-col transition-all duration-200 space-y-2.5 shadow-lg">
+          <div class="flex items-center justify-between gap-1 select-none">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <span class="text-xs">📌</span>
+              <span class="text-[10px] font-mono uppercase tracking-wider text-street-orange font-bold truncate">SEGRETI SCAMBIATI</span>
+              <span id="chat-pinned-partner-nick" class="hidden">SHADOW_42</span>
+              <p id="chat-partner-secret-snippet" class="hidden"></p>
+            </div>
+
+            <div class="flex items-center gap-1 shrink-0">
+              <button type="button" onclick="copyPartnerSecret()" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 rounded-lg text-[10px] font-mono border border-zinc-800 flex items-center gap-1 cursor-pointer active:scale-95 transition" title="Copia segreto negli appunti">
+                <span>📋</span> <span>Copia</span>
+              </button>
+              <button type="button" onclick="openSocialCardModal()" class="px-2 py-1 bg-street-orange/15 hover:bg-street-orange/30 text-street-orange rounded-lg text-[10px] font-mono border border-street-orange/30 flex items-center gap-1 cursor-pointer active:scale-95 transition" title="Card Story Instagram/TikTok">
+                <span>📷</span> <span>Story</span>
+              </button>
+              <button id="pinned-secret-toggle-btn" type="button" onclick="togglePinnedSecret()" class="p-1 text-zinc-400 hover:text-white transition-transform duration-200 cursor-pointer" aria-label="Espandi o contrai segreti">
+                <svg id="pinned-secret-chevron" class="w-4 h-4 transform transition-transform duration-200 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Collapsible Secret Drawer -->
+          <div id="pinned-secret-drawer" class="pt-2 border-t border-zinc-800/80 space-y-2.5">
+            <!-- Card 1: Il tuo segreto -->
+            <div class="bg-[#0b0d13] border border-zinc-800/90 rounded-xl p-3 shadow-inner">
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[9px] font-mono uppercase tracking-widest text-zinc-400 font-bold flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-zinc-500"></span>
+                  IL TUO SEGRETO
+                </span>
+                <span class="text-[9px] font-mono text-zinc-500">Scambiato</span>
+              </div>
+              <p id="chat-my-secret-text" class="text-xs text-zinc-300 font-sans italic break-words leading-relaxed">
+                <!-- Rendered via textContent -->
+              </p>
+            </div>
+
+            <!-- Card 2: Segreto del Partner -->
+            <div id="partner-secret-card" class="bg-[#141724] border border-street-orange/40 rounded-xl p-3 street-glow-sm relative overflow-hidden shadow-inner">
+              <div class="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-street-orange to-transparent"></div>
+              <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-street-orange/15 text-street-orange font-bold border border-street-orange/30">Membro Educato</span>
+                <button
+                  type="button"
+                  id="btn-open-partner-card"
+                  onclick="openPartnerProfileModal()"
+                  class="py-0.5 px-2 bg-zinc-900 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-zinc-300 hover:text-white rounded text-[9px] font-mono flex items-center gap-1 transition cursor-pointer active:scale-95"
+                  title="Leggi la scheda personale e gli argomenti del partner"
+                >
+                  <span>👁️</span> <span>SCHEDA (NO FOTO)</span>
+                </button>
+              </div>
+              <p id="chat-partner-secret-box" class="text-xs text-white font-sans italic font-medium break-words mt-1 leading-relaxed">
+                <!-- Rendered via textContent -->
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM FOOTER NOTE -->
+      <div class="pt-3 border-t border-zinc-800/70 text-center">
+        <span class="text-[9px] font-mono text-zinc-500">⚡ Distruzione volatile istantanea a fine sessione</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT COLUMN: TELEGRAM CHAT STREAM & INPUT -->
+    <main id="chat-main-area">
 
       <!-- FLOATING REACTIONS OVERLAY (EMOJI BURSTS) -->
       <div id="floating-reactions-layer" class="pointer-events-none absolute inset-0 overflow-hidden z-30"></div>
 
-      <!-- CHAT HEADER BAR -->
-      <div class="p-3 sm:px-4 sm:py-3 bg-[#0d0e14] border-b border-zinc-800 flex items-center justify-between z-20">
-
-        <!-- Partner Badge & Pseudonym -->
-        <div class="flex items-center gap-2 sm:gap-3">
-          <div class="w-9 h-9 rounded-xl bg-street-orange/20 border border-street-orange/40 flex items-center justify-center text-street-orange text-base font-bold shadow-[0_0_12px_rgba(255,101,47,0.3)]">
-            ⚡
-          </div>
-          <div>
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span id="chat-partner-nick" class="font-street font-black text-sm text-white tracking-wide">SHADOW_42</span>
-              <span id="chat-partner-gender" class="text-[10px] font-mono px-1.5 py-0.2 bg-zinc-800 text-zinc-300 rounded border border-zinc-700">M</span>
-              <span id="chat-partner-mood" class="text-[10px] font-mono px-1.5 py-0.2 bg-street-orange/20 text-street-orange rounded border border-street-orange/30">Cazzeggio</span>
-            </div>
-            <div class="flex items-center gap-2 mt-0.5">
-              <span id="chat-my-nick-badge" class="text-[10px] font-mono text-zinc-500">Tu: Neon_18</span>
-              <span class="text-zinc-700 font-mono text-[10px]">•</span>
-              <p id="chat-partner-typing-indicator" class="text-[10px] font-mono text-street-orange transition-all opacity-0">sta digitando...</p>
-            </div>
+      <!-- MINIMAL TOP BAR FOR CHAT STREAM (TELEGRAM HEADER STYLE) -->
+      <div id="chat-top-bar" class="px-4 py-2.5 bg-[#0d0f17]/95 backdrop-blur-xl border-b border-zinc-800/90 flex items-center justify-between z-20 shrink-0">
+        <!-- Left: Back Button, Mobile Toggle & Partner Moniker -->
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <button
+            type="button"
+            onclick="leaveChatToRadar(); leaveChatToHome();"
+            id="btn-chat-back-radar"
+            class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-zinc-300 hover:text-white text-xs font-mono transition cursor-pointer active:scale-95 shrink-0 shadow-sm"
+            title="Torna alla schermata del radar"
+          >
+            <span>←</span> <span>RADAR</span>
+          </button>
+          <button
+            type="button"
+            onclick="toggleMobileChatSidebar(true)"
+            class="md:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-street-orange font-mono text-xs font-bold active:scale-95 transition cursor-pointer shrink-0 shadow-sm"
+            aria-label="Apri opzioni e segreti"
+          >
+            <span>☰</span> <span>OPZIONI</span>
+          </button>
+          <div class="flex items-center gap-2 min-w-0">
+            <span id="chat-top-partner-nick" class="font-street font-black text-sm sm:text-base text-white tracking-wide truncate">SHADOW_42</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" title="Online"></span>
+            <span id="chat-top-typing" class="text-[10px] font-mono text-street-orange hidden truncate">sta digitando...</span>
           </div>
         </div>
 
-        <!-- Controls: Ping, Circular Timer, +5 Min, Safety Shield, Skip -->
-        <div class="flex items-center gap-1.5 sm:gap-2">
-          <!-- Chat Realtime Latency Ping Badge -->
-          <div id="chat-ping-badge" class="hidden sm:flex items-center gap-1.5 bg-black/60 border border-zinc-800 px-2 py-1 rounded-lg font-mono text-[10px] text-zinc-400 shadow-inner" title="Latenza realtime (ping ogni 4s)">
-            <span id="chat-ping-dot" class="w-2 h-2 rounded-full bg-zinc-500"></span>
-            <span id="chat-ping-text">N/D</span>
-          </div>
-
-          <!-- Circular 3:00 Countdown Timer -->
-          <div id="countdown-badge" class="flex items-center gap-2 bg-black/70 border border-zinc-800 px-2.5 py-1 rounded-lg font-mono text-xs font-bold text-white transition-all shadow-inner">
-            <svg class="w-4 h-4 transform -rotate-90" viewBox="0 0 36 36">
-              <circle cx="18" cy="18" r="15.915" fill="none" stroke="#343d49" stroke-width="3"></circle>
-              <circle id="timer-circular-ring" cx="18" cy="18" r="15.915" fill="none" stroke="#ff652f" stroke-width="3" stroke-dasharray="100, 100" stroke-dashoffset="0" stroke-linecap="round" class="transition-all duration-300"></circle>
-            </svg>
-            <span id="chat-countdown">03:00</span>
-          </div>
-
-          <!-- +5 Min Button -->
+        <!-- Right: Mobile Compact Countdown & Quick Skip -->
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="chat-top-countdown" class="font-mono text-xs text-white font-bold bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-lg shadow-inner">03:00</span>
           <button
-            id="btn-extension"
-            onclick="requestExtension()"
-            title="Richiedi proroga di 5 minuti (richiede doppio consenso)"
-            class="px-2 sm:px-2.5 py-1 bg-street-surface hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-xs font-mono text-zinc-300 hover:text-street-orange rounded-lg transition flex items-center gap-1 cursor-pointer"
-          >
-            <span>+5m</span>
-          </button>
-
-          <!-- Safety Report Shield Button -->
-          <button
-            id="btn-open-report"
-            onclick="openReportModal()"
-            title="Segnala utente e termina istantaneamente la stanza"
-            class="px-2 py-1 bg-zinc-900 hover:bg-red-950/60 border border-zinc-800 hover:border-red-800/80 text-zinc-400 hover:text-red-400 text-xs font-mono rounded-lg transition flex items-center gap-1 cursor-pointer"
-          >
-            <span>🛡️</span>
-            <span class="hidden md:inline">Segnala</span>
-          </button>
-
-          <!-- Skip / Next Button -->
-          <button
+            type="button"
             onclick="confirmSkip()"
-            class="px-2.5 sm:px-3 py-1 bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-400 hover:text-red-200 text-xs font-mono font-bold rounded-lg transition cursor-pointer"
+            class="px-3 py-1 bg-red-950/50 hover:bg-red-900/70 border border-red-800/60 text-red-400 text-xs font-mono font-bold rounded-lg transition cursor-pointer active:scale-95"
           >
             SALTA
           </button>
         </div>
       </div>
 
-      <!-- BOX SUPERIORE: DOPPIA CARD SEGRETI -->
-      <div class="p-3 sm:px-4 sm:py-3 bg-[#08090c] border-b border-zinc-800 relative z-10">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-
-          <!-- Card 1: Il tuo segreto -->
-          <div class="bg-[#10121a] border border-zinc-800/90 hover:border-zinc-700 rounded-xl p-3 flex flex-col justify-between transition shadow-sm">
-            <div>
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-bold flex items-center gap-1.5">
-                  <span class="w-2 h-2 rounded-full bg-zinc-500"></span>
-                  IL TUO SEGRETO
-                </span>
-                <span class="text-[10px] font-mono text-zinc-500">Scambio nella stanza</span>
-              </div>
-              <p id="chat-my-secret-text" class="text-xs sm:text-sm text-zinc-300 font-sans italic break-words">
-                <!-- Rendered via textContent -->
-              </p>
-            </div>
-          </div>
-
-          <!-- Card 2: Il segreto del partner -->
-          <div id="partner-secret-card" class="bg-[#141722] border-2 border-street-orange/40 rounded-xl p-3 flex flex-col justify-between transition street-glow-sm shadow-sm relative overflow-hidden">
-            <div class="absolute top-0 right-0 left-0 h-[2px] bg-gradient-to-r from-transparent via-street-orange to-transparent"></div>
-            <div>
-              <div class="flex items-center justify-between mb-1.5 flex-wrap gap-1">
-                <div class="flex items-center gap-1.5 flex-wrap">
-                  <span id="chat-partner-avatar" class="text-sm">⚡</span>
-                  <span id="chat-partner-nick" class="font-street font-black text-xs sm:text-sm text-white uppercase tracking-wider">SHADOW_88</span>
-                  <span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-street-orange/15 text-street-orange font-bold border border-street-orange/30">Membro Educato</span>
-                </div>
-                <div class="flex items-center gap-1.5">
-                  <button onclick="copyPartnerSecret()" class="text-[10px] font-mono text-zinc-300 hover:text-white flex items-center gap-1 bg-zinc-900/90 px-2 py-0.5 rounded border border-zinc-800 transition cursor-pointer" title="Copia segreto negli appunti">
-                    <span>📋</span> <span>Copia</span>
-                  </button>
-                  <button onclick="openSocialCardModal()" class="text-[10px] font-mono text-street-orange hover:text-white flex items-center gap-1 bg-street-orange/15 hover:bg-street-orange/30 px-2 py-0.5 rounded border border-street-orange/40 transition cursor-pointer" title="Genera card grafica Instagram/TikTok">
-                    <span>📷</span> <span>Card Story</span>
-                  </button>
-                </div>
-              </div>
-              <div id="chat-partner-bio-container" class="hidden text-[11px] font-mono text-zinc-400 mb-1.5 italic bg-black/40 px-2.5 py-1 rounded-lg border border-zinc-800/80">
-                <span class="text-street-orange">“</span><span id="chat-partner-bio-text"></span><span class="text-street-orange">”</span>
-              </div>
-              <div class="mt-2 pt-2 border-t border-zinc-800/80">
-                <button
-                  type="button"
-                  id="btn-open-partner-card"
-                  onclick="openPartnerProfileModal()"
-                  class="w-full py-1.5 px-2 bg-zinc-900/90 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-zinc-300 hover:text-white rounded-lg text-[10px] font-mono flex items-center justify-center gap-1.5 transition cursor-pointer"
-                  title="Leggi la scheda personale e gli argomenti del partner"
-                >
-                  <span>👁️</span> <span>LEGGI SCHEDA DEL PARTNER (NO FOTO)</span>
-                </button>
-              </div>
-              <p id="chat-partner-secret-box" class="text-xs sm:text-sm text-white font-sans italic font-medium break-words">
-                <!-- Rendered via textContent -->
-              </p>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- MESSAGES SCROLL CONTAINER -->
-      <div id="messages-container" class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 z-10">
-        <div class="text-center my-2">
-          <span class="text-[10px] font-mono bg-zinc-900/90 border border-zinc-800 text-zinc-400 px-3.5 py-1 rounded-full">
-            Inizio chat • 180 secondi • Messaggi non archiviati
+      <!-- MESSAGES SCROLL CONTAINER (TELEGRAM BUBBLES STREAM) -->
+      <div id="messages-container" class="telegram-messages-container flex-1 overflow-y-auto p-4 sm:p-5 space-y-3 z-10">
+        <div class="text-center my-3">
+          <span class="text-[10px] font-mono bg-zinc-900/90 border border-zinc-800 text-zinc-400 px-4 py-1.5 rounded-full shadow-md">
+            🔒 Inizio chat • 180 secondi • Zero log salvati
           </span>
         </div>
       </div>
 
-      <!-- QUICK REACTION EMOJI BAR -->
-      <div class="px-3 py-1.5 bg-[#090a0e] border-t border-zinc-800/80 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar z-10">
-        <span class="text-[10px] font-mono text-zinc-500 hidden sm:inline uppercase tracking-wider mr-1">Reagisci:</span>
+      <!-- QUICK REACTION EMOJI DOCK -->
+      <div class="px-3 sm:px-4 py-1.5 bg-[#0a0c13]/95 backdrop-blur-md border-t border-zinc-800/80 flex items-center justify-between gap-1 overflow-x-auto no-scrollbar z-10 shrink-0">
+        <span class="text-[9px] font-mono text-zinc-500 hidden sm:inline uppercase tracking-wider mr-1">Reagisci:</span>
         <div class="flex items-center gap-1 sm:gap-2">
-          <button type="button" onclick="sendReaction('🔥')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Fuoco">🔥</button>
-          <button type="button" onclick="sendReaction('💀')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Morto">💀</button>
-          <button type="button" onclick="sendReaction('⚡')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Flash">⚡</button>
-          <button type="button" onclick="sendReaction('🖤')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Cuore nero">🖤</button>
-          <button type="button" onclick="sendReaction('🚬')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Fumo">🚬</button>
-          <button type="button" onclick="sendReaction('👀')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Occhi">👀</button>
-          <button type="button" onclick="sendReaction('🤯')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Mind blown">🤯</button>
-          <button type="button" onclick="sendReaction('👏')" class="reaction-btn px-2 py-1 rounded-lg bg-zinc-900/80 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-sm transition transform hover:scale-115 active:scale-95 cursor-pointer" title="Applausi">👏</button>
+          <button type="button" onclick="sendReaction('🔥')" class="reaction-btn text-sm" title="Fuoco">🔥</button>
+          <button type="button" onclick="sendReaction('💀')" class="reaction-btn text-sm" title="Morto">💀</button>
+          <button type="button" onclick="sendReaction('⚡')" class="reaction-btn text-sm" title="Flash">⚡</button>
+          <button type="button" onclick="sendReaction('🖤')" class="reaction-btn text-sm" title="Cuore nero">🖤</button>
+          <button type="button" onclick="sendReaction('🚬')" class="reaction-btn text-sm" title="Fumo">🚬</button>
+          <button type="button" onclick="sendReaction('👀')" class="reaction-btn text-sm" title="Occhi">👀</button>
+          <button type="button" onclick="sendReaction('🤯')" class="reaction-btn text-sm" title="Mind blown">🤯</button>
+          <button type="button" onclick="sendReaction('👏')" class="reaction-btn text-sm" title="Applausi">👏</button>
         </div>
       </div>
 
-      <!-- MESSAGE INPUT FORM -->
-      <form id="chat-input-form" onsubmit="event.preventDefault(); sendMessage();" class="p-2.5 sm:p-3 bg-[#0d0e14] border-t border-zinc-800 flex items-center gap-2 z-10">
+      <!-- TELEGRAM GIF PICKER POPOVER -->
+      <div id="chat-gif-popover" role="dialog" aria-label="Selettore GIF animate" class="hidden absolute bottom-[76px] left-2 right-2 sm:left-auto sm:right-6 sm:w-96 bg-[#12141f] border border-zinc-700/80 rounded-2xl shadow-2xl p-3 z-30 backdrop-blur-2xl transition-all">
+        <div class="gif-sheet-handle"></div>
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-zinc-800">
+          <div class="flex items-center gap-1.5">
+            <span class="text-xs font-mono font-bold text-street-orange flex items-center gap-1">
+              <span>🎬</span> GIF REACTION
+            </span>
+            <span id="gif-provider-badge" class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">Multi-Provider</span>
+          </div>
+          <button type="button" onclick="toggleGifPicker(false)" class="text-zinc-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-zinc-800 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center" aria-label="Chiudi selettore GIF">✕</button>
+        </div>
+
+        <!-- GIF Search Bar -->
+        <div class="relative mb-2">
+          <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500 text-xs pointer-events-none">🔍</span>
+          <input
+            type="text"
+            id="gif-search-input"
+            class="w-full bg-[#0a0b10] border border-zinc-800 focus:border-street-orange/80 rounded-xl pl-8 pr-7 py-1.5 text-xs text-zinc-200 placeholder-zinc-500 font-sans outline-none transition"
+            placeholder="Cerca GIF (es. lol, hype, drift, anime)..."
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Cerca GIF"
+          />
+          <button
+            type="button"
+            id="gif-search-clear"
+            onclick="clearGifSearch()"
+            class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 text-xs cursor-pointer p-0.5"
+            aria-label="Cancella ricerca"
+          >✕</button>
+        </div>
+
+        <!-- GIF Category Tabs (9 Street Categories) -->
+        <div id="gif-category-scroll" class="flex items-center gap-1 mb-2 overflow-x-auto no-scrollbar pb-1 text-[10px] font-mono scroll-smooth">
+          <button type="button" onclick="switchGifCategory('trend', this)" class="gif-cat-btn active px-2.5 py-1 rounded-lg bg-street-orange text-black font-bold cursor-pointer whitespace-nowrap">Trend</button>
+          <button type="button" onclick="switchGifCategory('street', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Street</button>
+          <button type="button" onclick="switchGifCategory('reazioni', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Reazioni</button>
+          <button type="button" onclick="switchGifCategory('memes', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Memes</button>
+          <button type="button" onclick="switchGifCategory('lol', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">LOL</button>
+          <button type="button" onclick="switchGifCategory('notte', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Notte</button>
+          <button type="button" onclick="switchGifCategory('cyberpunk', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Cyberpunk</button>
+          <button type="button" onclick="switchGifCategory('anime', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Anime</button>
+          <button type="button" onclick="switchGifCategory('music', this)" class="gif-cat-btn px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white cursor-pointer whitespace-nowrap">Music</button>
+        </div>
+
+        <!-- GIF 3D Grid -->
+        <div id="chat-gif-grid" class="grid grid-cols-3 gap-2 max-h-60 overflow-y-auto pr-1" role="region" aria-label="Risultati GIF">
+          <!-- Populated dynamically by JS -->
+        </div>
+      </div>
+
+      <!-- AUDIO RECORDING BAR (ACTIVE DURING MEDIA RECORDER) -->
+      <div id="chat-recording-bar" class="hidden p-2 sm:p-2.5 bg-[#12141f] border-t border-red-500/50 flex items-center justify-between gap-2 z-20 shrink-0">
+        <div class="flex items-center gap-2.5 flex-1 min-w-0">
+          <span class="w-3 h-3 rounded-full bg-red-500 animate-ping shrink-0"></span>
+          <span class="text-xs font-mono font-bold text-red-400 shrink-0">REC</span>
+          <span id="recording-timer" class="text-xs font-mono text-white font-bold shrink-0">00:00</span>
+          <!-- Live Audio Waveform Simulation Bar -->
+          <div class="recording-wave-visualizer flex items-center gap-1 flex-1 h-6 overflow-hidden px-2">
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+            <span class="wave-bar"></span><span class="wave-bar"></span><span class="wave-bar"></span>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onclick="cancelAudioRecording()"
+            class="px-2.5 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-red-400 rounded-xl text-xs font-mono transition flex items-center gap-1 cursor-pointer active:scale-95"
+            title="Annulla registrazione"
+          >
+            <span>🗑️</span> <span class="hidden sm:inline">Annulla</span>
+          </button>
+          <button
+            type="button"
+            onclick="stopAndSendAudioRecording()"
+            class="px-3 py-1.5 bg-street-orange hover:bg-street-orangeHover text-black font-street font-bold rounded-xl text-xs transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-[0_0_12px_rgba(255,101,47,0.4)]"
+            title="Invia nota vocale"
+          >
+            <span>▲ Invia</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MESSAGE INPUT FORM (TELEGRAM BOTTOM BAR) -->
+      <form id="chat-input-form" onsubmit="event.preventDefault(); sendMessage();" class="p-2 sm:p-2.5 bg-[#090b10] border-t border-zinc-800/90 flex items-center gap-2 z-10 relative shrink-0">
+        <!-- GIF Picker Toggle Button -->
+        <button
+          type="button"
+          id="btn-gif-picker"
+          onclick="toggleGifPicker()"
+          class="w-10 h-10 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-street-orange text-zinc-300 hover:text-street-orange text-[10px] font-mono font-black flex items-center justify-center transition cursor-pointer shrink-0 active:scale-95"
+          title="Invia reaction GIF animata"
+        >
+          GIF
+        </button>
+
+        <!-- Message Input -->
         <input
           id="chat-message-input"
           type="text"
           maxlength="500"
           autocomplete="off"
-          placeholder="Scrivi qualcosa nella notte..."
-          oninput="handleTyping()"
-          class="flex-1 bg-[#0b0d10] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none transition"
+          placeholder="Messaggio nella notte..."
+          oninput="handleTyping(); updateChatInputState();"
+          class="flex-1 bg-[#121520] border border-zinc-800 focus:border-street-orange focus:ring-1 focus:ring-street-orange rounded-xl px-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none transition"
         />
+
+        <!-- Voice Note Mic Button -->
+        <button
+          type="button"
+          id="btn-chat-mic"
+          onclick="startAudioRecording()"
+          class="w-10 h-10 rounded-xl bg-zinc-900 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-zinc-300 hover:text-street-orange text-base flex items-center justify-center transition cursor-pointer shrink-0 active:scale-95 shadow-sm"
+          title="Clicca per registrare un vocale"
+        >
+          🎙️
+        </button>
+
+        <!-- Send Button -->
         <button
           type="submit"
-          class="bg-street-orange hover:bg-street-orangeHover text-black font-street font-black px-4 py-2.5 rounded-xl text-sm transition street-glow-sm flex items-center justify-center cursor-pointer active:scale-95"
+          id="btn-chat-send"
+          class="hidden w-10 h-10 rounded-xl bg-street-orange hover:bg-street-orangeHover text-black text-sm font-black flex items-center justify-center transition cursor-pointer shrink-0 active:scale-95 shadow-[0_0_12px_rgba(255,101,47,0.4)]"
+          title="Invia messaggio"
         >
-          INVIA
+          ➤
         </button>
       </form>
 
-    </div>
+    </main>
   </section>
 
   <!-- ======================================================== -->

@@ -461,3 +461,533 @@ textarea::placeholder {
   opacity: 0.75;
   filter: contrast(1.15) saturate(1.2);
 }
+
+/* ==========================================================================
+   ENTERPRISE FULLSCREEN TELEGRAM CHATROOM, EPHEMERAL VOICE & GIF PIPELINE
+   - 100vw x 100dvh Zero-Void Layout (Edge-to-Edge)
+   - High-contrast Neo-Brutalist Sidebar (Discord/Linear Dark System)
+   - Telegram Web Dark Message Stream with Native Checkmarks
+   - Mobile Gesture/Drawer Parity (Zero Page Bounce)
+   ========================================================================== */
+
+/* Ensure hidden views are strictly hidden */
+#view-chat.hidden,
+#view-radar.hidden,
+#view-app.hidden,
+#view-landing.hidden,
+#view-bacheca.hidden,
+#view-profilo.hidden,
+.hidden {
+  display: none !important;
+}
+
+/* Fullscreen Root Container: Strictly Overrides all Parent & Editorial Limits */
+#view-chat {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-height: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: row !important;
+  background-color: #090b10 !important;
+  z-index: 50 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Left Sidebar: Unified Dark Glass Control Panel */
+#chat-sidebar {
+  width: 340px !important;
+  min-width: 320px !important;
+  max-width: 380px !important;
+  height: 100% !important;
+  background: #0d0f17 !important;
+  border-right: 1px solid #1c2130 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  padding: 16px !important;
+  gap: 12px !important;
+  overflow-y: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 101, 47, 0.25) transparent;
+  flex-shrink: 0 !important;
+  z-index: 45 !important;
+  box-sizing: border-box !important;
+  transform: none !important;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+#chat-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+#chat-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 101, 47, 0.25);
+  border-radius: 4px;
+}
+
+/* Right Main Area: Edge-to-Edge Telegram Chatroom */
+#chat-main-area {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  background: #090b10 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+
+/* Telegram Messages Container with Seamless Texture */
+.telegram-messages-container {
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  padding: 16px 20px !important;
+  background-color: #0b0d13 !important;
+  background-image: 
+    radial-gradient(circle at 50% 30%, rgba(255, 101, 47, 0.03) 0%, transparent 65%),
+    linear-gradient(rgba(11, 13, 19, 0.88), rgba(11, 13, 19, 0.94)),
+    url('/assets/street/asphalt_grunge.jpg') !important;
+  background-repeat: repeat !important;
+  background-size: 100% 100%, 100% 100%, 320px 320px !important;
+  background-attachment: local !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(255, 101, 47, 0.3) rgba(14, 17, 24, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  box-sizing: border-box !important;
+}
+
+.telegram-messages-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.telegram-messages-container::-webkit-scrollbar-track {
+  background: rgba(14, 17, 24, 0.5);
+}
+
+.telegram-messages-container::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 101, 47, 0.3);
+  border-radius: 9999px;
+}
+
+/* Telegram Message Bubble Layouts */
+.tg-bubble-out {
+  margin-left: auto !important;
+  background: linear-gradient(135deg, #ff652f 0%, #eb5219 100%) !important;
+  color: #0b0d10 !important;
+  border-radius: 18px 18px 4px 18px !important;
+  box-shadow: 0 4px 16px rgba(255, 101, 47, 0.28) !important;
+  font-weight: 500 !important;
+  max-width: min(560px, 85%) !important;
+  padding: 9px 14px !important;
+  position: relative !important;
+  word-break: break-word !important;
+  animation: tgMsgPop 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tg-bubble-out .tg-meta {
+  color: rgba(0, 0, 0, 0.72) !important;
+  font-size: 10px !important;
+  font-family: 'Space Mono', monospace !important;
+  font-weight: 700 !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  justify-content: flex-end !important;
+  margin-top: 4px !important;
+}
+
+.tg-bubble-in {
+  margin-right: auto !important;
+  background: #151924 !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  color: #f1f5f9 !important;
+  border-radius: 18px 18px 18px 4px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  max-width: min(560px, 85%) !important;
+  padding: 9px 14px !important;
+  position: relative !important;
+  word-break: break-word !important;
+  animation: tgMsgPop 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.tg-bubble-in .tg-meta {
+  color: #94a3b8 !important;
+  font-size: 10px !important;
+  font-family: 'Space Mono', monospace !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+  justify-content: flex-end !important;
+  margin-top: 4px !important;
+}
+
+.tg-bubble-in .tg-author {
+  color: #ff652f !important;
+  font-size: 11px !important;
+  font-family: 'Space Mono', monospace !important;
+  font-weight: 700 !important;
+  margin-bottom: 2px !important;
+  display: block !important;
+}
+
+@keyframes tgMsgPop {
+  0% { opacity: 0; transform: translateY(6px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Telegram Voice Note Player Bubble */
+.tg-voice-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 220px;
+  max-width: 290px;
+  padding: 8px 12px;
+  border-radius: 16px;
+  user-select: none;
+}
+
+.tg-voice-play-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.tg-bubble-out .tg-voice-play-btn {
+  background: #0b0d10;
+  color: #ff652f;
+}
+
+.tg-bubble-out .tg-voice-play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.tg-bubble-in .tg-voice-play-btn {
+  background: #ff652f;
+  color: #000;
+}
+
+.tg-bubble-in .tg-voice-play-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(255, 101, 47, 0.5);
+}
+
+.tg-waveform-wrap {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 24px;
+  flex: 1;
+}
+
+.tg-waveform-bar {
+  width: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.25);
+  transition: background-color 0.15s ease, height 0.15s ease;
+}
+
+.tg-bubble-out .tg-waveform-bar {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.tg-bubble-out .tg-waveform-bar.played {
+  background: #0b0d10;
+}
+
+.tg-bubble-in .tg-waveform-bar.played {
+  background: #ff652f;
+}
+
+/* Telegram GIF Card Bubble */
+.tg-gif-card {
+  position: relative;
+  max-width: 260px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tg-gif-img {
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  object-fit: cover;
+  display: block;
+}
+
+.tg-gif-time {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #e4e4e7;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Recording Bar Wave Animation */
+.recording-wave-visualizer .wave-bar {
+  width: 3px;
+  border-radius: 2px;
+  background: #ff652f;
+  animation: wavePulse 1s ease-in-out infinite alternate;
+}
+
+.recording-wave-visualizer .wave-bar:nth-child(2n) {
+  animation-duration: 0.7s;
+  animation-delay: 0.15s;
+}
+
+.recording-wave-visualizer .wave-bar:nth-child(3n) {
+  animation-duration: 1.1s;
+  animation-delay: 0.3s;
+}
+
+.recording-wave-visualizer .wave-bar:nth-child(4n) {
+  animation-duration: 0.55s;
+  animation-delay: 0.05s;
+}
+
+@keyframes wavePulse {
+  0% { height: 4px; opacity: 0.35; }
+  100% { height: 22px; opacity: 1; }
+}
+
+/* Telegram Pinned Secret Bar */
+#pinned-secret-bar {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+}
+
+#pinned-secret-chevron.rotate-180 {
+  transform: rotate(180deg);
+}
+
+/* Fullscreen Fixed Chat Mode (Zero Page Bounce/Scroll) */
+body.chat-mode-active {
+  overflow: hidden !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  position: fixed !important;
+  width: 100% !important;
+}
+
+/* Responsive Lateral Sidebar (Maintained on Mobile & Desktop - Zero Missing Sidebar) */
+@media (max-width: 768px) {
+  #chat-sidebar {
+    width: clamp(140px, 38vw, 190px) !important;
+    min-width: 130px !important;
+    max-width: 200px !important;
+    position: static !important;
+    transform: none !important;
+    box-shadow: none !important;
+    padding: 8px 6px !important;
+    gap: 8px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex-shrink: 0 !important;
+    border-right: 1px solid #1c2130 !important;
+  }
+
+  #chat-sidebar .chat-sidebar-card {
+    padding: 8px 6px !important;
+    border-radius: 12px !important;
+    gap: 6px !important;
+  }
+
+  #chat-sidebar .w-10.h-10 {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  #chat-sidebar #chat-partner-avatar {
+    font-size: 14px !important;
+  }
+
+  #chat-sidebar #chat-partner-nick {
+    font-size: 11px !important;
+  }
+
+  #chat-sidebar #countdown-badge {
+    padding: 2px 6px !important;
+    font-size: 10px !important;
+  }
+
+  #chat-sidebar .grid-cols-3 {
+    gap: 4px !important;
+  }
+
+  #chat-sidebar .grid-cols-3 button {
+    padding: 4px 2px !important;
+    font-size: 10px !important;
+  }
+
+  #chat-main-area {
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+  }
+
+  .telegram-messages-container {
+    padding: 10px 8px !important;
+  }
+
+  #chat-top-bar {
+    padding: 8px 10px !important;
+  }
+}
+
+/* ==========================================================================
+   3D GIF POPOVER & STREET CARDS ENGINE
+   ========================================================================== */
+#chat-gif-popover {
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 101, 47, 0.15);
+}
+
+@media (max-width: 767px) {
+  #chat-gif-popover {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    max-height: 75vh !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-top-left-radius: 1.5rem !important;
+    border-top-right-radius: 1.5rem !important;
+    padding-bottom: max(16px, env(safe-area-inset-bottom)) !important;
+    z-index: 50 !important;
+  }
+  .gif-sheet-handle {
+    display: block !important;
+  }
+}
+
+.gif-sheet-handle {
+  display: none;
+  width: 40px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 auto 8px auto;
+}
+
+#chat-gif-grid {
+  perspective: 1200px;
+}
+
+.tg-gif-3d-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #090a10;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transform-style: preserve-3d;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.2s ease;
+  height: 84px;
+  cursor: pointer;
+  outline: none;
+  display: block;
+  padding: 0;
+}
+
+.tg-gif-3d-card:hover,
+.tg-gif-3d-card:focus-visible {
+  transform: translateY(-4px) scale(1.04) rotateX(4deg);
+  border-color: #ff652f;
+  box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.8), 0 0 16px rgba(255, 101, 47, 0.35);
+  z-index: 2;
+}
+
+.tg-gif-3d-card:active {
+  transform: scale(0.97) translateY(0);
+}
+
+.tg-gif-3d-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.tg-gif-3d-badge {
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  padding: 2px 4px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: 6px;
+  font-size: 8.5px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #d1d5db;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateZ(10px);
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tg-gif-loading-skeleton {
+  background: linear-gradient(90deg, #181926 25%, #25283b 50%, #181926 75%);
+  background-size: 200% 100%;
+  animation: skeletonShift 1.5s infinite;
+}
+
+@keyframes skeletonShift {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tg-gif-3d-card {
+    transition: none !important;
+  }
+  .tg-gif-3d-card:hover,
+  .tg-gif-3d-card:focus-visible {
+    transform: none !important;
+  }
+  .tg-gif-loading-skeleton {
+    animation: none !important;
+  }
+}
+
+
