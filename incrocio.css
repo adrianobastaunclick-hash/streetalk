@@ -258,6 +258,11 @@ textarea:focus {
   visibility: visible !important;
 }
 
+#radar-scope-container {
+  background: radial-gradient(circle at center, #10141f 0%, #06070a 100%) !important;
+  box-shadow: 0 0 35px rgba(255, 101, 47, 0.3), inset 0 0 40px rgba(0, 0, 0, 0.95) !important;
+}
+
 #view-radar > div {
   background: #12151f !important;
   border: 2px solid rgba(255, 101, 47, 0.5) !important;

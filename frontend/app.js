@@ -1,206 +1,489 @@
-let radarEngineLoading = false;
-    function loadRadarEngine() {
-      if (radarEngineLoading || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-      radarEngineLoading = true;
-      const script = document.createElement('script');
-      script.src = '/vendor/three.min.js';
-      script.onload = init3DRadar;
-      script.onerror = () => { radarEngineLoading = false; };
-      document.head.appendChild(script);
-    }
-    function init3DRadar() {
-      const radarCanvas = document.getElementById('radar-3d-canvas');
-      if (!radarCanvas || !window.THREE) return;
+    // ==========================================
+    // TACTICAL RADAR SCOPE ENGINE (REALTIME ONLINE USERS & SWEEP)
+    // ==========================================
+    let radarEngineLoading = false;
+    let radarScopeEngine = null;
+    let latestTelemetrySnapshot = null;
 
-      try {
-        const renderer = new THREE.WebGLRenderer({
-          canvas: radarCanvas,
-          alpha: true,
-          antialias: true,
-          powerPreference: 'high-performance'
-        });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(224, 224);
+    class RadarScopeEngine {
+      constructor(canvas) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.animationFrame = null;
+        this.lastTimestamp = 0;
+        this.sweepAngle = 0;
+        this.previousSweepAngle = 0;
+        this.onlineCount = 0;
+        this.inQueue = 0;
+        this.contacts = [];
+        this.hoverTarget = null;
+        this.pointerX = -1;
+        this.pointerY = -1;
+        this.sonarPulseTime = 0;
+        this.isDemoMode = false;
+        this.soundThrottle = 0;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
-        camera.position.z = 6.2;
+        this.onPointerMove = this.onPointerMove.bind(this);
+        this.onPointerLeave = this.onPointerLeave.bind(this);
+        this.syncVisibility = this.syncVisibility.bind(this);
+        this.animate = this.animate.bind(this);
 
-        const radarGroup = new THREE.Group();
-        scene.add(radarGroup);
-
-        // 1. Outer Geodesic Sphere (Icosahedron Wireframe)
-        const geoSphere = new THREE.IcosahedronGeometry(2.3, 2);
-        const matSphere = new THREE.MeshBasicMaterial({
-          color: 0xff652f,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.75
-        });
-        const radarSphere = new THREE.Mesh(geoSphere, matSphere);
-        radarGroup.add(radarSphere);
-
-        // 2. Equatorial Gimbal Ring
-        const eqRingGeo = new THREE.TorusGeometry(2.45, 0.022, 16, 64);
-        const eqRingMat = new THREE.MeshBasicMaterial({
-          color: 0xffaa44,
-          transparent: true,
-          opacity: 0.85
-        });
-        const eqRing = new THREE.Mesh(eqRingGeo, eqRingMat);
-        eqRing.rotation.x = Math.PI / 2;
-        radarGroup.add(eqRing);
-
-        // 3. Polar Gimbal Ring
-        const polarRingGeo = new THREE.TorusGeometry(2.4, 0.02, 16, 64);
-        const polarRingMat = new THREE.MeshBasicMaterial({
-          color: 0xff3b00,
-          transparent: true,
-          opacity: 0.65
-        });
-        const polarRing = new THREE.Mesh(polarRingGeo, polarRingMat);
-        radarGroup.add(polarRing);
-
-        // 4. Inner Core Glowing Beacon
-        const innerGeo = new THREE.SphereGeometry(0.75, 16, 12);
-        const innerMat = new THREE.MeshBasicMaterial({
-          color: 0xffaa33,
-          wireframe: true,
-          transparent: true,
-          opacity: 0.85
-        });
-        const innerSphere = new THREE.Mesh(innerGeo, innerMat);
-        radarGroup.add(innerSphere);
-
-        // 5. Orbiting 3D Particle Cloud (Blips / Soul Signals)
-        const particleCount = 42;
-        const particleGeo = new THREE.BufferGeometry();
-        const particlePos = new Float32Array(particleCount * 3);
-        for (let i = 0; i < particleCount; i++) {
-          const u = Math.random();
-          const v = Math.random();
-          const theta = u * 2.0 * Math.PI;
-          const phi = Math.acos(2.0 * v - 1.0);
-          const r = 1.9 + Math.random() * 0.9;
-          const sinPhi = Math.sin(phi);
-          particlePos[i * 3] = r * sinPhi * Math.cos(theta);
-          particlePos[i * 3 + 1] = r * sinPhi * Math.sin(theta);
-          particlePos[i * 3 + 2] = r * Math.cos(phi);
-        }
-        particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
-        const particleMat = new THREE.PointsMaterial({
-          color: 0xffe0b2,
-          size: 0.09,
-          transparent: true,
-          opacity: 0.95
-        });
-        const particleCloud = new THREE.Points(particleGeo, particleMat);
-        radarGroup.add(particleCloud);
-
-        // 6. Expanding Volumetric Radar Ping Rings
-        const wave1Geo = new THREE.RingGeometry(0.25, 0.35, 32);
-        const wave1Mat = new THREE.MeshBasicMaterial({
-          color: 0xff652f,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.85
-        });
-        const wave1 = new THREE.Mesh(wave1Geo, wave1Mat);
-        radarGroup.add(wave1);
-
-        const wave2Geo = new THREE.RingGeometry(0.25, 0.35, 32);
-        const wave2Mat = new THREE.MeshBasicMaterial({
-          color: 0xff9944,
-          side: THREE.DoubleSide,
-          transparent: true,
-          opacity: 0.7
-        });
-        const wave2 = new THREE.Mesh(wave2Geo, wave2Mat);
-        radarGroup.add(wave2);
-
-        let wave1Scale = 0.5;
-        let wave2Scale = 2.8;
-
-        // Pointer Parallax on radar card
-        let targetRotX = 0;
-        let targetRotY = 0;
-        const radarCard = radarCanvas.closest('.tilt-card') || radarCanvas.parentElement;
-        if (radarCard) {
-          radarCard.addEventListener('pointermove', (e) => {
-            const rect = radarCard.getBoundingClientRect();
-            const px = (e.clientX - rect.left) / rect.width - 0.5;
-            const py = (e.clientY - rect.top) / rect.height - 0.5;
-            targetRotY = px * 0.45;
-            targetRotX = py * 0.45;
-          });
-          radarCard.addEventListener('pointerleave', () => {
-            targetRotX = 0;
-            targetRotY = 0;
-          });
-        }
-
-        let radarFrame = 0;
-        const radarSection = document.getElementById('view-radar');
-        const radarReduced = matchMedia('(prefers-reduced-motion: reduce)');
-        function radarVisible() { return radarSection && !radarSection.classList.contains('hidden') && !document.hidden; }
-        function syncRadar() { cancelAnimationFrame(radarFrame); radarFrame = 0; if (!radarVisible()) return; if (radarReduced.matches) renderer.render(scene, camera); else radarFrame = requestAnimationFrame(animateRadar); }
-        const radarObserver = new MutationObserver(syncRadar);
-        if (radarSection) radarObserver.observe(radarSection, {attributes:true,attributeFilter:['class']});
-        document.addEventListener('visibilitychange', syncRadar);
-        radarReduced.addEventListener('change', syncRadar);
-        window.addEventListener('pagehide', () => { cancelAnimationFrame(radarFrame); radarFrame = 0; });
-        window.addEventListener('pageshow', syncRadar);
-        function animateRadar() {
-          radarFrame = 0;
-          if (!radarVisible() || radarReduced.matches) return;
-          radarFrame = requestAnimationFrame(animateRadar);
-
-          const radarSection = document.getElementById('view-radar');
-          if (!radarSection || radarSection.classList.contains('hidden')) return;
-
-          // Smooth tilt follow
-          radarGroup.rotation.y += (targetRotY - radarGroup.rotation.y) * 0.08;
-          radarGroup.rotation.x += (targetRotX - radarGroup.rotation.x) * 0.08;
-
-          // Rotations
-          radarSphere.rotation.y += 0.014;
-          radarSphere.rotation.x += 0.007;
-
-          eqRing.rotation.z += 0.018;
-          polarRing.rotation.y -= 0.016;
-
-          innerSphere.rotation.y -= 0.022;
-          innerSphere.rotation.z += 0.012;
-
-          particleCloud.rotation.y += 0.008;
-          particleCloud.rotation.x += 0.004;
-
-          // Expand Ping Waves
-          wave1Scale += 0.045;
-          if (wave1Scale > 5.5) {
-            wave1Scale = 0.5;
-            wave1Mat.opacity = 0.85;
-          } else {
-            wave1Mat.opacity = Math.max(0, 0.85 * (1 - wave1Scale / 5.5));
-          }
-          wave1.scale.set(wave1Scale, wave1Scale, 1);
-
-          wave2Scale += 0.045;
-          if (wave2Scale > 5.5) {
-            wave2Scale = 0.5;
-            wave2Mat.opacity = 0.7;
-          } else {
-            wave2Mat.opacity = Math.max(0, 0.7 * (1 - wave2Scale / 5.5));
-          }
-          wave2.scale.set(wave2Scale, wave2Scale, 1);
-
-          renderer.render(scene, camera);
-        }
-
-        syncRadar();
-      } catch (e) {
-        console.warn('[RADAR-3D] WebGL fallback:', e);
+        this.initListeners();
+        this.resize();
       }
+
+      initListeners() {
+        this.canvas.addEventListener('pointermove', this.onPointerMove);
+        this.canvas.addEventListener('pointerleave', this.onPointerLeave);
+        window.addEventListener('resize', () => this.resize());
+        
+        const radarSection = document.getElementById('view-radar');
+        if (radarSection) {
+          this.observer = new MutationObserver(this.syncVisibility);
+          this.observer.observe(radarSection, { attributes: true, attributeFilter: ['class'] });
+        }
+        document.addEventListener('visibilitychange', this.syncVisibility);
+        window.addEventListener('pagehide', () => this.stop());
+        window.addEventListener('pageshow', this.syncVisibility);
+        
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+        reducedMotion.addEventListener('change', this.syncVisibility);
+      }
+
+      onPointerMove(e) {
+        const rect = this.canvas.getBoundingClientRect();
+        this.pointerX = e.clientX - rect.left;
+        this.pointerY = e.clientY - rect.top;
+      }
+
+      onPointerLeave() {
+        this.pointerX = -1;
+        this.pointerY = -1;
+        this.hoverTarget = null;
+      }
+
+      resize() {
+        if (!this.canvas) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const w = rect.width || 256;
+        const h = rect.height || 256;
+        this.canvas.width = Math.round(w * dpr);
+        this.canvas.height = Math.round(h * dpr);
+        this.width = w;
+        this.height = h;
+        this.dpr = dpr;
+      }
+
+      updateTelemetry(stats) {
+        if (!stats || typeof stats !== 'object') return;
+        const oc = Number.isSafeInteger(stats.onlineCount) ? stats.onlineCount : 0;
+        const q = Number.isSafeInteger(stats.inQueue) ? stats.inQueue : 0;
+        this.onlineCount = oc;
+        this.inQueue = q;
+        this.syncContacts();
+      }
+
+      setDemoMode(enabled) {
+        this.isDemoMode = enabled;
+        this.syncContacts();
+      }
+
+      syncContacts() {
+        let count = Math.max(0, this.onlineCount - 1);
+        if (this.isDemoMode && count === 0) {
+          count = 2;
+        }
+        count = Math.min(count, 16);
+
+        const GOLDEN_ANGLE = 2.399963;
+        const newContacts = [];
+
+        for (let i = 0; i < count; i++) {
+          const existing = this.contacts[i];
+          const baseAngle = ((i * GOLDEN_ANGLE) + 0.52) % (Math.PI * 2);
+          const baseRadius = 0.35 + (((i * 7) % 11) / 11) * 0.48;
+          const isQueued = i < this.inQueue;
+          const isDemo = this.isDemoMode && this.onlineCount <= 1;
+
+          newContacts.push({
+            id: i + 1,
+            label: isDemo 
+              ? (i === 0 ? 'SHADOW_88' : 'V1PER_94')
+              : (isQueued ? `SIG-${i + 1} [CODA]` : `SIG-${i + 1} [ON]`),
+            baseAngle,
+            radius: baseRadius,
+            distanceM: Math.round(baseRadius * 350),
+            isQueued: isQueued,
+            isDemo: isDemo,
+            lastPingTime: existing ? existing.lastPingTime : 0,
+            pingIntensity: existing ? existing.pingIntensity : 0,
+            driftPhase: i * 1.7
+          });
+        }
+
+        this.contacts = newContacts;
+      }
+
+      isVisible() {
+        const radarSection = document.getElementById('view-radar');
+        return radarSection && !radarSection.classList.contains('hidden') && !document.hidden;
+      }
+
+      syncVisibility() {
+        if (this.isVisible()) {
+          this.start();
+        } else {
+          this.stop();
+        }
+      }
+
+      start() {
+        if (this.animationFrame) return;
+        this.resize();
+        this.lastTimestamp = performance.now();
+        this.animationFrame = requestAnimationFrame(this.animate);
+      }
+
+      stop() {
+        if (this.animationFrame) {
+          cancelAnimationFrame(this.animationFrame);
+          this.animationFrame = null;
+        }
+      }
+
+      animate(now) {
+        this.animationFrame = null;
+        if (!this.isVisible()) return;
+
+        const deltaMs = Math.min(now - (this.lastTimestamp || now), 100);
+        this.lastTimestamp = now;
+
+        const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!reducedMotion) {
+          this.previousSweepAngle = this.sweepAngle;
+          this.sweepAngle = (this.sweepAngle + (deltaMs / 1000) * 1.4) % (Math.PI * 2);
+          this.sonarPulseTime = (this.sonarPulseTime + deltaMs) % 2400;
+        }
+
+        this.render(now, reducedMotion);
+
+        if (!reducedMotion) {
+          this.animationFrame = requestAnimationFrame(this.animate);
+        }
+      }
+
+      render(now, reducedMotion) {
+        const ctx = this.ctx;
+        const w = this.width;
+        const h = this.height;
+        const dpr = this.dpr;
+        if (!ctx || !w || !h) return;
+
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        ctx.clearRect(0, 0, w, h);
+
+        const cx = w / 2;
+        const cy = h / 2;
+        const maxR = Math.min(cx, cy) - 8;
+
+        // 1. Radar Circular Scope Clipping & Background Vignette
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, maxR, 0, Math.PI * 2);
+        ctx.clip();
+
+        const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+        bgGrad.addColorStop(0, '#101420');
+        bgGrad.addColorStop(0.7, '#090b10');
+        bgGrad.addColorStop(1, '#050608');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, w, h);
+
+        // 2. Concentric Range Rings (50m, 100m, 200m, 350m)
+        const ringFractions = [0.25, 0.50, 0.75, 0.98];
+        const ringLabels = ['50m', '100m', '200m', '350m'];
+
+        ringFractions.forEach((frac, idx) => {
+          const r = maxR * frac;
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, Math.PI * 2);
+          ctx.strokeStyle = idx === 3 ? 'rgba(255, 101, 47, 0.55)' : (idx === 2 ? 'rgba(255, 101, 47, 0.22)' : 'rgba(255, 101, 47, 0.16)');
+          ctx.lineWidth = idx === 3 ? 1.5 : 1;
+          if (idx === 2) {
+            ctx.setLineDash([4, 4]);
+          } else {
+            ctx.setLineDash([]);
+          }
+          ctx.stroke();
+
+          // Range text markers along 45-degree angle
+          const tagAngle = -Math.PI / 4;
+          const tx = cx + Math.cos(tagAngle) * (r - 2);
+          const ty = cy + Math.sin(tagAngle) * (r - 2);
+          ctx.font = '600 8px "JetBrains Mono", monospace';
+          ctx.fillStyle = 'rgba(255, 101, 47, 0.45)';
+          ctx.fillText(ringLabels[idx], tx - 12, ty + 2);
+        });
+        ctx.setLineDash([]);
+
+        // 3. Tactical Cardinal Axes & Degree Ticks
+        ctx.beginPath();
+        ctx.moveTo(cx - maxR, cy);
+        ctx.lineTo(cx + maxR, cy);
+        ctx.moveTo(cx, cy - maxR);
+        ctx.lineTo(cx, cy + maxR);
+        ctx.strokeStyle = 'rgba(255, 101, 47, 0.18)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Degree ticks and cardinal labels
+        for (let deg = 0; deg < 360; deg += 30) {
+          const rad = (deg * Math.PI) / 180;
+          const isMajor = deg % 90 === 0;
+          const tickLen = isMajor ? 7 : 4;
+          const x1 = cx + Math.cos(rad) * (maxR - tickLen);
+          const y1 = cy + Math.sin(rad) * (maxR - tickLen);
+          const x2 = cx + Math.cos(rad) * maxR;
+          const y2 = cy + Math.sin(rad) * maxR;
+
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.strokeStyle = isMajor ? 'rgba(255, 101, 47, 0.65)' : 'rgba(255, 101, 47, 0.25)';
+          ctx.lineWidth = isMajor ? 1.5 : 1;
+          ctx.stroke();
+
+          if (isMajor) {
+            const cardinalMap = { 0: '090°', 90: '180°', 180: '270°', 270: '000°' };
+            const label = cardinalMap[deg];
+            const lx = cx + Math.cos(rad) * (maxR - 14);
+            const ly = cy + Math.sin(rad) * (maxR - 14);
+            ctx.font = '700 8px "JetBrains Mono", monospace';
+            ctx.fillStyle = 'rgba(255, 101, 47, 0.7)';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(label, lx, ly);
+          }
+        }
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+        // 4. Expanding Sonar Wave Ripples from Center Beacon
+        if (!reducedMotion) {
+          const pulseFrac = this.sonarPulseTime / 2400;
+          const pRadius = pulseFrac * maxR;
+          const pAlpha = Math.max(0, (1 - pulseFrac) * 0.4);
+          ctx.beginPath();
+          ctx.arc(cx, cy, pRadius, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255, 101, 47, ${pAlpha})`;
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+
+        // 5. Rotating Radar Sweep Beam & Phosphor Trailing Cone
+        if (!reducedMotion) {
+          const sweepAngle = this.sweepAngle;
+          const coneAngle = 0.75;
+          const slices = 20;
+
+          for (let s = 0; s < slices; s++) {
+            const startA = sweepAngle - (s / slices) * coneAngle;
+            const endA = sweepAngle - ((s + 1) / slices) * coneAngle;
+            const sliceAlpha = (1 - s / slices) * 0.22;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, maxR, endA, startA);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(255, 101, 47, ${sliceAlpha})`;
+            ctx.fill();
+          }
+
+          // Sharp leading sweep laser line
+          const lx = cx + Math.cos(sweepAngle) * maxR;
+          const ly = cy + Math.sin(sweepAngle) * maxR;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(lx, ly);
+          ctx.strokeStyle = '#ffaa44';
+          ctx.shadowColor = '#ff652f';
+          ctx.shadowBlur = 9;
+          ctx.lineWidth = 1.8;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+
+        // 6. Online Contacts Tracking & Illumination Ping
+        let activeHover = null;
+
+        this.contacts.forEach((contact) => {
+          const driftAngle = contact.baseAngle + Math.sin(now * 0.0006 + contact.driftPhase) * 0.04;
+          const normAngle = ((driftAngle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+          const px = cx + Math.cos(normAngle) * (contact.radius * maxR);
+          const py = cy + Math.sin(normAngle) * (contact.radius * maxR);
+
+          if (!reducedMotion) {
+            const prevA = this.previousSweepAngle;
+            const currA = this.sweepAngle;
+            let crossed = false;
+            if (currA >= prevA) {
+              crossed = normAngle >= prevA && normAngle <= currA;
+            } else {
+              crossed = normAngle >= prevA || normAngle <= currA;
+            }
+
+            if (crossed) {
+              contact.lastPingTime = now;
+              contact.pingIntensity = 1.0;
+              if (typeof SoundEngine !== 'undefined' && SoundEngine.enabled && now - this.soundThrottle > 350) {
+                this.soundThrottle = now;
+                if (typeof SoundEngine.playRadarSweep === 'function') {
+                  SoundEngine.playRadarSweep();
+                }
+              }
+            }
+          } else {
+            contact.pingIntensity = 0.85;
+          }
+
+          const elapsedSec = (now - (contact.lastPingTime || 0)) / 1000;
+          const decay = Math.exp(-elapsedSec / 1.5);
+          const intensity = reducedMotion ? 0.85 : Math.max(0.12, decay);
+
+          if (this.pointerX >= 0 && this.pointerY >= 0) {
+            const dist = Math.hypot(this.pointerX - px, this.pointerY - py);
+            if (dist < 18) {
+              activeHover = { contact, px, py, normAngle };
+            }
+          }
+
+          const isQueued = contact.isQueued;
+          const blipColor = isQueued ? 'rgba(255, 170, 51,' : 'rgba(255, 101, 47,';
+
+          if (!reducedMotion && elapsedSec < 0.7) {
+            const ripProgress = elapsedSec / 0.7;
+            const ripRadius = 4 + ripProgress * 22;
+            const ripAlpha = (1 - ripProgress) * 0.75;
+            ctx.beginPath();
+            ctx.arc(px, py, ripRadius, 0, Math.PI * 2);
+            ctx.strokeStyle = `${blipColor} ${ripAlpha})`;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+
+          ctx.beginPath();
+          ctx.arc(px, py, 4 + intensity * 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = `${blipColor} ${intensity * 0.45})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+          ctx.fillStyle = `${blipColor} ${Math.min(1, intensity + 0.3)})`;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+          ctx.fill();
+
+          if (intensity > 0.22 || reducedMotion) {
+            ctx.font = '700 8px "JetBrains Mono", monospace';
+            ctx.fillStyle = `${blipColor} ${Math.min(1, intensity + 0.15)})`;
+            ctx.fillText(contact.label, px + 7, py - 6);
+            ctx.font = '500 7px "JetBrains Mono", monospace';
+            ctx.fillStyle = `rgba(200, 210, 225, ${Math.min(0.9, intensity * 0.85)})`;
+            ctx.fillText(`${contact.distanceM}m`, px + 7, py + 3);
+          }
+        });
+
+        // 7. Tactical Cursor Hover Inspection
+        if (activeHover) {
+          const { contact, px, py, normAngle } = activeHover;
+          const deg = Math.round((normAngle * 180 / Math.PI) % 360);
+          
+          ctx.beginPath();
+          const s = 10;
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 1.5;
+          ctx.moveTo(px - s, py - s + 4); ctx.lineTo(px - s, py - s); ctx.lineTo(px - s + 4, py - s);
+          ctx.moveTo(px + s - 4, py - s); ctx.lineTo(px + s, py - s); ctx.lineTo(px + s, py - s + 4);
+          ctx.moveTo(px - s, py + s - 4); ctx.lineTo(px - s, py + s); ctx.lineTo(px - s + 4, py + s);
+          ctx.moveTo(px + s - 4, py + s); ctx.lineTo(px + s, py + s); ctx.lineTo(px + s, py + s - 4);
+          ctx.stroke();
+
+          const azmEl = document.getElementById('radar-azimuth');
+          if (azmEl) {
+            azmEl.textContent = `TARGET: ${contact.label} • ${contact.distanceM}m • ${deg}°`;
+          }
+        } else {
+          const azmEl = document.getElementById('radar-azimuth');
+          if (azmEl) {
+            const deg = Math.round((this.sweepAngle * 180 / Math.PI) % 360);
+            azmEl.textContent = `SCANNER: ${deg.toString().padStart(3, '0')}° AZM`;
+          }
+        }
+
+        // 8. Center User Station (TU // NODO ATTIVO)
+        ctx.beginPath();
+        ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ff652f';
+        ctx.shadowColor = '#ff652f';
+        ctx.shadowBlur = 12;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.font = '900 8px "JetBrains Mono", monospace';
+        ctx.fillStyle = '#ffaa44';
+        ctx.textAlign = 'center';
+        ctx.fillText('TU', cx, cy + 14);
+        ctx.textAlign = 'left';
+
+        ctx.restore();
+        ctx.restore();
+
+        // 9. Sync Telemetry Text Readouts
+        const count = this.contacts.length;
+        const geoEl = document.getElementById('radar-geo-coords');
+        if (geoEl) {
+          if (count > 0) {
+            geoEl.textContent = `${count} ${count === 1 ? 'CONTATTO' : 'CONTATTI'} // ${this.inQueue} IN CODA`;
+          } else {
+            geoEl.textContent = '0 CONTATTI // NODO ATTIVO';
+          }
+        }
+      }
+    }
+
+    function loadRadarEngine() {
+      if (!radarScopeEngine) {
+        const canvas = document.getElementById('radar-3d-canvas');
+        if (canvas) {
+          radarScopeEngine = new RadarScopeEngine(canvas);
+          if (latestTelemetrySnapshot) {
+            radarScopeEngine.updateTelemetry(latestTelemetrySnapshot);
+          } else {
+            fetch('/api/stats').then(r => r.json()).then(data => {
+              if (radarScopeEngine && data) {
+                radarScopeEngine.updateTelemetry(data);
+              }
+            }).catch(() => {});
+          }
+        }
+      }
+      if (radarScopeEngine) {
+        radarScopeEngine.start();
+      }
+    }
+
+    function init3DRadar() {
+      loadRadarEngine();
     }
   
 if (typeof io === 'undefined') {
@@ -384,6 +667,10 @@ if (typeof io === 'undefined') {
     function updateTrustHUD(stats) {
       if (!socket || !socket.connected) return;
       const snapshot = stats && typeof stats === 'object' ? stats : {};
+      latestTelemetrySnapshot = snapshot;
+      if (radarScopeEngine) {
+        radarScopeEngine.updateTelemetry(snapshot);
+      }
       const count = value => Number.isSafeInteger(value) && value >= 0 ? value.toLocaleString() : '—';
       safeSetText(document.getElementById('header-counter-number'), count(snapshot.onlineCount));
       safeSetText(document.getElementById('hud-active-vaults'), count(snapshot.activeRooms));
