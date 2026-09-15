@@ -3475,17 +3475,10 @@ if (typeof io === 'undefined') {
     }
 
     function openCreateGroupModal() {
-      const isFounder = isFounderUser();
-      const karma = getStreetKarma();
-      const strikes = getBotStrikes();
-      const isQualified = isFounder || (karma >= 50 && strikes === 0);
+      const isQualified = isFounderUser() || (getStreetKarma() >= 100 && getBotStrikes() === 0);
 
       if (!isQualified) {
-        const unqualModal = document.getElementById('modal-group-unqualified');
-        if (unqualModal) {
-          unqualModal.classList.remove('hidden');
-          document.body.classList.add('overflow-hidden');
-        }
+        openFounderBadgeModal();
         return;
       }
 
@@ -3560,11 +3553,7 @@ if (typeof io === 'undefined') {
           loadThematicGroups();
         } else if (res.status === 403 || (data && data.code === 'NOT_QUALIFIED')) {
           closeCreateGroupModal();
-          const unqualModal = document.getElementById('modal-group-unqualified');
-          if (unqualModal) {
-            unqualModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
-          }
+          openFounderBadgeModal();
         } else {
           showToast(data.error || 'Errore nella creazione del tavolo.', 'error');
         }
@@ -3619,8 +3608,13 @@ if (typeof io === 'undefined') {
           closeFounderBadgeModal();
           updateKarmaHUD();
           showToast('🏆 COMPLIMENTI! Sei ora un Fondatore Ufficiale di STREETALK.', 'success');
+          const createModal = document.getElementById('modal-create-group');
+          if (createModal) {
+            createModal.classList.remove('hidden');
+            document.body.classList.add('overflow-hidden');
+          }
         } else {
-          showToast('Errore durante lo sblocco del badge.', 'error');
+          showToast(data && data.error ? data.error : 'Errore durante lo sblocco del badge.', 'error');
         }
       } catch (err) {
         try {
@@ -3630,6 +3624,11 @@ if (typeof io === 'undefined') {
         closeFounderBadgeModal();
         updateKarmaHUD();
         showToast('🏆 COMPLIMENTI! Sei ora un Fondatore Ufficiale di STREETALK.', 'success');
+        const createModal = document.getElementById('modal-create-group');
+        if (createModal) {
+          createModal.classList.remove('hidden');
+          document.body.classList.add('overflow-hidden');
+        }
       } finally {
         if (btn) {
           btn.disabled = false;

@@ -1,63 +1,37 @@
-# Forensic Integrity Audit Assignment
+# DISPATCH — Forensic Auditor (`auditor_1`)
 
-## Objective
-Conduct an independent forensic integrity audit of the entire codebase and test suite for R1-R6, ensuring authentic implementation without cheats, facades, dummy mocks, or hardcoded test bypasses.
+You are the Forensic Integrity Auditor (`auditor_1`).
+Your working directory is: `d:\streetalk\.agents\auditor_1`
+Project root: `d:\streetalk`
 
-## Inputs & Context
-- Requirements: `d:\streetalk\ORIGINAL_REQUEST.md`
-- Project specification: `d:\streetalk\PROJECT.md`
-- Test suite: `d:\streetalk\TEST_READY.md`
-- Operational rules: `d:\streetalk\AGENTS.md`
-- Codebase files: `server.js`, `lib/`, `frontend/app.js`, `index.html`, `public/`, `tests/autonomous-suite.js`.
+## Mandatory Requirements
+You MUST read `d:\streetalk\.agents\ORIGINAL_REQUEST.md` before starting your audit.
+You MUST read `d:\streetalk\AGENTS.md` for local development constraints.
+Read the handoff reports from:
+- Worker M1: `d:\streetalk\.agents\worker_m1_1\handoff.md`
+- Reviewer M1: `d:\streetalk\.agents\reviewer_m1_1\handoff.md`
+- Worker M2: `d:\streetalk\.agents\worker_m2_1\handoff.md`
+- Reviewer M2: `d:\streetalk\.agents\reviewer_m2_1\handoff.md`
+- Worker M3: `d:\streetalk\.agents\worker_m3_1\handoff.md`
+- Reviewer M3: `d:\streetalk\.agents\reviewer_m3_1\handoff.md`
+- Worker M4: `d:\streetalk\.agents\worker_m4_1\handoff.md`
 
-## Working Directory
-`d:\streetalk\.agents\auditor_1`
+## Audit Scope: Acceptance Criteria A1-A7 & Integrity Forensics
+1. **A1 (R1: Scambio Social Overflow)**: Check `#friend-request-unlocked-drawer` in `index.html` and `public/index.html`. Flex-wrap, input min-w-0, full width button.
+2. **A2 (R2: Story Card Redesign)**: Check `drawStoryCard()` in `frontend/app.js` and `public/app.min.js`. 720x1280 9:16 canvas, dark obsidian/purple gradient, urban grid watermark, neon orange border, dynamic local time, logo branding with vector fallback, randomized taglines (>=5 street phrases), 3 pillars, monospace streetalk.live CTA. Zero privacy leakage.
+3. **A3 (R3: Official Logo Integration)**: Check `assets/logo-streetalk.png` and `public/assets/logo-streetalk.png`. Check header in `index.html` and `public/index.html`.
+4. **A4 (R4: Chat Left Sidebar Hiding)**: Check `#chat-sidebar` hidden via CSS (`display: none !important`) and DOM nodes preserved for JS and tests. Chat main area full width.
+5. **A5 (R5: Bacheca Gruppi a Tema & Founder Modal)**: Check `#btn-bacheca-create-group`, `openCreateGroupModal()` qualification check, founder modal redirect showing €2.99 price and 4 benefits, simulated unlock opening `#modal-create-group`, and `POST /api/groups`.
+6. **A6 (R6: 40+ Avatar System)**: Check `STREET_AVATARS` (58 avatars), default `⚡`, localStorage dual persistence, grid rendering.
+7. **A7 (Parity & Test Suite)**: Check 100% SHA256 parity between root and public files (`index.html`, `incrocio.css`, `street-editorial.css`, `assets/logo-streetalk.png`). Check test suite `tests/autonomous-suite.js` (130 passing assertions, 0 failures).
+8. **Integrity Forensics**: Check for any hardcoded test shortcuts, dummy facades, mocked strings to trick tests, or weakened test assertions.
 
-## Forensic Audit Checklist
-1. **Integrity Forensics**:
-   - Check if any test in `tests/autonomous-suite.js` is trivial, self-certifying, or circumventing actual server logic.
-   - Verify that `streetBot` strike check in TEST 24.4 genuinely uses backend state in `streetBot`.
-   - Verify that `lib/network-policy.js` genuinely parses IP addresses and headers using `proxyaddr`.
-   - Verify that no private chat data, secrets, or contact handles are written to any persistent file, Supabase, or external server.
-2. **Asset Integrity**:
-   - Verify that all 13 SVG files in `assets/gifs/` and `public/assets/gifs/` are genuine vector illustrations with CSS animations, not dummy placeholders.
-   - Verify byte-for-byte identity between `assets/gifs/*.svg` and `public/assets/gifs/*.svg`.
-3. **Audio Integrity**:
-   - Verify that no `.mp3`, `.wav`, or `.ogg` files or URLs are referenced in `index.html`, `public/index.html`, `frontend/app.js`, or `public/app.min.js`.
-4. **File Parity Integrity**:
-   - Cryptographically verify SHA-256 hashes of `index.html` ↔ `public/index.html` and `incrocio.css` ↔ `public/incrocio.css`.
-5. **Free Chat Invariance**:
-   - Verify that 1v1 chat matchmaking, messaging, and extensions are 100% free with zero paywalls.
-6. **Execution Verification**:
-   - Run `npm test` and verify that all 124 tests pass legitimately.
+Write your final audit report and explicit verdict (`CLEAN` or `INTEGRITY VIOLATION`) to `d:\streetalk\.agents\auditor_1\handoff.md` and report back via `send_message`.
 
-Write your verdict (CLEAN or INTEGRITY VIOLATION) with full evidence to:
-`d:\streetalk\.agents\auditor_1\handoff.md`
-
-## 2026-09-14T22:09:32Z
-You are the Forensic Auditor.
-Your working directory is: d:\streetalk\.agents\auditor_1
-Workspace root: d:\streetalk
-
-MANDATORY FIRST STEP: Read d:\streetalk\ORIGINAL_REQUEST.md and d:\streetalk\AGENTS.md before starting.
-Also read your assignment in: d:\streetalk\.agents\auditor_1\DISPATCH.md
-And reference:
-- d:\streetalk\PROJECT.md
-- d:\streetalk\TEST_READY.md
-
-Your mission:
-Conduct an unsparing, exhaustive forensic integrity audit across the entire codebase:
-1. Check for cheats, facades, dummy implementations, or fake test passes.
-2. Check that streetBot strike check in TEST 24.4 genuinely queries real backend state.
-3. Check that network policy IP extraction uses real proxy traversal.
-4. Check that no private chat data, secrets, or contact handles are written to persistent storage.
-5. Check that all 13 SVG files are genuine vector graphics with animations (not empty or fake).
-6. Check that no audio media files (.mp3, .wav, .ogg) are referenced anywhere in frontend files.
-7. Cryptographically verify SHA-256 parity between root and public HTML and CSS.
-8. Verify 100% Free Chat Invariance.
-9. Execute `npm test` and verify that all 124 tests pass cleanly.
-
-Write your verdict (CLEAN or INTEGRITY VIOLATION) with full evidence to:
-d:\streetalk\.agents\auditor_1\handoff.md
-Send a message to orchestrator with your verdict.
+## 2026-09-15T00:04:31Z
+Conduct an exhaustive forensic integrity audit across all 4 Milestones and Acceptance Criteria A1-A7:
+1. Verify genuine logic across R1 (overflow fix), R2 (720x1280 9:16 story card with 0 privacy leakage), R3 (official logo in assets and header), R4 (chat sidebar hidden cleanly with DOM preserved), R5 (Bacheca thematic groups & founder modal flow), R6 (58 avatars, default ⚡, dual persistence).
+2. Audit 100% byte-for-byte SHA256 parity for all mirrored files (index.html, incrocio.css, street-editorial.css, logo-streetalk.png).
+3. Audit test suite tests/autonomous-suite.js: ensure all assertions are genuine, not hardcoded or mocked facades.
+4. Report your final verdict (CLEAN or INTEGRITY VIOLATION) in d:\streetalk\.agents\auditor_1\handoff.md and report back via send_message.
 

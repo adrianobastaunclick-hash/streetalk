@@ -1986,6 +1986,29 @@ async function runAutonomousSuite() {
     assert(indexContent.includes('id="chat-partner-avatar"'), 'index.html must include #chat-partner-avatar');
     pass('Street ID Avatar System (R6): >= 40 avatars, 58 total catalog, full grid rendering, default ⚡, localStorage persistence & display bindings verified');
 
+    // ====================================================
+    // TEST 27: Milestone 3: Bacheca Thematic Groups Flow & Founder Unlock Transition (R5)
+    // ====================================================
+    console.log('\n--- TEST 27: Milestone 3: Bacheca Thematic Groups Flow & Founder Unlock Transition (R5) ---');
+
+    // 27.1 Bacheca Create Group Button ID & Trigger Contract
+    assert(indexContent.includes('id="btn-bacheca-create-group"'), 'index.html must provide id="btn-bacheca-create-group"');
+    assert(publicIndexContent.includes('id="btn-bacheca-create-group"'), 'public/index.html must provide id="btn-bacheca-create-group"');
+    assert(indexContent.includes('onclick="openCreateGroupModal()"'), 'index.html must bind openCreateGroupModal() to create group button');
+    assert.strictEqual(indexContent, publicIndexContent, '100% byte-for-byte SHA256 parity between index.html and public/index.html must be strictly preserved');
+    pass('Bacheca Create Group DOM Contract: id="btn-bacheca-create-group" and onclick="openCreateGroupModal()" verified across index.html & public/index.html');
+
+    // 27.2 Hybrid Qualification Logic & Founder Transition in Client Bundle
+    const publicAppMinJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.min.js'), 'utf8');
+    assert(frontendAppJs.includes('openCreateGroupModal'), 'frontend/app.js must implement openCreateGroupModal');
+    assert(frontendAppJs.includes('getStreetKarma() >= 100'), 'openCreateGroupModal must check karma >= 100');
+    assert(frontendAppJs.includes('openFounderBadgeModal()'), 'openCreateGroupModal must trigger openFounderBadgeModal when unqualified');
+    assert(frontendAppJs.includes('unlockFounderBadge'), 'frontend/app.js must implement unlockFounderBadge');
+    assert(frontendAppJs.includes('modal-create-group'), 'unlockFounderBadge must transition to modal-create-group');
+    assert(publicAppMinJs.includes('openCreateGroupModal'), 'public/app.min.js must contain compiled openCreateGroupModal');
+    assert(publicAppMinJs.includes('unlockFounderBadge'), 'public/app.min.js must contain compiled unlockFounderBadge');
+    pass('Milestone 3 Flow Verification: Hybrid qualification check (karma >= 100 / founder), founder modal redirect and post-unlock transition to #modal-create-group verified in source and minified bundle');
+
     // ----------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------
