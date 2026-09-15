@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node tests/autonomous-suite.js",
+    "test": "node tests/autonomous-suite.js && node tests/undressed-engine-test.js",
     "build": "tailwindcss -i scripts/tailwind.css -o public/utilities.css --minify && esbuild frontend/app.js --outfile=public/app.min.js --minify"
   },
   "dependencies": {

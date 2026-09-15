@@ -23,6 +23,10 @@
   <meta name="theme-color" content="#0b0d10">
   <meta name="application-name" content="STREETALK">
   <meta name="color-scheme" content="dark">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.json">
 
   <!-- Open Graph / Facebook / WhatsApp -->
@@ -391,6 +395,35 @@
     .screen-shake-effect {
       animation: screen-micro-shake 0.22s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
     }
+
+    /* Undressed Engine & Vault Anti-Inspection Styles */
+    .vault-blur-heavy {
+      filter: blur(28px) brightness(0.6);
+      -webkit-filter: blur(28px) brightness(0.6);
+      transform: scale(1.08);
+      transition: filter 0.8s ease-out, transform 0.8s ease-out;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: none;
+      pointer-events: none;
+    }
+    .vault-unblurred {
+      filter: none !important;
+      -webkit-filter: none !important;
+      transform: scale(1) !important;
+    }
+    .anti-inspection-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(11, 13, 16, 0.45);
+      backdrop-filter: blur(2px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      user-select: none;
+    }
   </style>
 
   <link rel="stylesheet" href="/street-editorial.css">
@@ -452,6 +485,15 @@
         <span>📜</span> <span>LA BACHECA</span>
         <span class="px-1.5 py-0.2 text-[9px] bg-street-orange/20 text-street-orange rounded font-bold">INFO</span>
       </button>
+      <button
+        id="nav-btn-undressed"
+        type="button"
+        onclick="switchView('undressed')"
+        class="px-3 py-1.5 rounded-xl font-medium transition text-zinc-400 hover:text-white hover:bg-zinc-800/60 border border-zinc-800 hover:border-street-orange/60 cursor-pointer flex items-center gap-1.5"
+      >
+        <span>🔥</span> <span>UNDRESSED</span>
+        <span class="px-1.5 py-0.2 text-[9px] bg-street-orange/20 text-street-orange rounded font-bold">10-15M</span>
+      </button>
       <a
         href="#rules-title"
         onclick="if(document.getElementById('view-landing').classList.contains('hidden')) switchView('landing');"
@@ -474,6 +516,17 @@
         <span id="mobile-nav-icon">📜</span>
         <span class="text-[10px] text-zinc-300">BACHECA</span>
       </button>
+      <!-- Mobile Quick Undressed Button -->
+      <button
+        id="mobile-btn-undressed"
+        type="button"
+        onclick="switchView('undressed')"
+        class="flex sm:hidden items-center gap-1 bg-street-surface hover:bg-zinc-800 border border-street-orange/40 px-2.5 py-1.5 rounded-full font-mono text-xs text-street-orange transition cursor-pointer"
+        title="Undressed Engine (After Dark & Soul Talk)"
+      >
+        <span>🔥</span>
+        <span class="text-[10px] text-zinc-300 font-bold">UNDRESSED</span>
+      </button>
       <!-- Realtime Latency Ping Badge -->
       <div id="ping-badge" class="hidden sm:flex items-center gap-1.5 bg-street-surface border border-zinc-800 px-2.5 py-1.5 rounded-full font-mono text-[11px] text-zinc-400 shadow-inner" title="Latenza verso il nodo volatile">
         <span id="ping-dot" class="w-2 h-2 rounded-full bg-zinc-500"></span>
@@ -491,6 +544,18 @@
         <span id="header-profile-avatar" class="text-sm">⚡</span>
         <span id="header-profile-nick" class="font-bold text-street-orange max-w-[85px] sm:max-w-[120px] truncate">Profilo</span>
       </button>
+
+      <!-- Street Radio Ambient Player -->
+      <div id="street-radio-widget" class="flex items-center gap-1.5 bg-street-surface border border-zinc-800 hover:border-street-orange/60 px-2.5 sm:px-3 py-1.5 rounded-full font-mono text-xs transition" title="Street Radio (Lo-Fi & Beat)">
+        <button id="radio-btn-toggle" type="button" onclick="StreetRadio.toggle()" class="flex items-center gap-1 text-street-orange hover:text-white transition cursor-pointer" title="Ascolta Street Radio" aria-label="Street Radio Play Pausa">
+          <span id="radio-play-icon">▶</span>
+          <span id="radio-track-badge" class="hidden sm:inline text-[10px] text-zinc-300 font-bold uppercase">RADIO</span>
+        </button>
+        <span id="radio-bars" class="hidden text-street-orange text-[10px] select-none animate-pulse">ılı.</span>
+        <button id="radio-btn-next" type="button" onclick="StreetRadio.next()" class="text-zinc-400 hover:text-white text-xs transition cursor-pointer px-0.5" title="Traccia successiva" aria-label="Traccia successiva">
+          ⏭
+        </button>
+      </div>
 
       <!-- Sound FX Toggle Button -->
       <button id="btn-sound-toggle" onclick="toggleSound()" class="flex items-center gap-1.5 bg-street-surface hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 px-2.5 sm:px-3 py-1.5 rounded-full font-mono text-xs text-zinc-300 transition cursor-pointer" title="Attiva/Disattiva effetti sonori 808">
@@ -2285,6 +2350,603 @@
       </div>
     </section>
   </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 6: UNDRESSED ENGINE & MACRO-CATEGORIES EXPLORER     -->
+  <!-- ======================================================== -->
+  <main id="view-undressed" class="hidden flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-8 z-10 relative">
+
+    <!-- Header Section -->
+    <div class="text-center space-y-2">
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-street-orange/15 border border-street-orange/40 text-street-orange font-mono text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+        <span class="w-2 h-2 rounded-full bg-street-orange animate-pulse"></span>
+        <span>UNDRESSED ENGINE // ARCHITETTURA STANZE</span>
+      </div>
+      <h1 class="font-street font-black text-3xl sm:text-5xl uppercase tracking-tight text-white">
+        SCEGLI LA TUA FREQUENZA NELLA NOTTE
+      </h1>
+      <p class="text-zinc-300 font-sans text-xs sm:text-base max-w-xl mx-auto">
+        Scendi nei livelli della città: chat anonime a tempo, tavoli di discussione o l'incontro guidato dall'IA con sblocco progressivo.
+      </p>
+    </div>
+
+    <!-- Macro-Categories Navigation Tabs -->
+    <div class="flex items-center justify-center gap-2 border-b border-zinc-800 pb-3 overflow-x-auto no-scrollbar" role="tablist">
+      <button
+        type="button"
+        id="tab-macro-flirt"
+        onclick="switchMacroTab('flirt_connections')"
+        class="px-4 sm:px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer bg-street-orange text-black shadow-[0_0_20px_rgba(255,101,47,0.35)]"
+      >
+        <span>🔥</span> <span>FLIRT &amp; CONNESSIONI</span>
+        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono bg-black/30 text-black font-extrabold">ESCLUSIVO</span>
+      </button>
+      <button
+        type="button"
+        id="tab-macro-confession"
+        onclick="switchMacroTab('confession_wall')"
+        class="px-4 sm:px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer bg-[#121520] hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800"
+      >
+        <span>📜</span> <span>CONFESSIONI &amp; SFOGO</span>
+        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono bg-street-orange/20 text-street-orange">180s</span>
+      </button>
+      <button
+        type="button"
+        id="tab-macro-agora"
+        onclick="switchMacroTab('agora')"
+        class="px-4 sm:px-5 py-2.5 rounded-xl font-mono text-xs font-bold transition flex items-center gap-2 whitespace-nowrap cursor-pointer bg-[#121520] hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800"
+      >
+        <span>👥</span> <span>AGORÀ &amp; TAVOLI APERTI</span>
+        <span class="text-[9px] px-1.5 py-0.2 rounded font-mono bg-street-orange/20 text-street-orange">COMMUNITY</span>
+      </button>
+    </div>
+
+    <!-- Macro Tagline Banner -->
+    <div id="macro-tagline-container" class="bg-gradient-to-r from-orange-500/10 via-[#151922] to-orange-500/10 border border-street-orange/40 rounded-2xl p-4 sm:p-5 text-center shadow-lg">
+      <p id="macro-tagline-text" class="font-street font-bold text-sm sm:text-base text-zinc-100 uppercase tracking-wide">
+        "10 minuti al buio. Tre verità svelate. Tu e uno sconosciuto: restate o vi rivestite?"
+      </p>
+    </div>
+
+    <!-- Subcategories Cards Grid -->
+    <div id="macro-subcategories-grid" class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+      
+      <!-- Stanza Speciale 1: AFTER DARK -->
+      <div id="card-room-after-dark" class="bg-[#121520] border-2 border-street-orange/60 hover:border-street-orange rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between shadow-[0_4px_25px_rgba(0,0,0,0.6)]">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded bg-street-orange/20 border border-street-orange/50 text-street-orange font-mono text-[10px] font-bold">
+                [ 10 MIN ]
+              </span>
+              <span class="px-2 py-0.5 rounded bg-rose-500/20 border border-rose-500/40 text-rose-300 font-mono text-[10px] font-bold">
+                [ ADRENALINA FISICA ]
+              </span>
+            </div>
+            <span class="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Regia IA
+            </span>
+          </div>
+
+          <h3 class="font-street font-black text-xl sm:text-2xl text-white uppercase tracking-tight mb-2">
+            After Dark | Tensione a Orologeria
+          </h3>
+          <p class="text-zinc-300 text-xs sm:text-sm font-sans leading-relaxed mb-4">
+            Niente volti, niente chiacchiere da bar. Solo dettagli, ombre e 45 secondi a risposta. Riuscirai a reggere lo sguardo dell'IA prima che scada il tempo?
+          </p>
+
+          <!-- Engine Specs -->
+          <div class="bg-black/50 border border-zinc-800/90 rounded-xl p-3 mb-4 space-y-1.5 text-[11px] font-mono">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Durata totale:</span>
+              <strong class="text-white">10 minuti (600s)</strong>
+            </div>
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Turno di risposta:</span>
+              <strong class="text-street-orange">45 secondi</strong>
+            </div>
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Pre-match Vault:</span>
+              <strong class="text-zinc-200">3 slot obbligatori</strong>
+            </div>
+            <div class="pt-2 border-t border-zinc-800/80 space-y-1 text-[10px] text-zinc-400">
+              <div><strong class="text-street-orange">Slot 1:</strong> Il Dettaglio (labbra, collo, mani)</div>
+              <div><strong class="text-street-orange">Slot 2:</strong> L'Ombra (silhouette outfit)</div>
+              <div><strong class="text-street-orange">Slot 3:</strong> Il Segno (tatuaggio o frammento)</div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick="openUndressedVault('after_dark')"
+          class="w-full py-3.5 px-4 bg-street-orange hover:bg-orange-500 text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,101,47,0.4)] active:scale-95 cursor-pointer"
+        >
+          <span>⚡ APRI VAULT &amp; ENTRA IN AFTER DARK</span>
+          <span>➔</span>
+        </button>
+      </div>
+
+      <!-- Stanza Speciale 2: SOUL TALK -->
+      <div id="card-room-soul-talk" class="bg-[#121520] border-2 border-street-orange/60 hover:border-street-orange rounded-2xl p-6 transition-all duration-200 flex flex-col justify-between shadow-[0_4px_25px_rgba(0,0,0,0.6)]">
+        <div>
+          <div class="flex items-center justify-between gap-2 mb-3">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="px-2 py-0.5 rounded bg-street-orange/20 border border-street-orange/50 text-street-orange font-mono text-[10px] font-bold">
+                [ 15 MIN ]
+              </span>
+              <span class="px-2 py-0.5 rounded bg-teal-500/20 border border-teal-500/40 text-teal-300 font-mono text-[10px] font-bold">
+                [ INTIMITÀ PURA ]
+              </span>
+            </div>
+            <span class="text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+              Regia IA
+            </span>
+          </div>
+
+          <h3 class="font-street font-black text-xl sm:text-2xl text-white uppercase tracking-tight mb-2">
+            Soul Talk | Lo Specchio del Tempo
+          </h3>
+          <p class="text-zinc-300 text-xs sm:text-sm font-sans leading-relaxed mb-4">
+            Chi eri prima di imparare a proteggerti? Mostra chi sei stato da bambino, condividi le tue crepe e scopri se esiste ancora qualcuno capace di guardarti per davvero.
+          </p>
+
+          <!-- Engine Specs -->
+          <div class="bg-black/50 border border-zinc-800/90 rounded-xl p-3 mb-4 space-y-1.5 text-[11px] font-mono">
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Durata totale:</span>
+              <strong class="text-white">15 minuti (900s)</strong>
+            </div>
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Turno di risposta:</span>
+              <strong class="text-street-orange">90 secondi</strong>
+            </div>
+            <div class="flex items-center justify-between text-zinc-400">
+              <span>Pre-match Vault:</span>
+              <strong class="text-zinc-200">3 slot obbligatori</strong>
+            </div>
+            <div class="pt-2 border-t border-zinc-800/80 space-y-1 text-[10px] text-zinc-400">
+              <div><strong class="text-teal-400">Slot 1:</strong> L'Origine (foto da piccoli o oggetto)</div>
+              <div><strong class="text-teal-400">Slot 2:</strong> Il Presente (macro occhi spontanea)</div>
+              <div><strong class="text-teal-400">Slot 3:</strong> Il Rifugio (angolo sicuro o libro)</div>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onclick="openUndressedVault('soul_talk')"
+          class="w-full py-3.5 px-4 bg-street-orange hover:bg-orange-500 text-black font-street font-black text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,101,47,0.4)] active:scale-95 cursor-pointer"
+        >
+          <span>⚡ APRI VAULT &amp; ENTRA IN SOUL TALK</span>
+          <span>➔</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- VIEW 7: ACTIVE UNDRESSED SESSION ROOM                    -->
+  <!-- ======================================================== -->
+  <section id="view-undressed-session" class="hidden flex-1 w-full max-w-3xl mx-auto p-2 sm:p-4 flex flex-col justify-between z-10 relative min-h-[90vh]">
+
+    <!-- Blackout Overlay (Soul Talk Moment) -->
+    <div id="undressed-blackout-overlay" class="hidden fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6 text-center">
+      <span class="w-4 h-4 rounded-full bg-street-orange animate-ping mb-4"></span>
+      <h2 class="font-street font-black text-2xl sm:text-3xl uppercase tracking-widest text-zinc-300">SILENZIO.</h2>
+      <p class="font-mono text-xs text-zinc-500 mt-2">Lo specchio del tempo sta per rivelarsi.</p>
+    </div>
+
+    <!-- 1. TOP BAR WITH CIRCULAR HUD TIMER -->
+    <header class="w-full bg-[#121520]/90 backdrop-blur-xl border border-zinc-800 rounded-2xl p-3 flex items-center justify-between shadow-lg">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl bg-zinc-900 border border-street-orange/50 flex items-center justify-center text-lg">
+          <span id="undressed-partner-avatar">⚡</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span id="undressed-partner-nick" class="font-street font-black text-sm text-white uppercase truncate">Partner</span>
+            <span id="undressed-room-badge" class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-street-orange/20 text-street-orange border border-street-orange/30">AFTER DARK</span>
+          </div>
+          <p id="undressed-phase-indicator" class="text-[10px] font-mono text-zinc-400">FASE 1: GHIACCIO</p>
+        </div>
+      </div>
+
+      <!-- Circular HUD Timer -->
+      <div class="flex items-center gap-3">
+        <div class="relative w-14 h-14 flex items-center justify-center">
+          <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" stroke="#202630" stroke-width="8" fill="transparent"></circle>
+            <circle id="undressed-hud-circle" cx="50" cy="50" r="45" stroke="#ff652f" stroke-width="8" stroke-linecap="round" fill="transparent" stroke-dasharray="283" stroke-dashoffset="0" class="transition-all duration-1000 ease-linear"></circle>
+          </svg>
+          <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span id="undressed-hud-digits" class="font-mono font-bold text-xs text-white leading-none">10:00</span>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="leaveUndressedSession()"
+          class="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-white text-xs font-mono transition cursor-pointer"
+        >
+          Esci
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. THREE DYNAMIC BLUR CARDS BAR -->
+    <section class="w-full grid grid-cols-3 gap-2 my-2.5">
+      <!-- Slot 1 Card -->
+      <div id="undressed-slot-card-1" class="relative rounded-xl border border-zinc-800 bg-[#0e1017] p-2 flex flex-col items-center text-center overflow-hidden transition">
+        <div class="relative w-full h-16 sm:h-20 rounded-lg overflow-hidden bg-black flex items-center justify-center">
+          <img id="undressed-slot-img-1" src="" alt="Slot 1" class="w-full h-full object-cover select-none pointer-events-none vault-blur-heavy hidden" />
+          <div id="undressed-slot-overlay-1" class="anti-inspection-overlay">
+            <span class="text-sm">🔒</span>
+            <span class="text-[8px] font-mono text-zinc-400 uppercase tracking-wider mt-0.5">BLOCCATO</span>
+          </div>
+        </div>
+        <span id="undressed-slot-label-1" class="font-street font-black text-[10px] text-white uppercase truncate mt-1.5 w-full">Il Dettaglio</span>
+      </div>
+
+      <!-- Slot 2 Card -->
+      <div id="undressed-slot-card-2" class="relative rounded-xl border border-zinc-800 bg-[#0e1017] p-2 flex flex-col items-center text-center overflow-hidden transition">
+        <div class="relative w-full h-16 sm:h-20 rounded-lg overflow-hidden bg-black flex items-center justify-center">
+          <img id="undressed-slot-img-2" src="" alt="Slot 2" class="w-full h-full object-cover select-none pointer-events-none vault-blur-heavy hidden" />
+          <div id="undressed-slot-overlay-2" class="anti-inspection-overlay">
+            <span class="text-sm">🔒</span>
+            <span class="text-[8px] font-mono text-zinc-400 uppercase tracking-wider mt-0.5">BLOCCATO</span>
+          </div>
+        </div>
+        <span id="undressed-slot-label-2" class="font-street font-black text-[10px] text-white uppercase truncate mt-1.5 w-full">L'Ombra</span>
+      </div>
+
+      <!-- Slot 3 Card -->
+      <div id="undressed-slot-card-3" class="relative rounded-xl border border-zinc-800 bg-[#0e1017] p-2 flex flex-col items-center text-center overflow-hidden transition">
+        <div class="relative w-full h-16 sm:h-20 rounded-lg overflow-hidden bg-black flex items-center justify-center">
+          <img id="undressed-slot-img-3" src="" alt="Slot 3" class="w-full h-full object-cover select-none pointer-events-none vault-blur-heavy hidden" />
+          <div id="undressed-slot-overlay-3" class="anti-inspection-overlay">
+            <span class="text-sm">🔒</span>
+            <span class="text-[8px] font-mono text-zinc-400 uppercase tracking-wider mt-0.5">BLOCCATO</span>
+          </div>
+        </div>
+        <span id="undressed-slot-label-3" class="font-street font-black text-[10px] text-white uppercase truncate mt-1.5 w-full">Il Segno</span>
+      </div>
+    </section>
+
+    <!-- 3. CENTRAL MESSAGES FEED & AI GAME MASTER BOX -->
+    <main id="undressed-messages-feed" class="flex-1 w-full overflow-y-auto px-1 py-2 space-y-3.5 max-h-[48vh] no-scrollbar">
+      <!-- AI Regista system announcement box -->
+      <div id="undressed-ai-announcement-box" class="w-full my-2 p-4 bg-gradient-to-br from-[#12141c] via-[#10131b] to-[#1a1315] border-2 border-street-orange/80 rounded-2xl shadow-[0_0_25px_rgba(255,101,47,0.25)] text-center relative overflow-hidden">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-street-orange/20 text-street-orange font-mono text-[10px] font-bold uppercase tracking-wider mb-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-street-orange animate-ping"></span>
+          <span>REGIA IA // STREET GAME MASTER</span>
+        </div>
+        <p id="undressed-ai-announcement-text" class="font-street font-black text-sm sm:text-base text-zinc-100 uppercase tracking-wide leading-snug">
+          "Porte chiuse. Schermo acceso. Avete 10 minuti e nessuna maschera. Livello 1: Le parole prima dei corpi. Rispondete in 45 secondi."
+        </p>
+        <p id="undressed-ai-lockout-text" class="text-[10px] font-mono text-street-orange mt-2 flex items-center justify-center gap-1">
+          <span>⏳ Lettura forzata: input bloccato per <strong id="undressed-lockout-countdown">5</strong>s</span>
+        </p>
+      </div>
+
+      <!-- Live message bubbles container -->
+      <div id="undressed-bubbles-container" class="space-y-3"></div>
+    </main>
+
+    <!-- 4. TIMED INPUT BAR WITH TURN INDICATOR & INPUT LOCKOUT -->
+    <footer class="w-full pt-2">
+      <div class="flex items-center justify-between px-2 mb-1 text-[11px] font-mono">
+        <span id="undressed-turn-status" class="text-zinc-400">
+          Turno attivo
+        </span>
+        <span id="undressed-turn-timer" class="text-street-orange font-bold">
+          Tempo turno: 45s
+        </span>
+      </div>
+
+      <form id="undressed-input-form" onsubmit="event.preventDefault(); handleUndressedMessageSend();" class="flex items-center gap-2">
+        <!-- 5s Audio Mic Button -->
+        <button
+          type="button"
+          id="btn-undressed-mic"
+          onclick="openUndressedAudioRecorder()"
+          class="w-11 h-11 rounded-xl bg-zinc-900 hover:bg-street-orange/20 border border-zinc-800 hover:border-street-orange text-zinc-300 hover:text-street-orange flex items-center justify-center text-lg transition shrink-0 cursor-pointer"
+          title="Registra vocale di 5 secondi"
+        >
+          🎙️
+        </button>
+
+        <!-- Text Input -->
+        <input
+          id="undressed-text-input"
+          type="text"
+          maxlength="500"
+          placeholder="Ascolta l'annuncio dell'IA prima di rispondere..."
+          disabled
+          class="flex-1 rounded-xl px-4 py-3 text-xs sm:text-sm font-sans focus:outline-none transition border bg-zinc-950 border-zinc-900 text-zinc-600 cursor-not-allowed"
+        />
+
+        <!-- Send Button -->
+        <button
+          type="submit"
+          id="btn-undressed-send"
+          disabled
+          class="w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black transition shrink-0 bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed"
+        >
+          ➤
+        </button>
+      </form>
+    </footer>
+  </section>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: PRE-MATCH 3-SLOT VAULT                            -->
+  <!-- ======================================================== -->
+  <div id="modal-undressed-vault" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl overflow-y-auto">
+    <!-- Vault file input dynamically injected at runtime to strictly respect Art. 1 zero-photo profile invariants -->
+
+    <div class="w-full max-w-lg bg-[#0d0f17] border-2 border-street-orange/60 rounded-3xl p-5 sm:p-7 shadow-[0_0_40px_rgba(255,101,47,0.25)] relative my-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-street-orange/20 border border-street-orange/50 flex items-center justify-center text-street-orange font-bold text-sm">
+            🔒
+          </div>
+          <div>
+            <h3 class="font-street font-black text-lg text-white uppercase tracking-tight">
+              PRE-MATCH VAULT // 3 SLOT
+            </h3>
+            <p id="vault-modal-room-title" class="text-[10px] font-mono text-zinc-400">
+              After Dark | Tensione a Orologeria
+            </p>
+          </div>
+        </div>
+        <button
+          type="button"
+          onclick="closeUndressedVault()"
+          class="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center transition cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      <div class="my-3 p-3 bg-black/60 border border-zinc-800 rounded-xl text-zinc-300 font-mono text-[11px] leading-relaxed">
+        <p class="text-street-orange font-bold mb-1">⚡ REGOLE DI ACCESSO VINCOLATE:</p>
+        <p>L'ingresso al match è bloccato finché tutti e 3 gli slot non risultano validati. I tuoi media restano protetti dal forte blur dinamico e anti-ispezione finché l'IA non sblocca la fase corrispondente.</p>
+      </div>
+
+      <div id="vault-validation-error" class="hidden mb-3 p-2.5 bg-red-950/80 border border-red-800 rounded-xl text-red-200 text-xs font-mono flex items-center gap-2">
+        <span>⚠️</span>
+        <span id="vault-validation-error-text"></span>
+      </div>
+
+      <!-- 3 Slots Upload List -->
+      <div class="space-y-3.5 my-4">
+        <!-- Slot 1 -->
+        <div id="vault-slot-item-1" onclick="triggerVaultUpload(1)" class="group relative rounded-2xl border border-zinc-800 hover:border-street-orange/60 bg-[#10121a] hover:bg-zinc-900/90 p-3.5 transition cursor-pointer overflow-hidden">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div id="vault-slot-badge-1" class="w-9 h-9 rounded-xl flex items-center justify-center font-street font-black text-sm shrink-0 bg-zinc-900 text-street-orange border border-zinc-800">01</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span id="vault-slot-title-1" class="font-street font-black text-xs sm:text-sm text-white uppercase truncate">Il Dettaglio</span>
+                  <span id="vault-slot-status-1" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">VALIDATO</span>
+                </div>
+                <p id="vault-slot-desc-1" class="text-[11px] text-zinc-400 font-sans line-clamp-2 mt-0.5">Il Dettaglio — Uno sguardo, il collo, le mani, le labbra. Il tuo punto di non ritorno.</p>
+              </div>
+            </div>
+            <div id="vault-slot-thumb-box-1" class="shrink-0">
+              <button type="button" class="px-3 py-2 bg-zinc-900 group-hover:bg-street-orange/20 border border-zinc-700 group-hover:border-street-orange text-zinc-300 group-hover:text-street-orange font-mono text-[11px] rounded-xl transition flex items-center gap-1.5">+ Carica</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slot 2 -->
+        <div id="vault-slot-item-2" onclick="triggerVaultUpload(2)" class="group relative rounded-2xl border border-zinc-800 hover:border-street-orange/60 bg-[#10121a] hover:bg-zinc-900/90 p-3.5 transition cursor-pointer overflow-hidden">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div id="vault-slot-badge-2" class="w-9 h-9 rounded-xl flex items-center justify-center font-street font-black text-sm shrink-0 bg-zinc-900 text-street-orange border border-zinc-800">02</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span id="vault-slot-title-2" class="font-street font-black text-xs sm:text-sm text-white uppercase truncate">L'Ombra</span>
+                  <span id="vault-slot-status-2" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">VALIDATO</span>
+                </div>
+                <p id="vault-slot-desc-2" class="text-[11px] text-zinc-400 font-sans line-clamp-2 mt-0.5">L'Ombra — Silhouette, penombra o il profilo del tuo outfit. Fai intravedere, non rivelare.</p>
+              </div>
+            </div>
+            <div id="vault-slot-thumb-box-2" class="shrink-0">
+              <button type="button" class="px-3 py-2 bg-zinc-900 group-hover:bg-street-orange/20 border border-zinc-700 group-hover:border-street-orange text-zinc-300 group-hover:text-street-orange font-mono text-[11px] rounded-xl transition flex items-center gap-1.5">+ Carica</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slot 3 -->
+        <div id="vault-slot-item-3" onclick="triggerVaultUpload(3)" class="group relative rounded-2xl border border-zinc-800 hover:border-street-orange/60 bg-[#10121a] hover:bg-zinc-900/90 p-3.5 transition cursor-pointer overflow-hidden">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div id="vault-slot-badge-3" class="w-9 h-9 rounded-xl flex items-center justify-center font-street font-black text-sm shrink-0 bg-zinc-900 text-street-orange border border-zinc-800">03</div>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2">
+                  <span id="vault-slot-title-3" class="font-street font-black text-xs sm:text-sm text-white uppercase truncate">Il Segno</span>
+                  <span id="vault-slot-status-3" class="hidden text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">VALIDATO</span>
+                </div>
+                <p id="vault-slot-desc-3" class="text-[11px] text-zinc-400 font-sans line-clamp-2 mt-0.5">Il Segno — Un tatuaggio, una cicatrice, un frammento nascosto. Racconta una storia sulla tua pelle.</p>
+              </div>
+            </div>
+            <div id="vault-slot-thumb-box-3" class="shrink-0">
+              <button type="button" class="px-3 py-2 bg-zinc-900 group-hover:bg-street-orange/20 border border-zinc-700 group-hover:border-street-orange text-zinc-300 group-hover:text-street-orange font-mono text-[11px] rounded-xl transition flex items-center gap-1.5">+ Carica</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500 pt-2 border-t border-zinc-800/80">
+        <span>⏳ Policy TTL: Archiviazione oraria volatile</span>
+        <span>🛡️ Moderazione automatica attiva</span>
+      </div>
+
+      <div class="mt-5">
+        <button
+          type="button"
+          id="btn-vault-start-match"
+          disabled
+          onclick="startUndressedMatchmaking()"
+          class="w-full py-4 px-6 rounded-2xl font-street font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed"
+        >
+          CARICA TUTTI I 3 SLOT PER SBLOCCARE LA CODA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: VERDICT 30S & ZERO FOOTPRINT                      -->
+  <!-- ======================================================== -->
+  <div id="modal-undressed-verdict" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-2xl">
+    <div class="w-full max-w-lg bg-[#0e1018] border-2 border-street-orange/80 rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-[0_0_50px_rgba(255,101,47,0.35)] relative overflow-hidden">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-street-orange/20 border border-street-orange/40 text-street-orange font-mono text-xs font-bold uppercase tracking-widest">
+        <span>⚖️ IL VERDETTO FINALE</span>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="font-street font-black text-2xl sm:text-3xl text-white uppercase tracking-tight">
+          "Il tempo è scaduto. Il gioco è finito."
+        </h2>
+        <p class="font-sans text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
+          La scelta adesso è reale. Avete 30 secondi: un solo rifiuto o il silenzio distruggeranno la stanza e cancelleranno ogni traccia dal server all'istante.
+        </p>
+      </div>
+
+      <!-- 30s Countdown -->
+      <div id="verdict-countdown-box" class="flex flex-col items-center justify-center gap-1.5">
+        <span id="verdict-timer-digits" class="text-4xl font-mono font-black text-street-orange animate-pulse">30s</span>
+        <span class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Scelta sincronizzata bilaterale</span>
+      </div>
+
+      <!-- Binary Choice Buttons -->
+      <div id="verdict-buttons-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+        <button
+          type="button"
+          id="btn-verdict-no"
+          onclick="handleUndressedVerdictChoice('no')"
+          class="py-4 px-5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 hover:text-white font-street font-bold text-xs sm:text-sm uppercase tracking-wider rounded-2xl transition transform hover:scale-105 active:scale-95 cursor-pointer shadow-lg"
+        >
+          [ SPEGNI TUTTO ]
+        </button>
+        <button
+          type="button"
+          id="btn-verdict-yes"
+          onclick="handleUndressedVerdictChoice('yes')"
+          class="py-4 px-5 bg-street-orange hover:bg-orange-500 text-black font-street font-black text-xs sm:text-sm uppercase tracking-wider rounded-2xl transition transform hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,101,47,0.5)] cursor-pointer"
+        >
+          [ ACCENDI LA LUCE ]
+        </button>
+      </div>
+
+      <!-- Waiting State -->
+      <div id="verdict-waiting-box" class="hidden p-4 bg-[#151924] border border-street-orange/40 rounded-2xl text-center space-y-2">
+        <span class="w-5 h-5 rounded-full border-2 border-street-orange border-t-transparent animate-spin inline-block"></span>
+        <p id="verdict-my-choice-label" class="font-mono text-xs text-white font-bold">Hai fatto la tua scelta.</p>
+        <p class="text-[11px] font-mono text-zinc-400">In attesa della decisione del partner... (30s)</p>
+      </div>
+
+      <!-- Resolution: Connected (Double Yes) -->
+      <div id="verdict-connected-box" class="hidden p-5 bg-emerald-950/70 border-2 border-emerald-500 rounded-2xl text-center space-y-3">
+        <span class="text-3xl">✨</span>
+        <h3 class="font-street font-black text-xl text-white uppercase">CONNESSIONE CONFERMATA!</h3>
+        <p class="text-xs font-mono text-emerald-200 leading-relaxed">
+          Entrambi avete scelto di continuare. Tutti i filtri blur sui 3 slot sono stati rimossi. La conversazione è ora un thread privato permanente salvato nei tuoi contatti.
+        </p>
+        <button
+          type="button"
+          onclick="finishUndressedConnected()"
+          class="mt-2 py-3 px-6 bg-emerald-500 hover:bg-emerald-400 text-black font-street font-black text-xs uppercase rounded-xl transition cursor-pointer shadow-lg"
+        >
+          Vai alla Chat Permanente ➔
+        </button>
+      </div>
+
+      <!-- Resolution: Destroyed (Single No / Timeout) -->
+      <div id="verdict-destroyed-box" class="hidden p-5 bg-red-950/70 border-2 border-red-500 rounded-2xl text-center space-y-3">
+        <span class="text-3xl">💥</span>
+        <h3 class="font-street font-black text-xl text-white uppercase">ZERO FOOTPRINT // DISTRUZIONE TOTALE</h3>
+        <p class="text-xs font-mono text-red-200 leading-relaxed">
+          Accordo non raggiunto. La stanza è stata chiusa, i 3 file eliminati dallo storage volatile e la cache locale azzerata. Nessun log è stato conservato.
+        </p>
+        <button
+          type="button"
+          onclick="finishUndressedDestroyed()"
+          class="mt-2 py-3 px-6 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs uppercase rounded-xl transition cursor-pointer"
+        >
+          Torna alla Home
+        </button>
+      </div>
+
+      <div class="pt-2 border-t border-zinc-800 text-[10px] font-mono text-zinc-500">
+        🛡️ STREETALK PROTOCOL // MEMORIA VOLATILE RAM // ZERO TRACCE
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL: 5-SECOND AUDIO RECORDER FOR AFTER DARK            -->
+  <!-- ======================================================== -->
+  <div id="modal-undressed-audio" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
+    <div class="w-full max-w-sm bg-[#0e1017] border-2 border-street-orange rounded-3xl p-6 text-center space-y-4 shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-street-orange/20 border border-street-orange mx-auto flex items-center justify-center text-2xl text-street-orange">
+        🎙️
+      </div>
+      <h3 class="font-street font-black text-lg uppercase text-white">Sussurro Vocale (Max 5s)</h3>
+      <p class="text-xs font-mono text-zinc-400">
+        Registra una parola, un respiro o una frase rapida. L'audio si interromperà automaticamente a 5 secondi.
+      </p>
+
+      <div class="py-4">
+        <div id="undressed-audio-counter" class="text-3xl font-mono font-black text-street-orange">0:00 / 0:05</div>
+        <div id="undressed-audio-waves" class="hidden flex items-center justify-center gap-1.5 mt-3">
+          <span class="w-2 h-6 bg-red-500 rounded animate-pulse"></span>
+          <span class="w-2 h-8 bg-red-500 rounded animate-pulse"></span>
+          <span class="w-2 h-4 bg-red-500 rounded animate-pulse"></span>
+          <span class="w-2 h-7 bg-red-500 rounded animate-pulse"></span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-3">
+        <button
+          type="button"
+          id="btn-undressed-record-start"
+          onclick="startUndressedAudioCapture()"
+          class="px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white font-mono text-xs font-bold uppercase rounded-xl transition cursor-pointer"
+        >
+          Registra
+        </button>
+        <button
+          type="button"
+          id="btn-undressed-record-stop"
+          onclick="stopUndressedAudioCapture()"
+          class="hidden px-5 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-mono text-xs font-bold uppercase rounded-xl transition cursor-pointer"
+        >
+          Ferma
+        </button>
+        <button
+          type="button"
+          id="btn-undressed-record-send"
+          onclick="sendUndressedCapturedAudio()"
+          class="hidden px-5 py-2.5 bg-street-orange hover:bg-orange-500 text-black font-street font-black text-xs uppercase rounded-xl transition shadow-[0_0_15px_rgba(255,101,47,0.4)] cursor-pointer"
+        >
+          Invia Sussurro
+        </button>
+        <button
+          type="button"
+          onclick="closeUndressedAudioRecorder()"
+          class="px-4 py-2.5 bg-zinc-900 text-zinc-400 hover:text-white font-mono text-xs rounded-xl transition cursor-pointer"
+        >
+          Chiudi
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ======================================================== -->
   <!-- MODAL: MATCH TERMINATED / SKIPPED                        -->

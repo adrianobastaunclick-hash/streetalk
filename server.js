@@ -10,6 +10,7 @@ const { createNetworkPolicy } = require('./lib/network-policy');
 const networkPolicy = createNetworkPolicy();
 const { streetBot } = require('./lib/street-bot');
 const { defaultGifService } = require('./lib/gif-provider');
+const undressedEngine = require('./lib/undressed-engine');
 
 const app = express();
 const server = http.createServer(app);
@@ -937,6 +938,9 @@ io.on('connection', (socket) => {
     joinedQueueAt: null
   });
 
+  // Register Undressed Engine Realtime Socket Handlers
+  undressedEngine.registerUndressedSocketHandlers(io, socket, getClientIp, checkRateLimit);
+
   // Emit current stats to new user and broadcast updated user count to all
   socket.emit('online_stats', getTelemetryStats());
   broadcastOnlineStats();
@@ -1381,6 +1385,7 @@ io.on('connection', (socket) => {
 
   // 10. DISCONNECT
   socket.on('disconnect', () => {
+    undressedEngine.removeUndressedFromQueue(socket.id);
     streetBot.cleanSocket(socket.id);
     rateLimits.delete(socket.id);
     handleUserDisconnectOrSkip(socket.id, 'disconnect');
@@ -1589,6 +1594,9 @@ app.post(['/api/founder/unlock', '/api/founder/simulate-unlock'], (req, res) => 
   });
 });
 
+// Register Undressed Engine REST API Endpoints (Macro-Categories & Vault)
+undressedEngine.registerUndressedRestEndpoints(app, getClientIp);
+
 // Export app and server for testing & running
 const PORT = process.env.PORT || 3000;
 
@@ -1630,5 +1638,6 @@ module.exports = {
   getClientIp,
   networkPolicy,
   streetBot,
-  defaultGifService
+  defaultGifService,
+  undressedEngine
 };

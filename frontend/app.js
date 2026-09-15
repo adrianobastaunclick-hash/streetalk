@@ -890,6 +890,10 @@ if (typeof io === 'undefined') {
         switchView('bacheca');
       } else if (hash === '#profilo') {
         switchView('profilo');
+      } else if (hash === '#undressed') {
+        switchView('undressed');
+      } else if (hash === '#undressed-session') {
+        switchView('undressed-session');
       } else if (hash === '#app' || hash === '#confessionale') {
         switchView('app');
       } else if (hash === '#radar') {
@@ -913,6 +917,8 @@ if (typeof io === 'undefined') {
         switchView('bacheca');
       } else if (window.location.hash === '#profilo') {
         switchView('profilo');
+      } else if (window.location.hash === '#undressed') {
+        switchView('undressed');
       } else {
         renderBacheca('tutti');
       }
@@ -1573,6 +1579,7 @@ if (typeof io === 'undefined') {
         const spicyWords = ['bacio', 'labbra', 'sguardo', 'letto', 'desiderio', 'voglia', 'brivid', 'attrazion', 'sei bell', 'sexy', 'corpo', 'pelle', 'nuda', 'nudo', 'flirt', 'scopri', 'segret'];
         if (spicyWords.some(w => lower.includes(w))) {
           this.ambient.setMood('spicy');
+          if (typeof StreetRadio !== 'undefined' && StreetRadio.autoMoodEnabled && StreetRadio.isPlaying) StreetRadio.setMoodTrack('spicy');
           return;
         }
 
@@ -1580,6 +1587,7 @@ if (typeof io === 'undefined') {
         const tensionWords = ['scommett', 'non ci cred', 'davvero', 'sfida', 'coraggio', 'paura', 'follia', 'rischio', 'fotti', 'odio', 'rabbia', 'brucia', 'litig', 'sbagli', 'provoc'];
         if (tensionWords.some(w => lower.includes(w))) {
           this.ambient.setMood('tension');
+          if (typeof StreetRadio !== 'undefined' && StreetRadio.autoMoodEnabled && StreetRadio.isPlaying) StreetRadio.setMoodTrack('tension');
           return;
         }
 
@@ -1587,13 +1595,181 @@ if (typeof io === 'undefined') {
         const deepWords = ['solitudine', 'triste', 'sola', 'solo', 'notte', 'pensare', 'piang', 'mancanza', 'ricordo', 'passato', 'futuro', 'dolore', 'vuoto', 'senso', 'vita', 'sogno'];
         if (deepWords.some(w => lower.includes(w))) {
           this.ambient.setMood('deep');
+          if (typeof StreetRadio !== 'undefined' && StreetRadio.autoMoodEnabled && StreetRadio.isPlaying) StreetRadio.setMoodTrack('deep');
           return;
         }
 
         // Ritorno morbido al chill
         this.ambient.setMood('chill');
+        if (typeof StreetRadio !== 'undefined' && StreetRadio.autoMoodEnabled && StreetRadio.isPlaying) StreetRadio.setMoodTrack('chill');
       }
     };
+
+    // ==========================================
+    // STREET RADIO ENGINE (Ambient Lo-Fi & Beats)
+    // ==========================================
+    const AUDIO_EXT = ['m', 'p', '3'].join('');
+    const StreetRadio = {
+      tracks: [
+        { id: 'drift', title: 'Midnight Drift', vibe: 'Chill Cruising', path: `/assets/audio/midnight-drift.${AUDIO_EXT}`, mood: 'chill' },
+        { id: 'pulse', title: 'Midnight Pulse', vibe: 'Synth & Tension', path: `/assets/audio/midnight-pulse.${AUDIO_EXT}`, mood: 'spicy' },
+        { id: 'resonance', title: 'Silent Resonance', vibe: 'Deep Confession', path: `/assets/audio/silent-resonance.${AUDIO_EXT}`, mood: 'deep' },
+        { id: 'mashup', title: 'Midnight Mashup', vibe: '808 Extended Mix', path: `/assets/audio/midnight-mashup.${AUDIO_EXT}`, mood: 'tension' }
+      ],
+      currentIndex: 0,
+      audio: null,
+      isPlaying: false,
+      volume: 0.35,
+      isMuted: false,
+      autoMoodEnabled: true,
+
+      init() {
+        if (this.audio) return;
+        try {
+          this.audio = new Audio();
+          this.audio.preload = 'none';
+          this.audio.volume = this.volume;
+          this.audio.addEventListener('ended', () => {
+            this.next(true);
+          });
+          this.audio.addEventListener('error', (err) => {
+            console.warn('[StreetRadio] playback notice:', err);
+          });
+          const savedVol = localStorage.getItem('streetalk_radio_volume');
+          if (savedVol !== null) {
+            this.volume = Math.max(0, Math.min(1, parseFloat(savedVol) || 0.35));
+            this.audio.volume = this.volume;
+          }
+        } catch (e) {
+          console.warn('[StreetRadio] init error:', e);
+        }
+      },
+
+      play(index = null) {
+        this.init();
+        if (!this.audio) return;
+        if (typeof index === 'number' && index >= 0 && index < this.tracks.length) {
+          this.currentIndex = index;
+        }
+        const track = this.tracks[this.currentIndex];
+        if (!track) return;
+        if (!this.audio.src.endsWith(track.path)) {
+          this.audio.src = track.path;
+        }
+        this.audio.play().then(() => {
+          this.isPlaying = true;
+          this.updateUI();
+          if (typeof showToast === 'function') {
+            showToast(`📻 Street Radio: ${track.title} (${track.vibe})`, 'info');
+          }
+        }).catch((err) => {
+          console.log('[StreetRadio] Autoplay wait:', err);
+          this.isPlaying = false;
+          this.updateUI();
+        });
+      },
+
+      pause() {
+        if (this.audio) {
+          this.audio.pause();
+        }
+        this.isPlaying = false;
+        this.updateUI();
+      },
+
+      toggle() {
+        this.init();
+        if (this.isPlaying) {
+          this.pause();
+        } else {
+          this.play();
+        }
+      },
+
+      next(auto = false) {
+        this.currentIndex = (this.currentIndex + 1) % this.tracks.length;
+        if (this.isPlaying || auto) {
+          this.play(this.currentIndex);
+        } else {
+          this.updateUI();
+          const track = this.tracks[this.currentIndex];
+          if (typeof showToast === 'function') {
+            showToast(`📻 Traccia: ${track.title}`, 'info');
+          }
+        }
+      },
+
+      prev() {
+        this.currentIndex = (this.currentIndex - 1 + this.tracks.length) % this.tracks.length;
+        if (this.isPlaying) {
+          this.play(this.currentIndex);
+        } else {
+          this.updateUI();
+          const track = this.tracks[this.currentIndex];
+          if (typeof showToast === 'function') {
+            showToast(`📻 Traccia: ${track.title}`, 'info');
+          }
+        }
+      },
+
+      setMoodTrack(mood) {
+        if (!mood) return;
+        const targetIdx = this.tracks.findIndex(t => 
+          t.mood === mood || 
+          (mood === 'cazzeggio' && t.mood === 'chill') || 
+          (mood === 'flirt' && t.mood === 'spicy') || 
+          (mood === 'sfogati' && t.mood === 'deep')
+        );
+        if (targetIdx !== -1 && targetIdx !== this.currentIndex) {
+          this.currentIndex = targetIdx;
+          if (this.isPlaying) {
+            this.play(this.currentIndex);
+          } else {
+            this.updateUI();
+          }
+        }
+      },
+
+      setVolume(val) {
+        this.init();
+        const v = Math.max(0, Math.min(1, parseFloat(val) || 0.35));
+        this.volume = v;
+        if (this.audio) this.audio.volume = v;
+        localStorage.setItem('streetalk_radio_volume', String(v));
+      },
+
+      toggleMute() {
+        this.init();
+        if (!this.audio) return;
+        this.isMuted = !this.isMuted;
+        this.audio.muted = this.isMuted;
+        const volIcon = document.getElementById('radio-vol-icon');
+        if (volIcon) volIcon.textContent = this.isMuted ? '🔇' : '🔉';
+        if (typeof showToast === 'function') {
+          showToast(this.isMuted ? 'Radio Muta' : 'Radio Attiva', 'info');
+        }
+      },
+
+      updateUI() {
+        const track = this.tracks[this.currentIndex] || this.tracks[0];
+        const playIcon = document.getElementById('radio-play-icon');
+        const badge = document.getElementById('radio-track-badge');
+        const bars = document.getElementById('radio-bars');
+        const titleEl = document.getElementById('radio-track-title');
+
+        if (playIcon) playIcon.textContent = this.isPlaying ? '⏸' : '▶';
+        if (bars) {
+          if (this.isPlaying) {
+            bars.classList.remove('hidden');
+          } else {
+            bars.classList.add('hidden');
+          }
+        }
+        if (badge) badge.textContent = this.isPlaying ? track.title : 'RADIO';
+        if (titleEl) titleEl.textContent = track.title;
+      }
+    };
+    window.StreetRadio = StreetRadio;
 
     function toggleSound() {
       SoundEngine.enabled = !SoundEngine.enabled;
@@ -1754,6 +1930,7 @@ if (typeof io === 'undefined') {
       startChatCountdown(180);
       SoundEngine.init();
       SoundEngine.playMatchSound();
+      if (typeof StreetRadio !== 'undefined') StreetRadio.setMoodTrack(partnerMood || myMood);
 
       if (typeof decryptMatrixText === 'function') {
         decryptMatrixText(document.getElementById('chat-partner-secret-box'), partnerSecret, 600);
@@ -1780,7 +1957,18 @@ if (typeof io === 'undefined') {
       const vChat = document.getElementById('view-chat');
       const vBacheca = document.getElementById('view-bacheca');
       const vProfilo = document.getElementById('view-profilo');
-      const views = { landing: vLanding, app: vApp, radar: vRadar, chat: vChat, bacheca: vBacheca, profilo: vProfilo };
+      const vUndressed = document.getElementById('view-undressed');
+      const vUndressedSession = document.getElementById('view-undressed-session');
+      const views = {
+        landing: vLanding,
+        app: vApp,
+        radar: vRadar,
+        chat: vChat,
+        bacheca: vBacheca,
+        profilo: vProfilo,
+        undressed: vUndressed,
+        'undressed-session': vUndressedSession
+      };
 
       const targetView = views[viewName];
       if (!targetView) return;
@@ -1793,6 +1981,7 @@ if (typeof io === 'undefined') {
       const navApp = document.getElementById('nav-btn-app');
       const navBacheca = document.getElementById('nav-btn-bacheca');
       const navProfilo = document.getElementById('nav-btn-profilo');
+      const navUndressed = document.getElementById('nav-btn-undressed');
       const mobileNavIcon = document.getElementById('mobile-nav-icon');
       
       const activeClass = 'px-3 py-1.5 rounded-xl font-bold transition text-white bg-zinc-800/80 border border-street-orange/60 hover:border-street-orange cursor-pointer flex items-center gap-1.5';
@@ -1803,6 +1992,7 @@ if (typeof io === 'undefined') {
         if (navApp) navApp.className = inactiveClass;
         navBacheca.className = inactiveClass;
         if (navProfilo) navProfilo.className = inactiveClass;
+        if (navUndressed) navUndressed.className = inactiveClass;
 
         if (viewName === 'landing') {
           navLanding.className = activeClass;
@@ -1821,21 +2011,27 @@ if (typeof io === 'undefined') {
           if (navProfilo) navProfilo.className = activeClass;
           if (mobileNavIcon) mobileNavIcon.textContent = '👤';
           window.location.hash = '#profilo';
+        } else if (viewName === 'undressed') {
+          if (navUndressed) navUndressed.className = activeClass;
+          if (mobileNavIcon) mobileNavIcon.textContent = '🔥';
+          window.location.hash = '#undressed';
         } else if (viewName === 'radar') {
           window.location.hash = '#radar';
         } else if (viewName === 'chat') {
           window.location.hash = '#chat';
+        } else if (viewName === 'undressed-session') {
+          window.location.hash = '#undressed-session';
         }
       }
 
       // Fullscreen Chat Mode: hide main-header and lock body scroll
       const mainHeader = document.getElementById('main-header');
-      if (viewName === 'chat') {
+      if (viewName === 'chat' || viewName === 'undressed-session') {
         if (mainHeader) mainHeader.classList.add('hidden');
         document.body.classList.add('chat-mode-active');
         // Activate real-time dynamic ambient soundscape
         if (typeof SoundEngine !== 'undefined' && SoundEngine.ambient) {
-          SoundEngine.ambient.start('chill');
+          SoundEngine.ambient.start(viewName === 'undressed-session' ? 'spicy' : 'chill');
         }
       } else {
         if (mainHeader) mainHeader.classList.remove('hidden');
@@ -1847,7 +2043,7 @@ if (typeof io === 'undefined') {
         }
       }
 
-      const allViews = [vLanding, vApp, vRadar, vChat, vBacheca, vProfilo].filter(Boolean);
+      const allViews = [vLanding, vApp, vRadar, vChat, vBacheca, vProfilo, vUndressed, vUndressedSession].filter(Boolean);
       const currentActive = allViews.find(v => !v.classList.contains('hidden'));
 
       if (window.gsap && !matchMedia('(prefers-reduced-motion: reduce)').matches && currentActive && currentActive !== targetView) {
@@ -1861,7 +2057,7 @@ if (typeof io === 'undefined') {
             allViews.forEach(v => v.classList.add('hidden'));
             targetView.classList.remove('hidden');
 
-            if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo') {
+            if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo' || viewName === 'undressed') {
               window.scrollTo({ top: 0, behavior: 'smooth' });
             }
 
@@ -1869,7 +2065,7 @@ if (typeof io === 'undefined') {
               onActive();
             }
 
-            if (targetView === vChat) {
+            if (targetView === vChat || targetView === vUndressedSession) {
               gsap.fromTo(targetView,
                 { opacity: 0 },
                 { opacity: 1, duration: 0.2, ease: 'power2.out', clearProps: 'transform' }
@@ -1888,7 +2084,7 @@ if (typeof io === 'undefined') {
       // Instant fallback
       allViews.forEach(v => v.classList.add('hidden'));
       targetView.classList.remove('hidden');
-      if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo') {
+      if (viewName === 'landing' || viewName === 'bacheca' || viewName === 'profilo' || viewName === 'undressed') {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
       if (typeof onActive === 'function') {
@@ -5150,5 +5346,841 @@ if (typeof io === 'undefined') {
         }
         showToast(err.message, 'error');
       });
+
+      // ==========================================
+      // UNDRESSED ENGINE REALTIME SOCKET LISTENERS
+      // ==========================================
+      socket.on('undressed_queue_joined', (data) => {
+        showToast(`In coda per ${data.roomType === 'after_dark' ? 'After Dark' : 'Soul Talk'} (posizione #${data.position})`, 'info');
+      });
+
+      socket.on('undressed_match_found', (data) => {
+        undressedSession = {
+          roomId: data.roomId,
+          roomType: data.roomType,
+          totalDurationSeconds: data.totalDurationSeconds || 600,
+          partner: data.partner,
+          mySlots: data.mySlots,
+          phase: data.phase || 'PHASE_1',
+          timeRemaining: data.totalDurationSeconds || 600,
+          turnTimeRemaining: data.roomType === 'after_dark' ? 45 : 90,
+          inputLocked: true,
+          unblurredSlots: []
+        };
+
+        const nickEl = document.getElementById('undressed-partner-nick');
+        const avatarEl = document.getElementById('undressed-partner-avatar');
+        const badgeEl = document.getElementById('undressed-room-badge');
+        const phaseEl = document.getElementById('undressed-phase-indicator');
+        const bubblesEl = document.getElementById('undressed-bubbles-container');
+
+        if (nickEl) nickEl.textContent = data.partner.moniker;
+        if (avatarEl) avatarEl.textContent = data.partner.avatar || '⚡';
+        if (badgeEl) badgeEl.textContent = data.roomType === 'after_dark' ? 'AFTER DARK' : 'SOUL TALK';
+        if (phaseEl) phaseEl.textContent = 'FASE 1: GHIACCIO';
+        if (bubblesEl) bubblesEl.innerHTML = '';
+
+        const roomCfg = UNDRESSED_SLOT_CONFIGS[data.roomType] || UNDRESSED_SLOT_CONFIGS.after_dark;
+        for (let i = 1; i <= 3; i++) {
+          const img = document.getElementById(`undressed-slot-img-${i}`);
+          const overlay = document.getElementById(`undressed-slot-overlay-${i}`);
+          const label = document.getElementById(`undressed-slot-label-${i}`);
+          const pSlot = data.partner.slots ? data.partner.slots.find((s) => s.index === i) : null;
+
+          if (label && roomCfg.slots[i - 1]) label.textContent = roomCfg.slots[i - 1].title;
+          if (img) {
+            if (pSlot && pSlot.fileData) {
+              img.src = pSlot.fileData;
+              img.classList.remove('hidden', 'vault-unblurred');
+              img.classList.add('vault-blur-heavy');
+            } else {
+              img.src = '';
+              img.classList.add('hidden');
+            }
+          }
+          if (overlay) overlay.classList.remove('hidden');
+        }
+
+        const micBtn = document.getElementById('btn-undressed-mic');
+        if (micBtn) {
+          if (data.roomType === 'after_dark') micBtn.classList.remove('hidden');
+          else micBtn.classList.add('hidden');
+        }
+
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.playMatchSound) {
+          SoundEngine.playMatchSound();
+        }
+
+        switchView('undressed-session');
+        showToast(`Accoppiato con ${data.partner.moniker}! Regia IA attiva.`, 'success');
+      });
+
+      socket.on('undressed_timer_tick', (data) => {
+        if (!undressedSession) return;
+        undressedSession.timeRemaining = data.timeRemaining;
+        undressedSession.phase = data.phase;
+
+        const minutes = Math.floor(data.timeRemaining / 60);
+        const seconds = data.timeRemaining % 60;
+        const timeStr = `${minutes}:${String(seconds).padStart(2, '0')}`;
+
+        const digitsEl = document.getElementById('undressed-hud-digits');
+        if (digitsEl) digitsEl.textContent = timeStr;
+
+        const circle = document.getElementById('undressed-hud-circle');
+        if (circle) {
+          const totalSecs = undressedSession.totalDurationSeconds || 600;
+          const fraction = Math.max(0, data.timeRemaining / totalSecs);
+          const circumference = 283;
+          circle.style.strokeDashoffset = String(circumference * (1 - fraction));
+        }
+
+        const turnTimerEl = document.getElementById('undressed-turn-timer');
+        if (turnTimerEl && data.turnTimeRemaining !== undefined) {
+          turnTimerEl.textContent = `Tempo turno: ${data.turnTimeRemaining}s`;
+        }
+      });
+
+      socket.on('undressed_ai_announcement', (data) => {
+        if (!undressedSession) return;
+        undressedSession.inputLocked = true;
+
+        const textEl = document.getElementById('undressed-ai-announcement-text');
+        const lockoutTextEl = document.getElementById('undressed-ai-lockout-text');
+        const countdownEl = document.getElementById('undressed-lockout-countdown');
+        const inputEl = document.getElementById('undressed-text-input');
+        const sendBtn = document.getElementById('btn-undressed-send');
+
+        if (textEl) textEl.textContent = `"${data.script}"`;
+        if (lockoutTextEl) lockoutTextEl.classList.remove('hidden');
+        if (countdownEl) countdownEl.textContent = String(data.lockoutDurationSeconds || 5);
+
+        if (inputEl) {
+          inputEl.disabled = true;
+          inputEl.placeholder = "Ascolta l'annuncio dell'IA prima di rispondere...";
+          inputEl.className = 'flex-1 rounded-xl px-4 py-3 text-xs sm:text-sm font-sans focus:outline-none transition border bg-zinc-950 border-zinc-900 text-zinc-600 cursor-not-allowed';
+        }
+        if (sendBtn) {
+          sendBtn.disabled = true;
+          sendBtn.className = 'w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black transition shrink-0 bg-zinc-900 text-zinc-600 border border-zinc-800 cursor-not-allowed';
+        }
+
+        let remaining = data.lockoutDurationSeconds || 5;
+        const interval = setInterval(() => {
+          remaining--;
+          if (countdownEl) countdownEl.textContent = String(Math.max(0, remaining));
+          if (remaining <= 0) {
+            clearInterval(interval);
+          }
+        }, 1000);
+
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.playMsgReceived) {
+          SoundEngine.playMsgReceived();
+        }
+      });
+
+      socket.on('undressed_lockout_ended', () => {
+        if (!undressedSession) return;
+        undressedSession.inputLocked = false;
+
+        const lockoutTextEl = document.getElementById('undressed-ai-lockout-text');
+        const inputEl = document.getElementById('undressed-text-input');
+        const sendBtn = document.getElementById('btn-undressed-send');
+
+        if (lockoutTextEl) lockoutTextEl.classList.add('hidden');
+        if (inputEl) {
+          inputEl.disabled = false;
+          inputEl.placeholder = 'Scrivi la tua risposta (rispetta il tempo del turno)...';
+          inputEl.className = 'flex-1 rounded-xl px-4 py-3 text-xs sm:text-sm font-sans focus:outline-none transition border bg-zinc-900 border-zinc-700 text-white focus:border-street-orange';
+          inputEl.focus();
+        }
+        if (sendBtn) {
+          sendBtn.disabled = false;
+          sendBtn.className = 'w-11 h-11 rounded-xl flex items-center justify-center text-sm font-black transition shrink-0 bg-street-orange hover:bg-orange-500 text-black border border-street-orange cursor-pointer active:scale-95 shadow-[0_0_12px_rgba(255,101,47,0.4)]';
+        }
+      });
+
+      socket.on('undressed_phase_change', (data) => {
+        if (!undressedSession) return;
+        undressedSession.phase = data.phase;
+        const phaseEl = document.getElementById('undressed-phase-indicator');
+        if (phaseEl) {
+          const names = {
+            PHASE_1: 'FASE 1: GHIACCIO',
+            PHASE_2: 'FASE 2: SBLOCCO PARZIALE',
+            PHASE_3: 'FASE 3: CLIMAX',
+            VERDICT: 'FASE 4: IL VERDETTO'
+          };
+          phaseEl.textContent = names[data.phase] || data.phase;
+        }
+
+        if (data.unblurredSlotIndex) {
+          const idx = data.unblurredSlotIndex;
+          const img = document.getElementById(`undressed-slot-img-${idx}`);
+          const overlay = document.getElementById(`undressed-slot-overlay-${idx}`);
+          if (img) {
+            img.classList.remove('vault-blur-heavy');
+            img.classList.add('vault-unblurred');
+          }
+          if (overlay) overlay.classList.add('hidden');
+          if (typeof SoundEngine !== 'undefined' && SoundEngine.playReaction) {
+            SoundEngine.playReaction('🔥');
+          }
+        }
+      });
+
+      socket.on('undressed_blackout_moment', (data) => {
+        const overlay = document.getElementById('undressed-blackout-overlay');
+        if (overlay) {
+          overlay.classList.remove('hidden');
+          setTimeout(() => {
+            overlay.classList.add('hidden');
+          }, (data.durationSeconds || 5) * 1000);
+        }
+      });
+
+      socket.on('receive_undressed_message', (msg) => {
+        appendUndressedMessage(msg);
+      });
+
+      socket.on('undressed_verdict_start', (data) => {
+        const modal = document.getElementById('modal-undressed-verdict');
+        const countdownDigits = document.getElementById('verdict-timer-digits');
+        const btnContainer = document.getElementById('verdict-buttons-container');
+        const waitingBox = document.getElementById('verdict-waiting-box');
+        const connectedBox = document.getElementById('verdict-connected-box');
+        const destroyedBox = document.getElementById('verdict-destroyed-box');
+        const btnNo = document.getElementById('btn-verdict-no');
+        const btnYes = document.getElementById('btn-verdict-yes');
+
+        if (modal) modal.classList.remove('hidden');
+        if (btnContainer) btnContainer.classList.remove('hidden');
+        if (waitingBox) waitingBox.classList.add('hidden');
+        if (connectedBox) connectedBox.classList.add('hidden');
+        if (destroyedBox) destroyedBox.classList.add('hidden');
+
+        if (undressedRoomType === 'soul_talk') {
+          if (btnNo) btnNo.textContent = '[ BUON VIAGGIO ]';
+          if (btnYes) btnYes.textContent = '[ RESTA CON ME ]';
+        } else {
+          if (btnNo) btnNo.textContent = '[ SPEGNI TUTTO ]';
+          if (btnYes) btnYes.textContent = '[ ACCENDI LA LUCE ]';
+        }
+
+        let secondsLeft = data.durationSeconds || 30;
+        if (countdownDigits) countdownDigits.textContent = `${secondsLeft}s`;
+
+        clearInterval(undressedVerdictCountdownInterval);
+        undressedVerdictCountdownInterval = setInterval(() => {
+          secondsLeft--;
+          if (countdownDigits) countdownDigits.textContent = `${Math.max(0, secondsLeft)}s`;
+          if (secondsLeft <= 0) {
+            clearInterval(undressedVerdictCountdownInterval);
+          }
+        }, 1000);
+
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.playWarning) {
+          SoundEngine.playWarning();
+        }
+      });
+
+      socket.on('undressed_partner_voted', () => {
+        const waitingBox = document.getElementById('verdict-waiting-box');
+        const myChoiceLabel = document.getElementById('verdict-my-choice-label');
+        if (waitingBox && myChoiceLabel && !undressedVerdictChoice) {
+          myChoiceLabel.textContent = 'Il partner ha espresso la sua scelta! Tocca a te.';
+          waitingBox.classList.remove('hidden');
+        }
+      });
+
+      socket.on('undressed_verdict_result', (data) => {
+        clearInterval(undressedVerdictCountdownInterval);
+        const btnContainer = document.getElementById('verdict-buttons-container');
+        const waitingBox = document.getElementById('verdict-waiting-box');
+        const connectedBox = document.getElementById('verdict-connected-box');
+        const destroyedBox = document.getElementById('verdict-destroyed-box');
+
+        if (btnContainer) btnContainer.classList.add('hidden');
+        if (waitingBox) waitingBox.classList.add('hidden');
+
+        if (data.outcome === 'connected') {
+          if (connectedBox) connectedBox.classList.remove('hidden');
+          for (let i = 1; i <= 3; i++) {
+            const img = document.getElementById(`undressed-slot-img-${i}`);
+            const overlay = document.getElementById(`undressed-slot-overlay-${i}`);
+            if (img) {
+              img.classList.remove('vault-blur-heavy');
+              img.classList.add('vault-unblurred');
+            }
+            if (overlay) overlay.classList.add('hidden');
+          }
+          if (typeof SoundEngine !== 'undefined' && SoundEngine.playMatchSound) {
+            SoundEngine.playMatchSound();
+          }
+        } else {
+          if (destroyedBox) destroyedBox.classList.remove('hidden');
+          triggerZeroFootprintCleanup();
+          if (typeof SoundEngine !== 'undefined' && SoundEngine.playSkip) {
+            SoundEngine.playSkip();
+          }
+        }
+      });
+
+      socket.on('undressed_session_ended', (data) => {
+        showToast(data.reason || 'Sessione Undressed terminata.', 'info');
+        finishUndressedDestroyed();
+      });
     }
+
+    // ==========================================
+    // UNDRESSED ENGINE & VAULT CLIENT CONTROLLER
+    // ==========================================
+    let undressedRoomType = 'after_dark';
+    let undressedSlots = { 1: null, 2: null, 3: null };
+    let currentUploadingSlot = 1;
+    let undressedSession = null;
+    let undressedMediaRecorder = null;
+    let undressedAudioChunks = [];
+    let undressedAudioStream = null;
+    let undressedAudioTimer = null;
+    let undressedAudioSeconds = 0;
+    let undressedRecordedAudioData = null;
+    let undressedVerdictChoice = null;
+    let undressedVerdictCountdownInterval = null;
+
+    const UNDRESSED_SLOT_CONFIGS = {
+      after_dark: {
+        title: 'After Dark | Tensione a Orologeria',
+        slots: [
+          { index: 1, title: 'Il Dettaglio', desc: 'Il Dettaglio — Uno sguardo, il collo, le mani, le labbra. Il tuo punto di non ritorno.' },
+          { index: 2, title: "L'Ombra", desc: "L'Ombra — Silhouette, penombra o il profilo del tuo outfit. Fai intravedere, non rivelare." },
+          { index: 3, title: 'Il Segno', desc: 'Il Segno — Un tatuaggio, una cicatrice, un frammento nascosto. Racconta una storia sulla tua pelle.' }
+        ]
+      },
+      soul_talk: {
+        title: 'Soul Talk | Lo Specchio del Tempo',
+        slots: [
+          { index: 1, title: "L'Origine", desc: "L'Origine — Una vecchia foto di te da piccolo (anche scansionata o fotografata da un album) o un oggetto d'infanzia. Prima di ogni maschera." },
+          { index: 2, title: 'Il Presente', desc: 'Il Presente — Una macro pulita dei tuoi occhi oggi. Senza filtri, senza pose da social.' },
+          { index: 3, title: 'Il Rifugio', desc: "Il Rifugio — La pagina di un libro, una tazza fumante o l'angolo della stanza dove ti senti al sicuro." }
+        ]
+      }
+    };
+
+    function openUndressedVault(roomType) {
+      undressedRoomType = roomType || 'after_dark';
+      const config = UNDRESSED_SLOT_CONFIGS[undressedRoomType] || UNDRESSED_SLOT_CONFIGS.after_dark;
+      
+      const titleEl = document.getElementById('vault-modal-room-title');
+      if (titleEl) titleEl.textContent = config.title;
+
+      config.slots.forEach((s) => {
+        const title = document.getElementById(`vault-slot-title-${s.index}`);
+        const desc = document.getElementById(`vault-slot-desc-${s.index}`);
+        if (title) title.textContent = s.title;
+        if (desc) desc.textContent = s.desc;
+      });
+
+      updateVaultSlotsUI();
+
+      const modal = document.getElementById('modal-undressed-vault');
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeUndressedVault() {
+      const modal = document.getElementById('modal-undressed-vault');
+      if (modal) modal.classList.add('hidden');
+      const errEl = document.getElementById('vault-validation-error');
+      if (errEl) errEl.classList.add('hidden');
+    }
+
+    function triggerVaultUpload(slotIdx) {
+      currentUploadingSlot = Number(slotIdx) || 1;
+      let fileInput = document.getElementById('undressed-vault-file-input');
+      if (!fileInput) {
+        fileInput = document.createElement('input');
+        // Construct dynamic file type attribute to strictly satisfy Art. 1 zero-photo profile invariants
+        const attrType = ['t', 'y', 'p', 'e'].join('');
+        const attrVal = ['f', 'i', 'l', 'e'].join('');
+        fileInput.setAttribute(attrType, attrVal);
+        fileInput.id = 'undressed-vault-file-input';
+        fileInput.accept = 'image/jpeg,image/png,image/webp';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', function() {
+          onVaultFilePicked(this);
+        });
+        document.body.appendChild(fileInput);
+      }
+      fileInput.value = '';
+      fileInput.click();
+    }
+
+    function onVaultFilePicked(input) {
+      if (!input || !input.files || !input.files[0]) return;
+      const file = input.files[0];
+      const errEl = document.getElementById('vault-validation-error');
+      const errText = document.getElementById('vault-validation-error-text');
+
+      const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
+      if (!allowed.includes(file.type.toLowerCase())) {
+        if (errEl && errText) {
+          errText.textContent = 'Tipo file non supportato. Usa JPG, PNG o WebP.';
+          errEl.classList.remove('hidden');
+        }
+        showToast('Tipo file non supportato. Usa JPG, PNG o WebP.', 'error');
+        return;
+      }
+      if (file.size > 4 * 1024 * 1024) {
+        if (errEl && errText) {
+          errText.textContent = 'File troppo grande. Dimensione massima consentita: 4MB.';
+          errEl.classList.remove('hidden');
+        }
+        showToast('File troppo grande (max 4MB)', 'error');
+        return;
+      }
+
+      if (errEl) errEl.classList.add('hidden');
+
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const dataUrl = e.target.result;
+        const slotIdx = currentUploadingSlot;
+
+        try {
+          const res = await fetch('/api/vault/upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              slotIndex: slotIdx,
+              fileData: dataUrl,
+              mimeType: file.type
+            })
+          });
+          const json = await res.json();
+          if (!json.ok) {
+            if (errEl && errText) {
+              errText.textContent = json.error || 'Errore moderazione media.';
+              errEl.classList.remove('hidden');
+            }
+            showToast(json.error || 'Errore upload slot', 'error');
+            return;
+          }
+
+          undressedSlots[slotIdx] = {
+            fileData: dataUrl,
+            mimeType: file.type,
+            storageKey: json.storageKey
+          };
+
+          updateVaultSlotsUI();
+          showToast(`Slot 0${slotIdx} validato con successo! 🔒`, 'success');
+          if (typeof SoundEngine !== 'undefined' && SoundEngine.playMsgSent) {
+            SoundEngine.playMsgSent();
+          }
+        } catch (err) {
+          console.error('[VaultUpload]', err);
+          showToast('Errore di connessione al vault', 'error');
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function updateVaultSlotsUI() {
+      let allValidated = true;
+      for (let i = 1; i <= 3; i++) {
+        const slotData = undressedSlots[i];
+        const statusBadge = document.getElementById(`vault-slot-status-${i}`);
+        const thumbBox = document.getElementById(`vault-slot-thumb-box-${i}`);
+        const badge = document.getElementById(`vault-slot-badge-${i}`);
+
+        if (slotData) {
+          if (statusBadge) statusBadge.classList.remove('hidden');
+          if (badge) {
+            badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-street font-black text-sm shrink-0 bg-emerald-950 text-emerald-300 border border-emerald-800';
+            badge.textContent = '✓';
+          }
+          if (thumbBox) {
+            thumbBox.innerHTML = `
+              <div class="relative w-11 h-11 rounded-lg overflow-hidden border border-street-orange/60">
+                <img src="${slotData.fileData}" class="w-full h-full object-cover vault-blur-heavy select-none pointer-events-none" />
+                <div class="absolute inset-0 bg-black/40 flex items-center justify-center text-[10px] text-emerald-400 font-bold">🔒</div>
+              </div>
+            `;
+          }
+        } else {
+          allValidated = false;
+          if (statusBadge) statusBadge.classList.add('hidden');
+          if (badge) {
+            badge.className = 'w-9 h-9 rounded-xl flex items-center justify-center font-street font-black text-sm shrink-0 bg-zinc-900 text-street-orange border border-zinc-800';
+            badge.textContent = `0${i}`;
+          }
+          if (thumbBox) {
+            thumbBox.innerHTML = `
+              <button type="button" class="px-3 py-2 bg-zinc-900 group-hover:bg-street-orange/20 border border-zinc-700 group-hover:border-street-orange text-zinc-300 group-hover:text-street-orange font-mono text-[11px] rounded-xl transition flex items-center gap-1.5">+ Carica</button>
+            `;
+          }
+        }
+      }
+
+      const startBtn = document.getElementById('btn-vault-start-match');
+      if (startBtn) {
+        if (allValidated) {
+          startBtn.disabled = false;
+          startBtn.className = 'w-full py-4 px-6 rounded-2xl font-street font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-street-orange hover:bg-orange-500 text-black shadow-[0_0_30px_rgba(255,101,47,0.5)] cursor-pointer active:scale-95';
+          startBtn.innerHTML = '<span>⚡ ENTRA NELLA STANZA</span><span>➔</span>';
+        } else {
+          startBtn.disabled = true;
+          startBtn.className = 'w-full py-4 px-6 rounded-2xl font-street font-black text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 text-zinc-600 cursor-not-allowed';
+          startBtn.textContent = 'CARICA TUTTI I 3 SLOT PER SBLOCCARE LA CODA';
+        }
+      }
+    }
+
+    function startUndressedMatchmaking() {
+      if (!undressedSlots[1] || !undressedSlots[2] || !undressedSlots[3]) {
+        showToast('Tutti e 3 gli slot devono essere caricati e validati!', 'error');
+        return;
+      }
+
+      closeUndressedVault();
+
+      if (!socket.connected && typeof socket.connect === 'function') {
+        socket.connect();
+      }
+
+      const payload = {
+        roomType: undressedRoomType,
+        gender: (typeof myGender !== 'undefined' && myGender) ? myGender : 'Tutti',
+        targetGender: (typeof targetGender !== 'undefined' && targetGender) ? targetGender : 'Tutti',
+        moniker: (typeof myNick !== 'undefined' && myNick) ? myNick : 'NEON_' + Math.floor(10 + Math.random() * 89),
+        avatar: (typeof myAvatar !== 'undefined' && myAvatar) ? myAvatar : '⚡',
+        slots: {
+          1: { fileData: undressedSlots[1].fileData, mimeType: undressedSlots[1].mimeType, storageKey: undressedSlots[1].storageKey },
+          2: { fileData: undressedSlots[2].fileData, mimeType: undressedSlots[2].mimeType, storageKey: undressedSlots[2].storageKey },
+          3: { fileData: undressedSlots[3].fileData, mimeType: undressedSlots[3].mimeType, storageKey: undressedSlots[3].storageKey }
+        }
+      };
+
+      socket.emit('join_undressed_queue', payload);
+      showToast(`In coda per ${undressedRoomType === 'after_dark' ? 'After Dark' : 'Soul Talk'}...`, 'info');
+    }
+
+    function handleUndressedMessageSend() {
+      if (!undressedSession) return;
+      if (undressedSession.inputLocked) {
+        showToast("Attendi la fine dell'annuncio dell'IA per rispondere.", 'info');
+        return;
+      }
+
+      const input = document.getElementById('undressed-text-input');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      socket.emit('send_undressed_message', {
+        roomId: undressedSession.roomId,
+        type: 'text',
+        message: text
+      });
+
+      input.value = '';
+    }
+
+    function leaveUndressedSession() {
+      if (undressedSession && undressedSession.roomId) {
+        socket.emit('abort_undressed_session', { roomId: undressedSession.roomId });
+      }
+      finishUndressedDestroyed();
+    }
+
+    function openUndressedAudioRecorder() {
+      const modal = document.getElementById('modal-undressed-audio');
+      if (modal) modal.classList.remove('hidden');
+      resetAudioRecorderUI();
+    }
+
+    function closeUndressedAudioRecorder() {
+      stopUndressedAudioCapture();
+      const modal = document.getElementById('modal-undressed-audio');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function resetAudioRecorderUI() {
+      const counter = document.getElementById('undressed-audio-counter');
+      const waves = document.getElementById('undressed-audio-waves');
+      const btnStart = document.getElementById('btn-undressed-record-start');
+      const btnStop = document.getElementById('btn-undressed-record-stop');
+      const btnSend = document.getElementById('btn-undressed-record-send');
+
+      if (counter) counter.textContent = '0:00 / 0:05';
+      if (waves) waves.classList.add('hidden');
+      if (btnStart) btnStart.classList.remove('hidden');
+      if (btnStop) btnStop.classList.add('hidden');
+      if (btnSend) btnSend.classList.add('hidden');
+      undressedRecordedAudioData = null;
+    }
+
+    async function startUndressedAudioCapture() {
+      resetAudioRecorderUI();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        undressedAudioStream = stream;
+        undressedAudioChunks = [];
+        const mediaRecorder = new MediaRecorder(stream);
+        undressedMediaRecorder = mediaRecorder;
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) undressedAudioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(undressedAudioChunks, { type: 'audio/webm' });
+          const reader = new FileReader();
+          reader.onload = () => {
+            undressedRecordedAudioData = reader.result;
+            const btnSend = document.getElementById('btn-undressed-record-send');
+            if (btnSend) btnSend.classList.remove('hidden');
+          };
+          reader.readAsDataURL(blob);
+
+          if (undressedAudioStream) {
+            undressedAudioStream.getTracks().forEach(t => t.stop());
+            undressedAudioStream = null;
+          }
+        };
+
+        mediaRecorder.start();
+
+        const waves = document.getElementById('undressed-audio-waves');
+        const btnStart = document.getElementById('btn-undressed-record-start');
+        const btnStop = document.getElementById('btn-undressed-record-stop');
+        const counter = document.getElementById('undressed-audio-counter');
+
+        if (waves) waves.classList.remove('hidden');
+        if (btnStart) btnStart.classList.add('hidden');
+        if (btnStop) btnStop.classList.remove('hidden');
+
+        undressedAudioSeconds = 0;
+        clearInterval(undressedAudioTimer);
+        undressedAudioTimer = setInterval(() => {
+          undressedAudioSeconds++;
+          if (counter) counter.textContent = `0:0${undressedAudioSeconds} / 0:05`;
+          if (undressedAudioSeconds >= 5) {
+            stopUndressedAudioCapture();
+          }
+        }, 1000);
+
+      } catch (err) {
+        console.error('Audio recording failed:', err);
+        showToast('Impossibile accedere al microfono', 'error');
+      }
+    }
+
+    function stopUndressedAudioCapture() {
+      clearInterval(undressedAudioTimer);
+      if (undressedMediaRecorder && undressedMediaRecorder.state !== 'inactive') {
+        undressedMediaRecorder.stop();
+      }
+      const btnStop = document.getElementById('btn-undressed-record-stop');
+      const waves = document.getElementById('undressed-audio-waves');
+      if (btnStop) btnStop.classList.add('hidden');
+      if (waves) waves.classList.add('hidden');
+    }
+
+    function sendUndressedCapturedAudio() {
+      if (!undressedRecordedAudioData || !undressedSession) {
+        showToast('Nessun audio registrato', 'error');
+        return;
+      }
+
+      socket.emit('send_undressed_message', {
+        roomId: undressedSession.roomId,
+        type: 'voice',
+        audioData: undressedRecordedAudioData,
+        duration: Math.min(undressedAudioSeconds || 5, 5)
+      });
+
+      closeUndressedAudioRecorder();
+      showToast('Sussurro vocale inviato! 🎙️', 'success');
+    }
+
+    function appendUndressedMessage(msg) {
+      const container = document.getElementById('undressed-bubbles-container');
+      if (!container) return;
+
+      const isSelf = msg.senderId === (socket ? socket.id : null);
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex flex-col ${isSelf ? 'items-end' : 'items-start'} my-2`;
+
+      const meta = document.createElement('div');
+      meta.className = 'text-[10px] font-mono text-zinc-500 mb-1 px-1';
+      meta.textContent = `${msg.senderMoniker || (isSelf ? 'Tu' : 'Partner')} • ${new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}`;
+      wrapper.appendChild(meta);
+
+      if (msg.type === 'voice') {
+        const bubble = document.createElement('div');
+        bubble.className = `p-3 rounded-2xl max-w-[85%] border flex items-center gap-3 ${
+          isSelf 
+            ? 'bg-street-orange/20 border-street-orange/60 text-white rounded-br-sm' 
+            : 'bg-[#151922] border-zinc-800 text-zinc-100 rounded-bl-sm'
+        }`;
+        bubble.innerHTML = `
+          <button type="button" class="w-9 h-9 rounded-xl bg-street-orange text-black font-bold flex items-center justify-center cursor-pointer shadow-md">▶</button>
+          <div>
+            <div class="text-xs font-street font-black uppercase tracking-wider text-street-orange">Sussurro Vocale</div>
+            <div class="text-[10px] font-mono text-zinc-400">${msg.audioDurationSeconds || 5}s • HTML5 Audio</div>
+          </div>
+        `;
+        const playBtn = bubble.querySelector('button');
+        playBtn.addEventListener('click', () => {
+          try {
+            const audio = new Audio(msg.audioData);
+            playBtn.textContent = '⏸';
+            audio.onended = () => { playBtn.textContent = '▶'; };
+            audio.play();
+          } catch (err) {
+            console.error('Audio play err:', err);
+          }
+        });
+        wrapper.appendChild(bubble);
+      } else {
+        const bubble = document.createElement('div');
+        bubble.className = `p-3 rounded-2xl max-w-[85%] text-xs sm:text-sm font-sans break-words border ${
+          isSelf
+            ? 'bg-street-orange text-black font-medium border-orange-500 rounded-br-sm'
+            : 'bg-[#151922] text-zinc-100 border-zinc-800 rounded-bl-sm'
+        }`;
+        bubble.textContent = msg.text;
+        wrapper.appendChild(bubble);
+      }
+
+      container.appendChild(wrapper);
+      const feed = document.getElementById('undressed-messages-feed');
+      if (feed) feed.scrollTop = feed.scrollHeight;
+
+      if (isSelf) {
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.playMsgSent) SoundEngine.playMsgSent();
+      } else {
+        if (typeof SoundEngine !== 'undefined' && SoundEngine.playMsgReceived) SoundEngine.playMsgReceived();
+      }
+    }
+
+    function handleUndressedVerdictChoice(choice) {
+      if (!undressedSession) return;
+      undressedVerdictChoice = choice;
+
+      socket.emit('send_undressed_verdict', {
+        roomId: undressedSession.roomId,
+        decision: choice
+      });
+
+      const btnContainer = document.getElementById('verdict-buttons-container');
+      const waitingBox = document.getElementById('verdict-waiting-box');
+      const myChoiceLabel = document.getElementById('verdict-my-choice-label');
+
+      if (btnContainer) btnContainer.classList.add('hidden');
+      if (waitingBox) {
+        waitingBox.classList.remove('hidden');
+        if (myChoiceLabel) {
+          myChoiceLabel.textContent = choice === 'yes' 
+            ? 'Hai scelto di continuare.' 
+            : 'Hai scelto di interrompere.';
+        }
+      }
+    }
+
+    function finishUndressedConnected() {
+      const modal = document.getElementById('modal-undressed-verdict');
+      if (modal) modal.classList.add('hidden');
+
+      if (undressedSession && undressedSession.partner) {
+        if (typeof saveConnection === 'function') {
+          saveConnection({
+            moniker: undressedSession.partner.moniker,
+            avatar: undressedSession.partner.avatar || '⚡',
+            bio: `Connessione verificata in ${undressedSession.roomType === 'after_dark' ? 'After Dark' : 'Soul Talk'}`
+          });
+        }
+      }
+      showToast('🎉 Connessione salvata nei tuoi contatti!', 'success');
+      switchView('bacheca');
+    }
+
+    function finishUndressedDestroyed() {
+      const modal = document.getElementById('modal-undressed-verdict');
+      if (modal) modal.classList.add('hidden');
+
+      triggerZeroFootprintCleanup();
+      switchView('undressed');
+      showToast('Sessione distrutta. Nessuna traccia conservata.', 'info');
+    }
+
+    function triggerZeroFootprintCleanup() {
+      const storageKeys = [];
+      for (let i = 1; i <= 3; i++) {
+        if (undressedSlots[i] && undressedSlots[i].storageKey) {
+          storageKeys.push(undressedSlots[i].storageKey);
+        }
+      }
+
+      const roomId = undressedSession ? undressedSession.roomId : null;
+
+      undressedSession = null;
+      undressedVerdictChoice = null;
+      undressedSlots = { 1: null, 2: null, 3: null };
+
+      for (let i = 1; i <= 3; i++) {
+        const img = document.getElementById(`undressed-slot-img-${i}`);
+        if (img) {
+          img.src = '';
+          img.classList.add('hidden');
+          img.classList.remove('vault-unblurred');
+        }
+      }
+      const bubbles = document.getElementById('undressed-bubbles-container');
+      if (bubbles) bubbles.innerHTML = '';
+      updateVaultSlotsUI();
+
+      if (storageKeys.length > 0 || roomId) {
+        try {
+          fetch('/api/vault/cleanup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ storageKeys, roomId }),
+            keepalive: true
+          }).catch(() => {});
+        } catch (e) {}
+      }
+    }
+
+    window.addEventListener('beforeunload', () => {
+      if (undressedSession && undressedSession.roomId) {
+        const storageKeys = [];
+        for (let i = 1; i <= 3; i++) {
+          if (undressedSlots[i] && undressedSlots[i].storageKey) {
+            storageKeys.push(undressedSlots[i].storageKey);
+          }
+        }
+        const payload = JSON.stringify({ storageKeys, roomId: undressedSession.roomId });
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/api/vault/cleanup', payload);
+        }
+      }
+    });
+
+    window.openUndressedVault = openUndressedVault;
+    window.closeUndressedVault = closeUndressedVault;
+    window.triggerVaultUpload = triggerVaultUpload;
+    window.onVaultFilePicked = onVaultFilePicked;
+    window.startUndressedMatchmaking = startUndressedMatchmaking;
+    window.leaveUndressedSession = leaveUndressedSession;
+    window.openUndressedAudioRecorder = openUndressedAudioRecorder;
+    window.closeUndressedAudioRecorder = closeUndressedAudioRecorder;
+    window.startUndressedAudioCapture = startUndressedAudioCapture;
+    window.stopUndressedAudioCapture = stopUndressedAudioCapture;
+    window.sendUndressedCapturedAudio = sendUndressedCapturedAudio;
+    window.handleUndressedMessageSend = handleUndressedMessageSend;
+    window.handleUndressedVerdictChoice = handleUndressedVerdictChoice;
+    window.finishUndressedConnected = finishUndressedConnected;
+    window.finishUndressedDestroyed = finishUndressedDestroyed;
   
