@@ -1627,7 +1627,7 @@ if (typeof io === 'undefined') {
         if (this.audio) return;
         try {
           this.audio = new Audio();
-          this.audio.preload = 'none';
+          this.audio.preload = 'auto';
           this.audio.volume = this.volume;
           this.audio.addEventListener('ended', () => {
             this.next(true);
@@ -1767,9 +1767,39 @@ if (typeof io === 'undefined') {
         }
         if (badge) badge.textContent = this.isPlaying ? track.title : 'RADIO';
         if (titleEl) titleEl.textContent = track.title;
+
+        // Synchronize Hero Action Bar Radio Controls
+        const heroIcon = document.getElementById('hero-radio-icon');
+        const heroText = document.getElementById('hero-radio-text');
+        const heroBars = document.getElementById('hero-radio-bars');
+        if (heroIcon) heroIcon.textContent = this.isPlaying ? '⏸' : '▶';
+        if (heroText) heroText.textContent = this.isPlaying ? track.title : 'RADIO LO-FI';
+        if (heroBars) {
+          if (this.isPlaying) {
+            heroBars.classList.remove('hidden');
+          } else {
+            heroBars.classList.add('hidden');
+          }
+        }
       }
     };
     window.StreetRadio = StreetRadio;
+
+    // Automatic Audio Unlocker on first user interaction anywhere
+    let audioUnlocked = false;
+    const unlockAudioOnGesture = () => {
+      if (audioUnlocked) return;
+      audioUnlocked = true;
+      if (typeof SoundEngine !== 'undefined') SoundEngine.init();
+      if (typeof StreetRadio !== 'undefined') {
+        StreetRadio.init();
+        if (!StreetRadio.isPlaying) {
+          StreetRadio.play();
+        }
+      }
+    };
+    window.addEventListener('click', unlockAudioOnGesture, { once: true });
+    window.addEventListener('touchstart', unlockAudioOnGesture, { once: true });
 
     function toggleSound() {
       SoundEngine.enabled = !SoundEngine.enabled;

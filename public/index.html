@@ -606,13 +606,19 @@
 
       <!-- Quick Action Jump Bar -->
       <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
-        <button type="button" onclick="switchView('app')" class="px-8 py-4 bg-street-orange hover:bg-orange-500 text-black font-black font-street uppercase tracking-wider rounded-2xl shadow-[0_0_25px_rgba(255,101,47,0.5)] transition transform hover:scale-105 active:scale-95 inline-flex items-center gap-2.5 text-sm sm:text-base cursor-pointer font-bold">
-          <span>⚡ ENTRA NELLA WEB APP</span>
+        <button type="button" onclick="switchView('undressed')" class="px-7 py-4 bg-street-orange hover:bg-orange-500 text-black font-black font-street uppercase tracking-wider rounded-2xl shadow-[0_0_30px_rgba(255,101,47,0.6)] transition transform hover:scale-105 active:scale-95 inline-flex items-center gap-2.5 text-sm sm:text-base cursor-pointer font-bold">
+          <span>🔥 ENTRA IN UNDRESSED</span>
+          <span class="text-[10px] font-mono bg-black text-street-orange px-2 py-0.5 rounded-full font-bold">10-15M</span>
           <span class="text-lg">➔</span>
         </button>
-        <a href="#manifesto-pillars" class="px-5 py-3 bg-zinc-900/90 hover:bg-zinc-800 text-white font-bold text-sm rounded-xl border border-zinc-700 transition inline-flex items-center gap-2 cursor-pointer">
-          <span>📜 Il Nostro Manifesto</span>
-        </a>
+        <button type="button" onclick="switchView('app')" class="px-6 py-4 bg-[#141822] hover:bg-zinc-800 text-white font-street font-bold uppercase tracking-wider rounded-2xl border border-zinc-700 hover:border-street-orange/60 transition transform hover:scale-105 active:scale-95 inline-flex items-center gap-2 text-sm sm:text-base cursor-pointer">
+          <span>⚡ CHAT 180s</span>
+        </button>
+        <button type="button" id="hero-radio-toggle" onclick="StreetRadio.toggle()" class="px-5 py-3.5 bg-zinc-900/90 hover:bg-zinc-800 text-street-orange hover:text-white font-mono font-bold text-xs rounded-2xl border border-zinc-800 hover:border-street-orange/40 transition inline-flex items-center gap-2 cursor-pointer shadow-md">
+          <span id="hero-radio-icon">▶</span>
+          <span id="hero-radio-text">RADIO LO-FI</span>
+          <span id="hero-radio-bars" class="hidden text-street-orange animate-pulse">ılı.</span>
+        </button>
       </div>
 
       <!-- Hazard Warning Tape (Art. 1 Compliance & Street Vibe) -->
@@ -655,6 +661,151 @@
       <div class="hero-caption">
         <strong>01 / SCRIVI. 02 / INCONTRA.</strong>
         <span>03 / SCEGLI SE RESTARE.</span>
+      </div>
+    </section>
+
+    <!-- ---------------------------------------------------- -->
+    <!-- B.2. FEATURED: UNDRESSED ENGINE & MACRO-CATEGORIE    -->
+    <!-- ---------------------------------------------------- -->
+    <section id="landing-macro-categories" class="w-full max-w-5xl mx-auto reveal-on-scroll my-6 sm:my-8 space-y-6" aria-labelledby="macro-cat-title">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-street-orange/15 border border-street-orange/40 text-street-orange font-mono text-xs font-bold uppercase tracking-widest backdrop-blur-md">
+          <span class="w-2 h-2 rounded-full bg-street-orange animate-ping"></span>
+          <span>ESCLUSIVA 2026 // ARCHITETTURA STANZE REALTIME</span>
+        </div>
+        <h2 id="macro-cat-title" class="font-street font-black text-2xl sm:text-4xl md:text-5xl text-white uppercase tracking-tight">
+          SCEGLI LA TUA FREQUENZA NELLA NOTTE
+        </h2>
+        <p class="font-sans text-xs sm:text-sm md:text-base text-zinc-300 max-w-2xl mx-auto leading-relaxed">
+          "10 minuti al buio. Tre verità svelate. Tu e uno sconosciuto: restate o vi rivestite?"
+        </p>
+      </div>
+
+      <!-- Macro Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-2">
+        <!-- Room 1: AFTER DARK -->
+        <div class="bg-gradient-to-br from-[#121520] via-[#0e1017] to-[#181318] border-2 border-street-orange/70 hover:border-street-orange rounded-3xl p-6 sm:p-7 transition-all duration-300 flex flex-col justify-between shadow-[0_4px_35px_rgba(255,101,47,0.15)] group relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-street-orange/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg bg-street-orange/20 border border-street-orange/50 text-street-orange font-mono text-xs font-bold">
+                  [ 10 MINUTI ]
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 font-mono text-xs font-bold">
+                  [ ADRENALINA FISICA ]
+                </span>
+              </div>
+              <span class="text-xs font-mono text-zinc-400 flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-md border border-zinc-800">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Regia IA
+              </span>
+            </div>
+
+            <h3 class="font-street font-black text-xl sm:text-2xl text-white uppercase tracking-tight mb-2 group-hover:text-street-orange transition">
+              After Dark | Tensione a Orologeria
+            </h3>
+            <p class="text-zinc-300 text-xs sm:text-sm font-sans leading-relaxed mb-4">
+              Niente volti, niente chiacchiere da bar. Solo dettagli, ombre e 45 secondi a risposta. Riuscirai a reggere lo sguardo dell'IA prima che scada il tempo?
+            </p>
+
+            <div class="bg-black/60 border border-zinc-800/90 rounded-2xl p-3.5 mb-5 space-y-2 text-xs font-mono">
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>⏱️ Durata sessione:</span>
+                <strong class="text-white">10 minuti (600s)</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>⏳ Turno risposta:</span>
+                <strong class="text-street-orange font-bold">45 secondi</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>🔒 Pre-match Vault:</span>
+                <strong class="text-zinc-200">3 slot (Il Dettaglio, L'Ombra, Il Segno)</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>🎙️ Sussurro Vocale:</span>
+                <strong class="text-rose-400 font-bold">Max 5 secondi Web Audio</strong>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onclick="openUndressedVault('after_dark')"
+            class="w-full py-4 px-5 bg-street-orange hover:bg-orange-500 text-black font-street font-black text-xs sm:text-sm uppercase tracking-wider rounded-2xl transition flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,101,47,0.45)] transform active:scale-95 cursor-pointer"
+          >
+            <span>⚡ APRI VAULT &amp; ENTRA IN AFTER DARK</span>
+            <span>➔</span>
+          </button>
+        </div>
+
+        <!-- Room 2: SOUL TALK -->
+        <div class="bg-gradient-to-br from-[#10141f] via-[#0d1017] to-[#10171a] border-2 border-teal-500/50 hover:border-teal-400 rounded-3xl p-6 sm:p-7 transition-all duration-300 flex flex-col justify-between shadow-[0_4px_35px_rgba(20,184,166,0.12)] group relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-1 rounded-lg bg-teal-500/20 border border-teal-500/50 text-teal-300 font-mono text-xs font-bold">
+                  [ 15 MINUTI ]
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-indigo-500/20 border border-indigo-500/40 text-indigo-300 font-mono text-xs font-bold">
+                  [ INTIMITÀ PURA ]
+                </span>
+              </div>
+              <span class="text-xs font-mono text-zinc-400 flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-md border border-zinc-800">
+                <span class="w-2 h-2 rounded-full bg-teal-400 animate-pulse"></span>
+                Regia IA
+              </span>
+            </div>
+
+            <h3 class="font-street font-black text-xl sm:text-2xl text-white uppercase tracking-tight mb-2 group-hover:text-teal-300 transition">
+              Soul Talk | Lo Specchio del Tempo
+            </h3>
+            <p class="text-zinc-300 text-xs sm:text-sm font-sans leading-relaxed mb-4">
+              Chi eri prima di imparare a proteggerti? Mostra chi sei stato da bambino, condividi le tue crepe e scopri se esiste ancora qualcuno capace di guardarti per davvero.
+            </p>
+
+            <div class="bg-black/60 border border-zinc-800/90 rounded-2xl p-3.5 mb-5 space-y-2 text-xs font-mono">
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>⏱️ Durata sessione:</span>
+                <strong class="text-white">15 minuti (900s)</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>⏳ Turno risposta:</span>
+                <strong class="text-teal-400 font-bold">90 secondi</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>🔒 Pre-match Vault:</span>
+                <strong class="text-zinc-200">3 slot (L'Origine, Il Presente, Il Rifugio)</strong>
+              </div>
+              <div class="flex items-center justify-between text-zinc-400">
+                <span>🌑 Momento Blackout:</span>
+                <strong class="text-indigo-300 font-bold">Al minuto 5: "Lo Specchio"</strong>
+              </div>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onclick="openUndressedVault('soul_talk')"
+            class="w-full py-4 px-5 bg-teal-500 hover:bg-teal-400 text-black font-street font-black text-xs sm:text-sm uppercase tracking-wider rounded-2xl transition flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(20,184,166,0.45)] transform active:scale-95 cursor-pointer"
+          >
+            <span>⚡ APRI VAULT &amp; ENTRA IN SOUL TALK</span>
+            <span>➔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Link to All Macro-Categories -->
+      <div class="text-center pt-2">
+        <button
+          type="button"
+          onclick="switchView('undressed')"
+          class="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700 hover:border-street-orange/50 text-xs font-mono text-zinc-300 hover:text-white transition cursor-pointer"
+        >
+          <span>Esplora tutte le Macro-Categorie (Flirt, Confessioni, Agorà)</span>
+          <span>➔</span>
+        </button>
       </div>
     </section>
 
